@@ -113,6 +113,21 @@
 			this.players = [];
 			this.pack = new Pack();
 
+			this.points = {
+				A: { x: 5.33, y: 0 },
+				B: { x: -5.33, y: 0 },
+				C: { x: 5.33, y: 3.81 },
+				D: { x: 5.33, y: -3.81 },
+				E: { x: -5.33, y: 3.81 },
+				F: { x: -5.33, y: -3.81 },
+				G: { x: 5.33, y: 0.3 },
+				H: { x: -5.33, y: -0.3 },
+				I: { x: 5.33, y: 8.38 }, // 0.3 + 8.08
+				J: { x: 5.33, y: -7.78 }, // 0.3 - 8.08
+				K: { x: -5.33, y: 7.78 }, // -0.3 + 8.08
+				L: { x: -5.33, y: -8.38 } // -0.3 - 8.08
+			};
+
 			this.initializePlayers();
 		}
 
@@ -218,39 +233,40 @@
 		drawTrack() {
 			const ctx = this.ctx;
 			const scale = PIXELS_PER_METER;
+			const p = this.points;
 
 			ctx.save();
 			ctx.translate(this.canvas.width / 2, this.canvas.height / 2);
-			ctx.scale(scale, -scale); // Flip the y-axis to match the coordinate system
+			ctx.scale(scale, -scale);
 
 			ctx.lineWidth = LINE_WIDTH / scale;
 
 			// Draw inside arcs
 			ctx.strokeStyle = 'blue';
-			this.drawArc(5.33, 0, 3.81, Math.PI / 2, -Math.PI / 2, true);
-			this.drawArc(-5.33, 0, 3.81, -Math.PI / 2, Math.PI / 2, true);
+			this.drawArc(p.A.x, p.A.y, p.C.y, Math.PI / 2, -Math.PI / 2, true);
+			this.drawArc(p.B.x, p.B.y, p.E.y, -Math.PI / 2, Math.PI / 2, true);
 
 			// Draw inside straight lines
 			ctx.strokeStyle = 'green';
 			ctx.beginPath();
-			ctx.moveTo(5.33, 3.81);
-			ctx.lineTo(-5.33, 3.81);
-			ctx.moveTo(5.33, -3.81);
-			ctx.lineTo(-5.33, -3.81);
+			ctx.moveTo(p.C.x, p.C.y);
+			ctx.lineTo(p.E.x, p.E.y);
+			ctx.moveTo(p.D.x, p.D.y);
+			ctx.lineTo(p.F.x, p.F.y);
 			ctx.stroke();
 
 			// Draw outside arcs
 			ctx.strokeStyle = 'red';
-			this.drawArc(5.33, 0.3, 8.08, Math.PI / 2, -Math.PI / 2, true);
-			this.drawArc(-5.33, -0.3, 8.08, -Math.PI / 2, Math.PI / 2, true);
+			this.drawArc(p.G.x, p.G.y, p.I.y - p.G.y, Math.PI / 2, -Math.PI / 2, true);
+			this.drawArc(p.H.x, p.H.y, p.K.y - p.H.y, -Math.PI / 2, Math.PI / 2, true);
 
 			// Draw outside straight lines
 			ctx.strokeStyle = 'purple';
 			ctx.beginPath();
-			ctx.moveTo(5.33, 0.3 + 8.08);
-			ctx.lineTo(-5.33, -0.3 + 8.08);
-			ctx.moveTo(5.33, 0.3 - 8.08);
-			ctx.lineTo(-5.33, -0.3 - 8.08);
+			ctx.moveTo(p.I.x, p.I.y);
+			ctx.lineTo(p.K.x, p.K.y);
+			ctx.moveTo(p.J.x, p.J.y);
+			ctx.lineTo(p.L.x, p.L.y);
 			ctx.stroke();
 
 			// Draw pivot line
@@ -269,40 +285,22 @@
 
 		drawPoints() {
 			const ctx = this.ctx;
-			const points = [
-				{ x: 5.33, y: 0, label: 'A' },
-				{ x: -5.33, y: 0, label: 'B' },
-				{ x: 5.33, y: 3.81, label: 'C' },
-				{ x: 5.33, y: -3.81, label: 'D' },
-				{ x: -5.33, y: 3.81, label: 'E' },
-				{ x: -5.33, y: -3.81, label: 'F' },
-				{ x: 5.33, y: 0.3, label: 'G' },
-				{ x: -5.33, y: -0.3, label: 'H' },
-				{ x: 5.33, y: 0.3 + 8.08, label: 'I' },
-				{ x: 5.33, y: 0.3 - 8.08, label: 'J' },
-				{ x: -5.33, y: -0.3 + 8.08, label: 'K' },
-				{ x: -5.33, y: -0.3 - 8.08, label: 'L' }
-			];
 
 			ctx.fillStyle = 'black';
 			ctx.font = '0.85px Arial';
 			ctx.textAlign = 'left';
 			ctx.textBaseline = 'middle';
 
-			for (let point of points) {
+			for (let [label, point] of Object.entries(this.points)) {
 				// Draw point
 				ctx.beginPath();
 				ctx.arc(point.x, point.y, 0.1, 0, Math.PI * 2);
 				ctx.fill();
 
-				// Draw label with coordinates
-				const label = `${point.label}`;
-
-				// Save the current transformation state
+				// Draw label
 				ctx.save();
 
-				// Check if the point is G or H
-				if (point.label === 'G' || point.label === 'H') {
+				if (label === 'G' || label === 'H') {
 					ctx.textAlign = 'right';
 					ctx.translate(point.x - 0.2, point.y);
 				} else {
@@ -310,13 +308,9 @@
 					ctx.translate(point.x + 0.2, point.y);
 				}
 
-				// Scale the y-axis to flip the text
 				ctx.scale(1, -1);
-
-				// Draw the text at the origin (0, 0) of the transformed context
 				ctx.fillText(label, 0, 0);
 
-				// Restore the transformation state
 				ctx.restore();
 			}
 		}
@@ -329,53 +323,50 @@
 
 		drawPivotLine() {
 			const ctx = this.ctx;
+			const p = this.points;
 			ctx.beginPath();
-			ctx.moveTo(5.33, 0.3 + 8.08);
-			ctx.lineTo(5.33, 3.81);
+			ctx.moveTo(p.I.x, p.I.y);
+			ctx.lineTo(p.C.x, p.C.y);
 			ctx.stroke();
 		}
 
 		drawJammerLine() {
 			const ctx = this.ctx;
+			const p = this.points;
 			ctx.beginPath();
-			ctx.moveTo(-5.33, -0.3 + 8.08);
-			ctx.lineTo(-5.33, 3.81);
+			ctx.moveTo(p.K.x, p.K.y);
+			ctx.lineTo(p.E.x, p.E.y);
 			ctx.stroke();
 		}
 
 		drawMidTrackLine() {
 			const ctx = this.ctx;
 			const scale = PIXELS_PER_METER;
+			const p = this.points;
 
 			ctx.save();
 			ctx.translate(this.canvas.width / 2, this.canvas.height / 2);
-			ctx.scale(scale, -scale); // Flip the y-axis to match the coordinate system
+			ctx.scale(scale, -scale);
 
 			ctx.strokeStyle = 'pink';
 			ctx.lineWidth = 3 / scale;
 
 			// Draw straight sections
-			const innerYStart = 3.81;
-			const outerYStart = 8.08 + 0.3;
-			const innerYEnd = 3.81;
-			const outerYEnd = 8.08 - 0.3;
-			const midYStart = (innerYStart + outerYStart) / 2;
-			const midYEnd = (innerYEnd + outerYEnd) / 2;
+			const midYStart = (p.C.y + p.I.y) / 2;
+			const midYEnd = (p.E.y + p.K.y) / 2;
 
 			ctx.beginPath();
-			ctx.moveTo(5.33, midYStart);
-			ctx.lineTo(-5.33, midYEnd);
-			ctx.moveTo(5.33, -midYEnd);
-			ctx.lineTo(-5.33, -midYStart);
+			ctx.moveTo(p.C.x, midYStart);
+			ctx.lineTo(p.E.x, midYEnd);
+			ctx.moveTo(p.D.x, -midYEnd);
+			ctx.lineTo(p.F.x, -midYStart);
 			ctx.stroke();
 
 			// Draw curved sections
-			const innerRadius = 3.81;
-			const outerRadius = 8.08;
-			const midRadius = (innerRadius + outerRadius) / 2;
+			const midRadius = (p.C.y + (p.I.y - p.G.y)) / 2;
 
-			this.drawArc(5.33, 0.15, midRadius, Math.PI / 2, -Math.PI / 2, true);
-			this.drawArc(-5.33, -0.15, midRadius, -Math.PI / 2, Math.PI / 2, true);
+			this.drawArc(p.G.x, (p.G.y + p.A.y) / 2, midRadius, Math.PI / 2, -Math.PI / 2, true);
+			this.drawArc(p.H.x, (p.B.y + p.H.y) / 2, midRadius, -Math.PI / 2, Math.PI / 2, true);
 
 			ctx.restore();
 		}
