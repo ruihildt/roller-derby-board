@@ -1,10 +1,8 @@
 <script>
 	import { onMount } from 'svelte';
 	// Constants for track dimensions
-	const CANVAS_WIDTH = 1000;
-	const CANVAS_HEIGHT = 600;
 	const LINE_WIDTH = 3;
-	const PIXELS_PER_METER = 30;
+	const PIXELS_PER_METER = 40;
 
 	class Player {
 		constructor(x, y, team, role) {
@@ -110,8 +108,8 @@
 			this.canvas = canvas;
 			this.ctx = canvas.getContext('2d');
 
-			const centerX = CANVAS_WIDTH / 2;
-			const centerY = CANVAS_HEIGHT / 2;
+			const centerX = this.canvas.width / 2;
+			const centerY = this.canvas.height / 2;
 			const scale = PIXELS_PER_METER;
 
 			this.points = {
@@ -432,13 +430,24 @@
 	}
 
 	let canvas;
+	let game;
 
 	onMount(() => {
 		if (canvas) {
-			canvas.width = CANVAS_WIDTH;
-			canvas.height = CANVAS_HEIGHT;
-			const game = new Game(canvas);
-			game.gameLoop();
+			const resizeCanvas = () => {
+				canvas.width = window.innerWidth;
+				canvas.height = window.innerHeight;
+				// Reinitialize the game with new dimensions
+				game = new Game(canvas);
+				game.gameLoop();
+			};
+
+			window.addEventListener('resize', resizeCanvas);
+			resizeCanvas(); // Initial call to set the size
+
+			return () => {
+				window.removeEventListener('resize', resizeCanvas);
+			};
 		}
 	});
 </script>
@@ -447,8 +456,18 @@
 
 <style>
 	canvas {
-		border: 1px solid black;
-		max-width: 100%;
-		height: auto;
+		display: block; /* Removes default inline spacing */
+		width: 100vw;
+		height: 100vh;
+		margin: 0;
+		padding: 0;
+	}
+
+	/* Ensure the body and html elements don't have margins or padding */
+	:global(body),
+	:global(html) {
+		margin: 0;
+		padding: 0;
+		overflow: hidden;
 	}
 </style>
