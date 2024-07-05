@@ -1,8 +1,5 @@
 <script>
 	import { onMount } from 'svelte';
-	// Constants for track dimensions
-	const LINE_WIDTH = 3;
-	const PIXELS_PER_METER = 40;
 
 	class Player {
 		constructor(x, y, team, role) {
@@ -108,9 +105,13 @@
 			this.canvas = canvas;
 			this.ctx = canvas.getContext('2d');
 
+			// Calculate LINE_WIDTH and PIXELS_PER_METER based on canvas width
+			this.LINE_WIDTH = Math.max(1, Math.floor(this.canvas.width / 300));
+			this.PIXELS_PER_METER = Math.floor(this.canvas.width / 30);
+
 			const centerX = this.canvas.width / 2;
 			const centerY = this.canvas.height / 2;
-			const scale = PIXELS_PER_METER;
+			const scale = this.PIXELS_PER_METER;
 
 			this.points = {
 				A: { x: centerX + 5.33 * scale, y: centerY },
@@ -169,7 +170,7 @@
 		}
 
 		getJammerLinePosition() {
-			const JAMMER_LINE_OFFSET = -2 * PIXELS_PER_METER; // 0.5 meters offset
+			const JAMMER_LINE_OFFSET = -2 * this.PIXELS_PER_METER; // 0.5 meters offset
 
 			const { I, C } = this.points;
 			// Calculate a random position along the jammer line
@@ -228,7 +229,7 @@
 
 		drawGrid() {
 			const ctx = this.ctx;
-			const scale = PIXELS_PER_METER;
+			const scale = this.PIXELS_PER_METER;
 			const gridSize = scale; // 1 meter grid
 
 			ctx.strokeStyle = '#ccc'; // Light gray color for the grid
@@ -255,7 +256,7 @@
 			const p = this.points;
 
 			const ctx = this.ctx;
-			ctx.lineWidth = LINE_WIDTH;
+			ctx.lineWidth = this.LINE_WIDTH;
 
 			// Set fill style for grey color
 			ctx.fillStyle = '#D3D3D3';
@@ -379,7 +380,7 @@
 
 		drawMidTrackLine() {
 			const ctx = this.ctx;
-			const scale = PIXELS_PER_METER;
+			const scale = this.PIXELS_PER_METER;
 			const p = this.points;
 
 			// Transform points to canvas coordinates
