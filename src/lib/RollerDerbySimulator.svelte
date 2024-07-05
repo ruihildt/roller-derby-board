@@ -2,8 +2,11 @@
 	import { onMount } from 'svelte';
 
 	// Constants for track dimensions
-	const PIXELS_PER_METER = 30; // Reduce this value to fit the track on the canvas
-	const LINE_WIDTH = 2;
+	const LINE_WIDTH = 3;
+
+	const CANVAS_WIDTH = 1000;
+	const CANVAS_HEIGHT = 600;
+	const PIXELS_PER_METER = 30;
 
 	// class Player {
 	// 	constructor(x, y, team, role) {
@@ -110,23 +113,28 @@
 		constructor(canvas) {
 			this.canvas = canvas;
 			this.ctx = canvas.getContext('2d');
-			// this.players = [];
-			// this.pack = new Pack();
+
+			const centerX = CANVAS_WIDTH / 2;
+			const centerY = CANVAS_HEIGHT / 2;
+			const scale = PIXELS_PER_METER;
 
 			this.points = {
-				A: { x: 5.33, y: 0 },
-				B: { x: -5.33, y: 0 },
-				C: { x: 5.33, y: 3.81 },
-				D: { x: 5.33, y: -3.81 },
-				E: { x: -5.33, y: 3.81 },
-				F: { x: -5.33, y: -3.81 },
-				G: { x: 5.33, y: 0.3 },
-				H: { x: -5.33, y: -0.3 },
-				I: { x: 5.33, y: 8.38 }, // 0.3 + 8.08
-				J: { x: 5.33, y: -7.78 }, // 0.3 - 8.08
-				K: { x: -5.33, y: 7.78 }, // -0.3 + 8.08
-				L: { x: -5.33, y: -8.38 } // -0.3 - 8.08
+				A: { x: centerX + 5.33 * scale, y: centerY },
+				B: { x: centerX - 5.33 * scale, y: centerY },
+				C: { x: centerX + 5.33 * scale, y: centerY - 3.81 * scale },
+				D: { x: centerX + 5.33 * scale, y: centerY + 3.81 * scale },
+				E: { x: centerX - 5.33 * scale, y: centerY - 3.81 * scale },
+				F: { x: centerX - 5.33 * scale, y: centerY + 3.81 * scale },
+				G: { x: centerX + 5.33 * scale, y: centerY - 0.3 * scale },
+				H: { x: centerX - 5.33 * scale, y: centerY + 0.3 * scale },
+				I: { x: centerX + 5.33 * scale, y: centerY - 8.38 * scale },
+				J: { x: centerX + 5.33 * scale, y: centerY + 7.78 * scale },
+				K: { x: centerX - 5.33 * scale, y: centerY - 7.78 * scale },
+				L: { x: centerX - 5.33 * scale, y: centerY + 8.38 * scale }
 			};
+
+			// this.players = [];
+			// this.pack = new Pack();
 
 			// this.initializePlayers();
 		}
@@ -191,58 +199,36 @@
 		drawGrid() {
 			const ctx = this.ctx;
 			const scale = PIXELS_PER_METER;
-			const gridSize = 1; // 1 meter grid
-
-			ctx.save();
-			ctx.translate(this.canvas.width / 2, this.canvas.height / 2);
-			ctx.scale(scale, -scale); // Flip the y-axis to match the coordinate system
+			const gridSize = scale; // 1 meter grid
 
 			ctx.strokeStyle = '#ccc'; // Light gray color for the grid
-			ctx.lineWidth = 0.5 / scale;
+			ctx.lineWidth = 0.5;
 
 			// Draw vertical lines
-			for (let x = -20; x <= 20; x += gridSize) {
+			for (let x = 0; x <= this.canvas.width; x += gridSize) {
 				ctx.beginPath();
-				ctx.moveTo(x, -20);
-				ctx.lineTo(x, 20);
+				ctx.moveTo(x, 0);
+				ctx.lineTo(x, this.canvas.height);
 				ctx.stroke();
 			}
 
 			// Draw horizontal lines
-			for (let y = -20; y <= 20; y += gridSize) {
+			for (let y = 0; y <= this.canvas.height; y += gridSize) {
 				ctx.beginPath();
-				ctx.moveTo(-20, y);
-				ctx.lineTo(20, y);
+				ctx.moveTo(0, y);
+				ctx.lineTo(this.canvas.width, y);
 				ctx.stroke();
 			}
-
-			// Draw x and y axes
-			ctx.strokeStyle = '#000'; // Black color for axes
-			ctx.lineWidth = 1 / scale;
-
-			ctx.beginPath();
-			ctx.moveTo(-20, 0);
-			ctx.lineTo(20, 0);
-			ctx.moveTo(0, -20);
-			ctx.lineTo(0, 20);
-			ctx.stroke();
-
-			ctx.restore();
 		}
 
 		drawTrack() {
-			const ctx = this.ctx;
-			const scale = PIXELS_PER_METER;
 			const p = this.points;
 
-			ctx.save();
-			ctx.translate(this.canvas.width / 2, this.canvas.height / 2);
-			ctx.scale(scale, -scale);
-
-			ctx.lineWidth = LINE_WIDTH / scale;
+			const ctx = this.ctx;
+			ctx.lineWidth = LINE_WIDTH;
 
 			// Set fill style for grey color
-			ctx.fillStyle = '#D3D3D3'; // Light grey color
+			ctx.fillStyle = '#D3D3D3';
 
 			// Fill area between straight lines
 			ctx.beginPath();
@@ -263,21 +249,21 @@
 
 			// Fill area between arcs
 			ctx.beginPath();
-			ctx.arc(p.A.x, p.A.y, p.C.y, Math.PI / 2, -Math.PI / 2, true);
-			ctx.arc(p.G.x, p.G.y, p.I.y - p.G.y, -Math.PI / 2, Math.PI / 2, false);
+			ctx.arc(p.A.x, p.A.y, Math.abs(p.C.y - p.A.y), Math.PI / 2, -Math.PI / 2, true);
+			ctx.arc(p.G.x, p.G.y, Math.abs(p.I.y - p.G.y), -Math.PI / 2, Math.PI / 2, false);
 			ctx.closePath();
 			ctx.fill();
 
 			ctx.beginPath();
-			ctx.arc(p.B.x, p.B.y, p.E.y, -Math.PI / 2, Math.PI / 2, true);
-			ctx.arc(p.H.x, p.H.y, p.K.y - p.H.y, Math.PI / 2, -Math.PI / 2, false);
+			ctx.arc(p.B.x, p.B.y, Math.abs(p.E.y - p.B.y), -Math.PI / 2, Math.PI / 2, true);
+			ctx.arc(p.H.x, p.H.y, Math.abs(p.K.y - p.H.y), Math.PI / 2, -Math.PI / 2, false);
 			ctx.closePath();
 			ctx.fill();
 
 			// Draw inside arcs
 			ctx.strokeStyle = 'blue';
-			this.drawArc(p.A.x, p.A.y, p.C.y, Math.PI / 2, -Math.PI / 2, true);
-			this.drawArc(p.B.x, p.B.y, p.E.y, -Math.PI / 2, Math.PI / 2, true);
+			this.drawArc(p.A.x, p.A.y, Math.abs(p.C.y - p.A.y), Math.PI / 2, -Math.PI / 2, true);
+			this.drawArc(p.B.x, p.B.y, Math.abs(p.E.y - p.B.y), -Math.PI / 2, Math.PI / 2, true);
 
 			// Draw inside straight lines
 			ctx.strokeStyle = 'green';
@@ -290,8 +276,8 @@
 
 			// Draw outside arcs
 			ctx.strokeStyle = 'red';
-			this.drawArc(p.G.x, p.G.y, p.I.y - p.G.y, Math.PI / 2, -Math.PI / 2, true);
-			this.drawArc(p.H.x, p.H.y, p.K.y - p.H.y, -Math.PI / 2, Math.PI / 2, true);
+			this.drawArc(p.G.x, p.G.y, Math.abs(p.I.y - p.G.y), Math.PI / 2, -Math.PI / 2, true);
+			this.drawArc(p.H.x, p.H.y, Math.abs(p.K.y - p.H.y), -Math.PI / 2, Math.PI / 2, true);
 
 			// Draw outside straight lines
 			ctx.strokeStyle = 'purple';
@@ -304,48 +290,14 @@
 
 			// Draw pivot line
 			ctx.strokeStyle = 'orange';
-			this.drawPivotLine();
+			this.drawPivotLine(p);
 
 			// Draw jammer line
 			ctx.strokeStyle = 'cyan';
-			this.drawJammerLine();
+			this.drawJammerLine(p);
 
 			// Draw points
-			this.drawPoints();
-
-			ctx.restore();
-		}
-
-		drawPoints() {
-			const ctx = this.ctx;
-
-			ctx.fillStyle = 'black';
-			ctx.font = '0.85px Arial';
-			ctx.textAlign = 'left';
-			ctx.textBaseline = 'middle';
-
-			for (let [label, point] of Object.entries(this.points)) {
-				// Draw point
-				ctx.beginPath();
-				ctx.arc(point.x, point.y, 0.1, 0, Math.PI * 2);
-				ctx.fill();
-
-				// Draw label
-				ctx.save();
-
-				if (label === 'G' || label === 'H') {
-					ctx.textAlign = 'right';
-					ctx.translate(point.x - 0.2, point.y);
-				} else {
-					ctx.textAlign = 'left';
-					ctx.translate(point.x + 0.2, point.y);
-				}
-
-				ctx.scale(1, -1);
-				ctx.fillText(label, 0, 0);
-
-				ctx.restore();
-			}
+			this.drawPoints(p);
 		}
 
 		drawArc(x, y, radius, startAngle, endAngle, clockwise) {
@@ -354,22 +306,45 @@
 			this.ctx.stroke();
 		}
 
-		drawPivotLine() {
+		drawPivotLine(p) {
 			const ctx = this.ctx;
-			const p = this.points;
 			ctx.beginPath();
 			ctx.moveTo(p.I.x, p.I.y);
 			ctx.lineTo(p.C.x, p.C.y);
 			ctx.stroke();
 		}
 
-		drawJammerLine() {
+		drawJammerLine(p) {
 			const ctx = this.ctx;
-			const p = this.points;
 			ctx.beginPath();
 			ctx.moveTo(p.K.x, p.K.y);
 			ctx.lineTo(p.E.x, p.E.y);
 			ctx.stroke();
+		}
+
+		drawPoints(p) {
+			const ctx = this.ctx;
+
+			ctx.fillStyle = 'black';
+			ctx.font = '12px Arial';
+			ctx.textAlign = 'left';
+			ctx.textBaseline = 'middle';
+
+			for (let [label, point] of Object.entries(p)) {
+				// Draw point
+				ctx.beginPath();
+				ctx.arc(point.x, point.y, 3, 0, Math.PI * 2);
+				ctx.fill();
+
+				// Draw label
+				if (label === 'G' || label === 'H') {
+					ctx.textAlign = 'right';
+					ctx.fillText(label, point.x - 6, point.y);
+				} else {
+					ctx.textAlign = 'left';
+					ctx.fillText(label, point.x + 6, point.y);
+				}
+			}
 		}
 
 		drawMidTrackLine() {
@@ -377,31 +352,35 @@
 			const scale = PIXELS_PER_METER;
 			const p = this.points;
 
-			ctx.save();
-			ctx.translate(this.canvas.width / 2, this.canvas.height / 2);
-			ctx.scale(scale, -scale);
+			// Transform points to canvas coordinates
+			const transformPoint = (point) => ({
+				x: point.x * scale + this.canvas.width / 2,
+				y: -point.y * scale + this.canvas.height / 2
+			});
+
+			const tp = Object.fromEntries(
+				Object.entries(p).map(([key, value]) => [key, transformPoint(value)])
+			);
 
 			ctx.strokeStyle = 'pink';
-			ctx.lineWidth = 3 / scale;
+			ctx.lineWidth = 3;
 
 			// Draw straight sections
-			const midYStart = (p.C.y + p.I.y) / 2;
-			const midYEnd = (p.E.y + p.K.y) / 2;
+			const midYStart = (tp.C.y + tp.I.y) / 2;
+			const midYEnd = (tp.E.y + tp.K.y) / 2;
 
 			ctx.beginPath();
-			ctx.moveTo(p.C.x, midYStart);
-			ctx.lineTo(p.E.x, midYEnd);
-			ctx.moveTo(p.D.x, -midYEnd);
-			ctx.lineTo(p.F.x, -midYStart);
+			ctx.moveTo(tp.C.x, midYStart);
+			ctx.lineTo(tp.E.x, midYEnd);
+			ctx.moveTo(tp.D.x, this.canvas.height - midYEnd);
+			ctx.lineTo(tp.F.x, this.canvas.height - midYStart);
 			ctx.stroke();
 
 			// Draw curved sections
-			const midRadius = (p.C.y + (p.I.y - p.G.y)) / 2;
+			const midRadius = Math.abs((tp.C.y + tp.I.y) / 2 - tp.A.y);
 
-			this.drawArc(p.G.x, (p.G.y + p.A.y) / 2, midRadius, Math.PI / 2, -Math.PI / 2, true);
-			this.drawArc(p.H.x, (p.B.y + p.H.y) / 2, midRadius, -Math.PI / 2, Math.PI / 2, true);
-
-			ctx.restore();
+			this.drawArc(tp.G.x, (tp.G.y + tp.A.y) / 2, midRadius, Math.PI / 2, -Math.PI / 2, true);
+			this.drawArc(tp.H.x, (tp.B.y + tp.H.y) / 2, midRadius, -Math.PI / 2, Math.PI / 2, true);
 		}
 
 		drawPositionMarkers() {
@@ -424,8 +403,8 @@
 
 	onMount(() => {
 		if (canvas) {
-			canvas.width = 1200; // Increase the width
-			canvas.height = 800; // Increase the height
+			canvas.width = CANVAS_WIDTH;
+			canvas.height = CANVAS_HEIGHT;
 			const game = new Game(canvas);
 			game.gameLoop();
 		}
