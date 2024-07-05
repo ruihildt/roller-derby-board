@@ -5,113 +5,113 @@
 	const PIXELS_PER_METER = 30; // Reduce this value to fit the track on the canvas
 	const LINE_WIDTH = 2;
 
-	class Player {
-		constructor(x, y, team, role) {
-			this.x = x;
-			this.y = y;
-			this.vx = 0;
-			this.vy = 0;
-			this.team = team;
-			this.role = role;
-			this.angle = 0;
-			this.speed = 2;
-			this.turnSpeed = 0.1;
-			this.trackPosition = 0;
-			this.inPlay = true;
-		}
+	// class Player {
+	// 	constructor(x, y, team, role) {
+	// 		this.x = x;
+	// 		this.y = y;
+	// 		this.vx = 0;
+	// 		this.vy = 0;
+	// 		this.team = team;
+	// 		this.role = role;
+	// 		this.angle = 0;
+	// 		this.speed = 2;
+	// 		this.turnSpeed = 0.1;
+	// 		this.trackPosition = 0;
+	// 		this.inPlay = true;
+	// 	}
 
-		update() {
-			this.x += this.vx;
-			this.y += this.vy;
-		}
+	// 	update() {
+	// 		this.x += this.vx;
+	// 		this.y += this.vy;
+	// 	}
 
-		draw(ctx) {
-			ctx.fillStyle = this.team === 'A' ? 'red' : 'blue';
-			ctx.beginPath();
-			ctx.arc(this.x, this.y, 10, 0, Math.PI * 2);
-			ctx.fill();
-		}
+	// 	draw(ctx) {
+	// 		ctx.fillStyle = this.team === 'A' ? 'red' : 'blue';
+	// 		ctx.beginPath();
+	// 		ctx.arc(this.x, this.y, 10, 0, Math.PI * 2);
+	// 		ctx.fill();
+	// 	}
 
-		moveForward() {
-			this.vx = Math.cos(this.angle) * this.speed;
-			this.vy = Math.sin(this.angle) * this.speed;
-		}
+	// 	moveForward() {
+	// 		this.vx = Math.cos(this.angle) * this.speed;
+	// 		this.vy = Math.sin(this.angle) * this.speed;
+	// 	}
 
-		turn(direction) {
-			this.angle += direction * this.turnSpeed;
-		}
-	}
+	// 	turn(direction) {
+	// 		this.angle += direction * this.turnSpeed;
+	// 	}
+	// }
 
-	class Pack {
-		constructor() {
-			this.members = [];
-			this.frontBoundary = 0;
-			this.rearBoundary = 0;
-		}
+	// class Pack {
+	// 	constructor() {
+	// 		this.members = [];
+	// 		this.frontBoundary = 0;
+	// 		this.rearBoundary = 0;
+	// 	}
 
-		update(allPlayers) {
-			this.determinePack(allPlayers);
-			this.calculateBoundaries();
-		}
+	// 	update(allPlayers) {
+	// 		this.determinePack(allPlayers);
+	// 		this.calculateBoundaries();
+	// 	}
 
-		determinePack(allPlayers) {
-			const blockers = allPlayers.filter((player) => player.role === 'blocker');
-			blockers.sort((a, b) => a.trackPosition - b.trackPosition);
+	// 	determinePack(allPlayers) {
+	// 		const blockers = allPlayers.filter((player) => player.role === 'blocker');
+	// 		blockers.sort((a, b) => a.trackPosition - b.trackPosition);
 
-			let largestGroup = [];
-			let currentGroup = [];
+	// 		let largestGroup = [];
+	// 		let currentGroup = [];
 
-			for (let i = 0; i < blockers.length; i++) {
-				if (
-					currentGroup.length === 0 ||
-					this.isInProximity(blockers[i], currentGroup[currentGroup.length - 1])
-				) {
-					currentGroup.push(blockers[i]);
-				} else {
-					if (currentGroup.length > largestGroup.length) {
-						largestGroup = [...currentGroup];
-					}
-					currentGroup = [blockers[i]];
-				}
-			}
+	// 		for (let i = 0; i < blockers.length; i++) {
+	// 			if (
+	// 				currentGroup.length === 0 ||
+	// 				this.isInProximity(blockers[i], currentGroup[currentGroup.length - 1])
+	// 			) {
+	// 				currentGroup.push(blockers[i]);
+	// 			} else {
+	// 				if (currentGroup.length > largestGroup.length) {
+	// 					largestGroup = [...currentGroup];
+	// 				}
+	// 				currentGroup = [blockers[i]];
+	// 			}
+	// 		}
 
-			if (currentGroup.length > largestGroup.length) {
-				largestGroup = currentGroup;
-			}
+	// 		if (currentGroup.length > largestGroup.length) {
+	// 			largestGroup = currentGroup;
+	// 		}
 
-			this.members = largestGroup;
-		}
+	// 		this.members = largestGroup;
+	// 	}
 
-		isInProximity(player1, player2) {
-			const proximityThreshold = 30;
-			const distance = Math.sqrt(
-				Math.pow(player1.x - player2.x, 2) + Math.pow(player1.y - player2.y, 2)
-			);
-			return distance <= proximityThreshold;
-		}
+	// 	isInProximity(player1, player2) {
+	// 		const proximityThreshold = 30;
+	// 		const distance = Math.sqrt(
+	// 			Math.pow(player1.x - player2.x, 2) + Math.pow(player1.y - player2.y, 2)
+	// 		);
+	// 		return distance <= proximityThreshold;
+	// 	}
 
-		calculateBoundaries() {
-			if (this.members.length > 0) {
-				this.frontBoundary = Math.max(...this.members.map((p) => p.trackPosition));
-				this.rearBoundary = Math.min(...this.members.map((p) => p.trackPosition));
-			} else {
-				this.frontBoundary = this.rearBoundary = 0;
-			}
-		}
+	// 	calculateBoundaries() {
+	// 		if (this.members.length > 0) {
+	// 			this.frontBoundary = Math.max(...this.members.map((p) => p.trackPosition));
+	// 			this.rearBoundary = Math.min(...this.members.map((p) => p.trackPosition));
+	// 		} else {
+	// 			this.frontBoundary = this.rearBoundary = 0;
+	// 		}
+	// 	}
 
-		isInPack(player) {
-			return (
-				player.trackPosition >= this.rearBoundary && player.trackPosition <= this.frontBoundary
-			);
-		}
-	}
+	// 	isInPack(player) {
+	// 		return (
+	// 			player.trackPosition >= this.rearBoundary && player.trackPosition <= this.frontBoundary
+	// 		);
+	// 	}
+	// }
 
 	class Game {
 		constructor(canvas) {
 			this.canvas = canvas;
 			this.ctx = canvas.getContext('2d');
-			this.players = [];
-			this.pack = new Pack();
+			// this.players = [];
+			// this.pack = new Pack();
 
 			this.points = {
 				A: { x: 5.33, y: 0 },
@@ -128,40 +128,40 @@
 				L: { x: -5.33, y: -8.38 } // -0.3 - 8.08
 			};
 
-			this.initializePlayers();
+			// this.initializePlayers();
 		}
 
-		initializePlayers() {
-			this.players.push(new Player(100, 100, 'A', 'jammer'));
-			this.players.push(new Player(150, 150, 'A', 'blocker'));
-			this.players.push(new Player(200, 200, 'B', 'jammer'));
-			this.players.push(new Player(250, 250, 'B', 'blocker'));
-		}
+		// initializePlayers() {
+		// 	this.players.push(new Player(100, 100, 'A', 'jammer'));
+		// 	this.players.push(new Player(150, 150, 'A', 'blocker'));
+		// 	this.players.push(new Player(200, 200, 'B', 'jammer'));
+		// 	this.players.push(new Player(250, 250, 'B', 'blocker'));
+		// }
 
-		update() {
-			for (let player of this.players) {
-				player.update();
-			}
+		// update() {
+		// 	for (let player of this.players) {
+		// 		player.update();
+		// 	}
 
-			this.pack.update(this.players);
+		// 	this.pack.update(this.players);
 
-			for (let player of this.players) {
-				player.inPlay = this.isPlayerInPlay(player);
-			}
+		// 	for (let player of this.players) {
+		// 		player.inPlay = this.isPlayerInPlay(player);
+		// 	}
 
-			// Check for collisions, scoring, etc.
-		}
+		// Check for collisions, scoring, etc.
+		// }
 
-		isPlayerInPlay(player) {
-			if (player.role === 'jammer') {
-				return true; // Jammers are always in play
-			}
-			return (
-				this.pack.isInPack(player) ||
-				(player.trackPosition >= this.pack.rearBoundary - 20 &&
-					player.trackPosition <= this.pack.frontBoundary + 20)
-			);
-		}
+		// isPlayerInPlay(player) {
+		// 	if (player.role === 'jammer') {
+		// 		return true; // Jammers are always in play
+		// 	}
+		// 	return (
+		// 		this.pack.isInPack(player) ||
+		// 		(player.trackPosition >= this.pack.rearBoundary - 20 &&
+		// 			player.trackPosition <= this.pack.frontBoundary + 20)
+		// 	);
+		// }
 
 		draw() {
 			// Clear the canvas
@@ -180,10 +180,10 @@
 			// Draw midtrack line
 			this.drawMidTrackLine();
 
-			// Draw players
-			for (let player of this.players) {
-				player.draw(this.ctx);
-			}
+			// // Draw players
+			// for (let player of this.players) {
+			// 	player.draw(this.ctx);
+			// }
 
 			this.drawPackBoundaries();
 		}
@@ -381,7 +381,7 @@
 		}
 
 		gameLoop() {
-			this.update();
+			// this.update();
 			this.draw();
 			requestAnimationFrame(() => this.gameLoop());
 		}
