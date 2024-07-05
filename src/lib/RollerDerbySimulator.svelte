@@ -241,6 +241,39 @@
 
 			ctx.lineWidth = LINE_WIDTH / scale;
 
+			// Set fill style for grey color
+			ctx.fillStyle = '#D3D3D3'; // Light grey color
+
+			// Fill area between straight lines
+			ctx.beginPath();
+			ctx.moveTo(p.C.x, p.C.y);
+			ctx.lineTo(p.E.x, p.E.y);
+			ctx.lineTo(p.K.x, p.K.y);
+			ctx.lineTo(p.I.x, p.I.y);
+			ctx.closePath();
+			ctx.fill();
+
+			ctx.beginPath();
+			ctx.moveTo(p.D.x, p.D.y);
+			ctx.lineTo(p.F.x, p.F.y);
+			ctx.lineTo(p.L.x, p.L.y);
+			ctx.lineTo(p.J.x, p.J.y);
+			ctx.closePath();
+			ctx.fill();
+
+			// Fill area between arcs
+			ctx.beginPath();
+			ctx.arc(p.A.x, p.A.y, p.C.y, Math.PI / 2, -Math.PI / 2, true);
+			ctx.arc(p.G.x, p.G.y, p.I.y - p.G.y, -Math.PI / 2, Math.PI / 2, false);
+			ctx.closePath();
+			ctx.fill();
+
+			ctx.beginPath();
+			ctx.arc(p.B.x, p.B.y, p.E.y, -Math.PI / 2, Math.PI / 2, true);
+			ctx.arc(p.H.x, p.H.y, p.K.y - p.H.y, Math.PI / 2, -Math.PI / 2, false);
+			ctx.closePath();
+			ctx.fill();
+
 			// Draw inside arcs
 			ctx.strokeStyle = 'blue';
 			this.drawArc(p.A.x, p.A.y, p.C.y, Math.PI / 2, -Math.PI / 2, true);
