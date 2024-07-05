@@ -1,49 +1,45 @@
 <script>
 	import { onMount } from 'svelte';
-
 	// Constants for track dimensions
-	const LINE_WIDTH = 3;
-
 	const CANVAS_WIDTH = 1000;
 	const CANVAS_HEIGHT = 600;
+	const LINE_WIDTH = 3;
 	const PIXELS_PER_METER = 30;
 
-	// class Player {
-	// 	constructor(x, y, team, role) {
-	// 		this.x = x;
-	// 		this.y = y;
-	// 		this.vx = 0;
-	// 		this.vy = 0;
-	// 		this.team = team;
-	// 		this.role = role;
-	// 		this.angle = 0;
-	// 		this.speed = 2;
-	// 		this.turnSpeed = 0.1;
-	// 		this.trackPosition = 0;
-	// 		this.inPlay = true;
-	// 	}
+	class Player {
+		constructor(x, y, team, role) {
+			this.x = x;
+			this.y = y;
+			this.team = team;
+			this.role = role;
+			this.color = team === 'A' ? 'red' : 'blue';
+			this.radius = 10;
+			this.speed = 0;
+			this.direction = 0;
+		}
 
-	// 	update() {
-	// 		this.x += this.vx;
-	// 		this.y += this.vy;
-	// 	}
+		draw(ctx) {
+			ctx.beginPath();
+			ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+			ctx.fillStyle = this.color;
+			ctx.fill();
+			ctx.strokeStyle = 'black';
+			ctx.stroke();
 
-	// 	draw(ctx) {
-	// 		ctx.fillStyle = this.team === 'A' ? 'red' : 'blue';
-	// 		ctx.beginPath();
-	// 		ctx.arc(this.x, this.y, 10, 0, Math.PI * 2);
-	// 		ctx.fill();
-	// 	}
+			// Draw role indicator
+			ctx.fillStyle = 'white';
+			ctx.font = '10px Arial';
+			ctx.textAlign = 'center';
+			ctx.textBaseline = 'middle';
+			ctx.fillText(this.role[0].toUpperCase(), this.x, this.y);
+		}
 
-	// 	moveForward() {
-	// 		this.vx = Math.cos(this.angle) * this.speed;
-	// 		this.vy = Math.sin(this.angle) * this.speed;
-	// 	}
-
-	// 	turn(direction) {
-	// 		this.angle += direction * this.turnSpeed;
-	// 	}
-	// }
+		update() {
+			// Update player position based on speed and direction
+			this.x += Math.cos(this.direction) * this.speed;
+			this.y += Math.sin(this.direction) * this.speed;
+		}
+	}
 
 	// class Pack {
 	// 	constructor() {
@@ -133,43 +129,79 @@
 				L: { x: centerX - 5.33 * scale, y: centerY + 8.38 * scale }
 			};
 
-			// this.players = [];
-			// this.pack = new Pack();
+			this.players = [];
+			this.initializePlayers();
 
-			// this.initializePlayers();
+			// this.pack = new Pack();
 		}
 
-		// initializePlayers() {
-		// 	this.players.push(new Player(100, 100, 'A', 'jammer'));
-		// 	this.players.push(new Player(150, 150, 'A', 'blocker'));
-		// 	this.players.push(new Player(200, 200, 'B', 'jammer'));
-		// 	this.players.push(new Player(250, 250, 'B', 'blocker'));
-		// }
+		initializePlayers() {
+			const { I, K, G, E, C } = this.points;
 
-		// update() {
-		// 	for (let player of this.players) {
-		// 		player.update();
-		// 	}
+			// Function to get a random position within the specified area for blockers
+			const getRandomBlockerPosition = () => {
+				const minX = Math.min(I.x, K.x);
+				const maxX = Math.max(G.x, E.x);
+				const minY = Math.min(I.y, G.y);
+				const maxY = Math.max(K.y, E.y);
 
-		// 	this.pack.update(this.players);
+				return {
+					x: Math.random() * (maxX - minX) + minX,
+					y: Math.random() * (maxY - minY) + minY
+				};
+			};
 
-		// 	for (let player of this.players) {
-		// 		player.inPlay = this.isPlayerInPlay(player);
-		// 	}
+			// Create 4 blockers for Team A
+			for (let i = 0; i < 4; i++) {
+				const pos = getRandomBlockerPosition();
+				this.players.push(new Player(pos.x, pos.y, 'A', 'blocker'));
+			}
 
-		// Check for collisions, scoring, etc.
-		// }
+			// Create 4 blockers for Team B
+			for (let i = 0; i < 4; i++) {
+				const pos = getRandomBlockerPosition();
+				this.players.push(new Player(pos.x, pos.y, 'B', 'blocker'));
+			}
 
-		// isPlayerInPlay(player) {
-		// 	if (player.role === 'jammer') {
-		// 		return true; // Jammers are always in play
-		// 	}
-		// 	return (
-		// 		this.pack.isInPack(player) ||
-		// 		(player.trackPosition >= this.pack.rearBoundary - 20 &&
-		// 			player.trackPosition <= this.pack.frontBoundary + 20)
-		// 	);
-		// }
+			// Add jammers
+			const jammerPosA = this.getJammerLinePosition();
+			const jammerPosB = this.getJammerLinePosition();
+			this.players.push(new Player(jammerPosA.x, jammerPosA.y, 'A', 'jammer'));
+			this.players.push(new Player(jammerPosB.x, jammerPosB.y, 'B', 'jammer'));
+		}
+
+		getJammerLinePosition() {
+			const JAMMER_LINE_OFFSET = -2 * PIXELS_PER_METER; // 0.5 meters offset
+
+			const { I, C } = this.points;
+			// Calculate a random position along the jammer line
+			const t = Math.random();
+
+			// Calculate the direction vector of the jammer line
+			const dx = C.x - I.x;
+			const dy = C.y - I.y;
+
+			// Normalize the direction vector
+			const length = Math.sqrt(dx * dx + dy * dy);
+			const normalizedDx = dx / length;
+			const normalizedDy = dy / length;
+
+			// Calculate the offset perpendicular to the jammer line
+			const offsetX = -normalizedDy * JAMMER_LINE_OFFSET;
+			const offsetY = normalizedDx * JAMMER_LINE_OFFSET;
+
+			return {
+				x: I.x + t * (C.x - I.x) + offsetX,
+				y: I.y + t * (C.y - I.y) + offsetY
+			};
+		}
+
+		update() {
+			for (let player of this.players) {
+				player.update();
+			}
+			// Add more game logic here
+		}
 
 		draw() {
 			// Clear the canvas
@@ -188,12 +220,12 @@
 			// Draw midtrack line
 			this.drawMidTrackLine();
 
-			// // Draw players
-			// for (let player of this.players) {
-			// 	player.draw(this.ctx);
-			// }
+			// Draw players
+			for (let player of this.players) {
+				player.draw(this.ctx);
+			}
 
-			this.drawPackBoundaries();
+			// this.drawPackBoundaries();
 		}
 
 		drawGrid() {
@@ -383,17 +415,17 @@
 			this.drawArc(tp.H.x, (tp.B.y + tp.H.y) / 2, midRadius, -Math.PI / 2, Math.PI / 2, true);
 		}
 
-		drawPositionMarkers() {
-			// TODO
-		}
+		// drawPositionMarkers() {
+		// TODO
+		// }
 
-		drawPackBoundaries() {
-			// Visualize pack boundaries on the track
-			// This is a placeholder and needs to be implemented based on how you want to represent the pack
-		}
+		// drawPackBoundaries() {
+		// Visualize pack boundaries on the track
+		// This is a placeholder and needs to be implemented based on how you want to represent the pack
+		// }
 
 		gameLoop() {
-			// this.update();
+			this.update();
 			this.draw();
 			requestAnimationFrame(() => this.gameLoop());
 		}
