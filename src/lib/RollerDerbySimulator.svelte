@@ -25,7 +25,7 @@
 			this.y = y;
 			this.team = team;
 			this.role = role;
-			this.color = team === 'A' ? 'red' : 'blue';
+			this.color = team === 'A' ? 'teal' : 'orange';
 			this.radius = radius;
 			this.speed = 0;
 			this.direction = 0;
@@ -46,8 +46,8 @@
 			ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
 			ctx.fillStyle = this.color;
 			ctx.fill();
-			ctx.strokeStyle = this.inBounds ? 'green' : 'black'; // Modify this line
-			ctx.lineWidth = 2; // Add this line to make the border more visible
+			ctx.strokeStyle = this.inBounds ? 'black' : 'red'; // Modify this line
+			ctx.lineWidth = 4; // Add this line to make the border more visible
 			ctx.stroke();
 
 			// Draw role indicator
@@ -143,8 +143,8 @@
 			this.ctx = canvas.getContext('2d')!;
 
 			// Calculate LINE_WIDTH and PIXELS_PER_METER based on canvas width
-			this.LINE_WIDTH = Math.max(1, Math.floor(this.canvas.width / 300));
-			this.PIXELS_PER_METER = Math.floor(this.canvas.width / 30);
+			this.LINE_WIDTH = Math.max(1, Math.floor(this.canvas.width / 330));
+			this.PIXELS_PER_METER = Math.floor(this.canvas.width / 33);
 			// Calculate player radius based on canvas width
 			const playerRadius = Math.max(0, Math.floor(this.canvas.width / 70));
 
