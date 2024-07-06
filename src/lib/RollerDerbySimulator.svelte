@@ -11,6 +11,7 @@
 			this.radius = 10;
 			this.speed = 0;
 			this.direction = 0;
+			this.inBounds = false;
 		}
 
 		draw(ctx) {
@@ -18,7 +19,8 @@
 			ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
 			ctx.fillStyle = this.color;
 			ctx.fill();
-			ctx.strokeStyle = 'black';
+			ctx.strokeStyle = this.inBounds ? 'green' : 'black'; // Modify this line
+			ctx.lineWidth = 2; // Add this line to make the border more visible
 			ctx.stroke();
 
 			// Draw role indicator
@@ -195,9 +197,73 @@
 			};
 		}
 
+		isPlayerInBounds(player) {
+			// Check if the player is in the turn
+			if (this.isPlayerInTurn(player)) {
+				return true;
+			}
+
+			// // Check if the player is in the straightaway
+			// if (this.isPlayerInStraightaway(player)) {
+			// 	return true;
+			// }
+
+			// If the player is neither in the turn nor in the straightaway, they're out of bounds
+			return false;
+		}
+
+		isPlayerInTurn(player) {
+			const { A, G, C, D, I, J } = this.points;
+
+			// Calculate distances from player to centers of arcs
+			const distToA = this.distance(player, A);
+			const distToG = this.distance(player, G);
+
+			// Calculate radii of arcs
+			const innerRadius = this.distance(A, C);
+			const outerRadius = this.distance(G, I);
+
+			// Check if player is between the two arcs
+			if (distToA >= innerRadius && distToG <= outerRadius) {
+				// Calculate angles
+				const angleAC = Math.atan2(C.y - A.y, C.x - A.x);
+				const angleAD = Math.atan2(D.y - A.y, D.x - A.x);
+				const angleAPlayer = Math.atan2(player.y - A.y, player.x - A.x);
+
+				const angleGI = Math.atan2(I.y - G.y, I.x - G.x);
+				const angleGJ = Math.atan2(J.y - G.y, J.x - G.x);
+				const angleGPlayer = Math.atan2(player.y - G.y, player.x - G.x);
+
+				// Check if player is within the correct arc segments
+				const inInnerArc = angleAPlayer >= angleAC && angleAPlayer <= angleAD;
+				const inOuterArc = angleGPlayer >= angleGI && angleGPlayer <= angleGJ;
+
+				return inInnerArc || inOuterArc;
+			}
+
+			return false;
+		}
+
+		// isPlayerInStraightaway(player) {
+		// 	const { C, E, I, K } = this.points;
+
+		// 	// Check if player is within the x-bounds of the straightaway
+		// 	const withinX = player.x >= E.x && player.x <= C.x;
+
+		// 	// Check if player is within the y-bounds of the straightaway
+		// 	const withinY = player.y >= C.y && player.y <= I.y;
+
+		// 	return withinX && withinY;
+		// }
+
+		distance(point1, point2) {
+			return Math.sqrt(Math.pow(point1.x - point2.x, 2) + Math.pow(point1.y - point2.y, 2));
+		}
+
 		update() {
 			for (let player of this.players) {
 				player.update();
+				player.inBounds = this.isPlayerInBounds(player);
 			}
 			// Add more game logic here
 		}
