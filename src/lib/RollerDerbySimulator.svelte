@@ -20,13 +20,13 @@
 		dragOffsetX: number;
 		dragOffsetY: number;
 
-		constructor(x: number, y: number, team: string, role: string) {
+		constructor(x: number, y: number, team: string, role: string, radius: number) {
 			this.x = x;
 			this.y = y;
 			this.team = team;
 			this.role = role;
 			this.color = team === 'A' ? 'red' : 'blue';
-			this.radius = 10;
+			this.radius = radius;
 			this.speed = 0;
 			this.direction = 0;
 			this.inBounds = false;
@@ -145,6 +145,8 @@
 			// Calculate LINE_WIDTH and PIXELS_PER_METER based on canvas width
 			this.LINE_WIDTH = Math.max(1, Math.floor(this.canvas.width / 300));
 			this.PIXELS_PER_METER = Math.floor(this.canvas.width / 30);
+			// Calculate player radius based on canvas width
+			const playerRadius = Math.max(0, Math.floor(this.canvas.width / 70));
 
 			const centerX = this.canvas.width / 2;
 			const centerY = this.canvas.height / 2;
@@ -166,7 +168,7 @@
 			};
 
 			this.players = [];
-			this.initializePlayers();
+			this.initializePlayers(playerRadius);
 
 			this.selectedPlayer = null;
 			this.canvas.addEventListener('mousedown', this.handleMouseDown.bind(this));
@@ -176,7 +178,7 @@
 			// this.pack = new Pack();
 		}
 
-		initializePlayers(): void {
+		initializePlayers(radius: number): void {
 			const { I, K, G, E } = this.points;
 
 			// Function to get a random position within the specified area for blockers
@@ -195,20 +197,20 @@
 			// Create 4 blockers for Team A
 			for (let i = 0; i < 4; i++) {
 				const pos = getRandomBlockerPosition();
-				this.players.push(new Player(pos.x, pos.y, 'A', 'blocker'));
+				this.players.push(new Player(pos.x, pos.y, 'A', 'blocker', radius));
 			}
 
 			// Create 4 blockers for Team B
 			for (let i = 0; i < 4; i++) {
 				const pos = getRandomBlockerPosition();
-				this.players.push(new Player(pos.x, pos.y, 'B', 'blocker'));
+				this.players.push(new Player(pos.x, pos.y, 'B', 'blocker', radius));
 			}
 
 			// Add jammers
 			const jammerPosA = this.getJammerLinePosition();
 			const jammerPosB = this.getJammerLinePosition();
-			this.players.push(new Player(jammerPosA.x, jammerPosA.y, 'A', 'jammer'));
-			this.players.push(new Player(jammerPosB.x, jammerPosB.y, 'B', 'jammer'));
+			this.players.push(new Player(jammerPosA.x, jammerPosA.y, 'A', 'jammer', radius));
+			this.players.push(new Player(jammerPosB.x, jammerPosB.y, 'B', 'jammer', radius));
 		}
 
 		getJammerLinePosition(): Point {
