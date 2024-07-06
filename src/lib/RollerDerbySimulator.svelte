@@ -634,13 +634,36 @@
 	let canvas: HTMLCanvasElement;
 	let game: Game;
 
+	function calculateCanvasSize(
+		containerWidth: number,
+		containerHeight: number
+	): { width: number; height: number } {
+		const aspectRatio = 100 / 66;
+		let width = containerWidth;
+		let height = containerWidth / aspectRatio;
+
+		if (height > containerHeight) {
+			height = containerHeight;
+			width = containerHeight * aspectRatio;
+		}
+
+		return { width, height };
+	}
+
 	onMount(() => {
 		if (canvas) {
 			const resizeCanvas = () => {
-				canvas.width = window.innerWidth;
-				canvas.height = window.innerHeight;
-				game = new Game(canvas);
-				game.gameLoop();
+				const container = canvas.parentElement;
+				if (container) {
+					const { width, height } = calculateCanvasSize(
+						container.clientWidth,
+						container.clientHeight
+					);
+					canvas.width = width;
+					canvas.height = height;
+					game = new Game(canvas);
+					game.gameLoop();
+				}
 			};
 
 			window.addEventListener('resize', resizeCanvas);
@@ -658,22 +681,21 @@
 	});
 </script>
 
-<canvas bind:this={canvas}></canvas>
+<div class="canvas-container">
+	<canvas bind:this={canvas}></canvas>
+</div>
 
 <style>
-	canvas {
-		display: block; /* Removes default inline spacing */
-		width: 100vw;
-		height: 100vh;
-		margin: 0;
-		padding: 0;
+	.canvas-container {
+		width: 100%;
+		height: 100%;
+		display: flex;
+		justify-content: center;
+		align-items: center;
 	}
 
-	/* Ensure the body and html elements don't have margins or padding */
-	:global(body),
-	:global(html) {
-		margin: 0;
-		padding: 0;
-		overflow: hidden;
+	canvas {
+		max-width: 100%;
+		max-height: 100%;
 	}
 </style>
