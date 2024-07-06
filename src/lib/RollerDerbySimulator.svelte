@@ -12,6 +12,15 @@
 			this.speed = 0;
 			this.direction = 0;
 			this.inBounds = false;
+			this.isDragging = false;
+			this.dragOffsetX = 0;
+			this.dragOffsetY = 0;
+		}
+
+		containsPoint(x, y) {
+			const dx = this.x - x;
+			const dy = this.y - y;
+			return dx * dx + dy * dy <= this.radius * this.radius;
 		}
 
 		draw(ctx) {
@@ -133,11 +142,16 @@
 			this.players = [];
 			this.initializePlayers();
 
+			this.selectedPlayer = null;
+			this.canvas.addEventListener('mousedown', this.handleMouseDown.bind(this));
+			this.canvas.addEventListener('mousemove', this.handleMouseMove.bind(this));
+			this.canvas.addEventListener('mouseup', this.handleMouseUp.bind(this));
+
 			// this.pack = new Pack();
 		}
 
 		initializePlayers() {
-			const { I, K, G, E, C } = this.points;
+			const { I, K, G, E } = this.points;
 
 			// Function to get a random position within the specified area for blockers
 			const getRandomBlockerPosition = () => {
@@ -260,10 +274,48 @@
 			return Math.sqrt(Math.pow(point1.x - point2.x, 2) + Math.pow(point1.y - point2.y, 2));
 		}
 
+		handleMouseDown(event) {
+			const rect = this.canvas.getBoundingClientRect();
+			const x = event.clientX - rect.left;
+			const y = event.clientY - rect.top;
+
+			for (let player of this.players) {
+				if (player.containsPoint(x, y)) {
+					this.selectedPlayer = player;
+					player.isDragging = true;
+					player.dragOffsetX = x - player.x;
+					player.dragOffsetY = y - player.y;
+					break;
+				}
+			}
+		}
+
+		handleMouseMove(event) {
+			if (this.selectedPlayer && this.selectedPlayer.isDragging) {
+				const rect = this.canvas.getBoundingClientRect();
+				const x = event.clientX - rect.left;
+				const y = event.clientY - rect.top;
+
+				this.selectedPlayer.x = x - this.selectedPlayer.dragOffsetX;
+				this.selectedPlayer.y = y - this.selectedPlayer.dragOffsetY;
+			}
+		}
+
+		handleMouseUp() {
+			if (this.selectedPlayer) {
+				this.selectedPlayer.isDragging = false;
+				this.selectedPlayer = null;
+			}
+		}
+
 		update() {
 			for (let player of this.players) {
 				player.update();
 				player.inBounds = this.isPlayerInBounds(player);
+			}
+
+			if (this.selectedPlayer) {
+				this.selectedPlayer.inBounds = this.isPlayerInBounds(this.selectedPlayer);
 			}
 			// Add more game logic here
 		}
@@ -504,16 +556,20 @@
 			const resizeCanvas = () => {
 				canvas.width = window.innerWidth;
 				canvas.height = window.innerHeight;
-				// Reinitialize the game with new dimensions
 				game = new Game(canvas);
 				game.gameLoop();
 			};
 
 			window.addEventListener('resize', resizeCanvas);
-			resizeCanvas(); // Initial call to set the size
+			resizeCanvas();
 
 			return () => {
 				window.removeEventListener('resize', resizeCanvas);
+				if (game) {
+					canvas.removeEventListener('mousedown', game.handleMouseDown);
+					canvas.removeEventListener('mousemove', game.handleMouseMove);
+					canvas.removeEventListener('mouseup', game.handleMouseUp);
+				}
 			};
 		}
 	});
