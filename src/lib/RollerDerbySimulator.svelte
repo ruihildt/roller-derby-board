@@ -217,10 +217,10 @@
 				return true;
 			}
 
-			// // Check if the player is in the straightaway
-			// if (this.isPlayerInStraightaway(player)) {
-			// 	return true;
-			// }
+			// Check if the player is in the straightaway
+			if (this.isPlayerInStraightaway(player)) {
+				return true;
+			}
 
 			// If the player is neither in the turn nor in the straightaway, they're out of bounds
 			return false;
@@ -283,6 +283,32 @@
 			return false;
 		}
 
+		isPlayerInStraightaway(player) {
+			const { K, E, I, C, L, F, D, J } = this.points;
+
+			// Define both quadrilaterals
+			const quad1 = [K, E, C, I];
+			const quad2 = [L, F, D, J];
+
+			// Check if the player is in either quadrilateral
+			return this.isPointInQuad(player, quad1) || this.isPointInQuad(player, quad2);
+		}
+
+		isPointInQuad(point, quad) {
+			let inside = false;
+			for (let i = 0, j = quad.length - 1; i < quad.length; j = i++) {
+				const xi = quad[i].x,
+					yi = quad[i].y;
+				const xj = quad[j].x,
+					yj = quad[j].y;
+
+				const intersect =
+					yi > point.y !== yj > point.y && point.x < ((xj - xi) * (point.y - yi)) / (yj - yi) + xi;
+				if (intersect) inside = !inside;
+			}
+			return inside;
+		}
+
 		isAngleBetween(angle, start, end) {
 			const normalizeDifference = (a) => (a + 2 * Math.PI) % (2 * Math.PI);
 			const normalizedAngle = normalizeDifference(angle - start);
@@ -290,18 +316,6 @@
 
 			return normalizedAngle <= normalizedEnd;
 		}
-
-		// isPlayerInStraightaway(player) {
-		// 	const { C, E, I, K } = this.points;
-
-		// 	// Check if player is within the x-bounds of the straightaway
-		// 	const withinX = player.x >= E.x && player.x <= C.x;
-
-		// 	// Check if player is within the y-bounds of the straightaway
-		// 	const withinY = player.y >= C.y && player.y <= I.y;
-
-		// 	return withinX && withinY;
-		// }
 
 		distance(point1, point2) {
 			return Math.sqrt(Math.pow(point1.x - point2.x, 2) + Math.pow(point1.y - point2.y, 2));
@@ -564,10 +578,6 @@
 			this.drawArc(tp.G.x, (tp.G.y + tp.A.y) / 2, midRadius, Math.PI / 2, -Math.PI / 2, true);
 			this.drawArc(tp.H.x, (tp.B.y + tp.H.y) / 2, midRadius, -Math.PI / 2, Math.PI / 2, true);
 		}
-
-		// drawPositionMarkers() {
-		// TODO
-		// }
 
 		// drawPackBoundaries() {
 		// Visualize pack boundaries on the track
