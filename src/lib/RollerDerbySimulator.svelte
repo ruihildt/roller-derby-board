@@ -1,8 +1,26 @@
-<script>
+<script lang="ts">
 	import { onMount } from 'svelte';
 
+	type Point = {
+		x: number;
+		y: number;
+	};
+
 	class Player {
-		constructor(x, y, team, role) {
+		x: number;
+		y: number;
+		team: string;
+		role: string;
+		color: string;
+		radius: number;
+		speed: number;
+		direction: number;
+		inBounds: boolean;
+		isDragging: boolean;
+		dragOffsetX: number;
+		dragOffsetY: number;
+
+		constructor(x: number, y: number, team: string, role: string) {
 			this.x = x;
 			this.y = y;
 			this.team = team;
@@ -17,13 +35,13 @@
 			this.dragOffsetY = 0;
 		}
 
-		containsPoint(x, y) {
+		containsPoint(x: number, y: number): boolean {
 			const dx = this.x - x;
 			const dy = this.y - y;
 			return dx * dx + dy * dy <= this.radius * this.radius;
 		}
 
-		draw(ctx) {
+		draw(ctx: CanvasRenderingContext2D): void {
 			ctx.beginPath();
 			ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
 			ctx.fillStyle = this.color;
@@ -40,7 +58,7 @@
 			ctx.fillText(this.role[0].toUpperCase(), this.x, this.y);
 		}
 
-		update() {
+		update(): void {
 			// Update player position based on speed and direction
 			this.x += Math.cos(this.direction) * this.speed;
 			this.y += Math.sin(this.direction) * this.speed;
@@ -112,9 +130,17 @@
 	// }
 
 	class Game {
-		constructor(canvas) {
+		canvas: HTMLCanvasElement;
+		ctx: CanvasRenderingContext2D;
+		LINE_WIDTH: number;
+		PIXELS_PER_METER: number;
+		points: Record<string, Point>;
+		players: Player[];
+		selectedPlayer: Player | null;
+
+		constructor(canvas: HTMLCanvasElement) {
 			this.canvas = canvas;
-			this.ctx = canvas.getContext('2d');
+			this.ctx = canvas.getContext('2d')!;
 
 			// Calculate LINE_WIDTH and PIXELS_PER_METER based on canvas width
 			this.LINE_WIDTH = Math.max(1, Math.floor(this.canvas.width / 300));
@@ -150,7 +176,7 @@
 			// this.pack = new Pack();
 		}
 
-		initializePlayers() {
+		initializePlayers(): void {
 			const { I, K, G, E } = this.points;
 
 			// Function to get a random position within the specified area for blockers
@@ -185,7 +211,7 @@
 			this.players.push(new Player(jammerPosB.x, jammerPosB.y, 'B', 'jammer'));
 		}
 
-		getJammerLinePosition() {
+		getJammerLinePosition(): Point {
 			const JAMMER_LINE_OFFSET = -2 * this.PIXELS_PER_METER; // 0.5 meters offset
 
 			const { I, C } = this.points;
@@ -211,7 +237,7 @@
 			};
 		}
 
-		isPlayerInBounds(player) {
+		isPlayerInBounds(player: Player): boolean {
 			// Check if the player is in the turn
 			if (this.isPlayerInTurn(player)) {
 				return true;
@@ -226,7 +252,7 @@
 			return false;
 		}
 
-		isPlayerInTurn(player) {
+		isPlayerInTurn(player: Player): boolean {
 			const { A, B, G, H, C, D, E, F, I, J, K, L } = this.points;
 
 			// Check right turn
@@ -239,14 +265,14 @@
 		}
 
 		isPlayerInSingleTurn(
-			player,
-			centerInner,
-			centerOuter,
-			innerPoint1,
-			innerPoint2,
-			outerPoint1,
-			outerPoint2
-		) {
+			player: Player,
+			centerInner: Point,
+			centerOuter: Point,
+			innerPoint1: Point,
+			innerPoint2: Point,
+			outerPoint1: Point,
+			outerPoint2: Point
+		): boolean {
 			const distToInner = this.distance(player, centerInner);
 			const distToOuter = this.distance(player, centerOuter);
 
@@ -283,7 +309,7 @@
 			return false;
 		}
 
-		isPlayerInStraightaway(player) {
+		isPlayerInStraightaway(player: Player): boolean {
 			const { K, E, I, C, L, F, D, J } = this.points;
 
 			// Define both quadrilaterals
@@ -294,7 +320,7 @@
 			return this.isPointInQuad(player, quad1) || this.isPointInQuad(player, quad2);
 		}
 
-		isPointInQuad(point, quad) {
+		isPointInQuad(point: Point, quad: Array<Point>): boolean {
 			let inside = false;
 			for (let i = 0, j = quad.length - 1; i < quad.length; j = i++) {
 				const xi = quad[i].x,
@@ -309,19 +335,19 @@
 			return inside;
 		}
 
-		isAngleBetween(angle, start, end) {
-			const normalizeDifference = (a) => (a + 2 * Math.PI) % (2 * Math.PI);
+		isAngleBetween(angle: number, start: number, end: number): boolean {
+			const normalizeDifference = (a: number) => (a + 2 * Math.PI) % (2 * Math.PI);
 			const normalizedAngle = normalizeDifference(angle - start);
 			const normalizedEnd = normalizeDifference(end - start);
 
 			return normalizedAngle <= normalizedEnd;
 		}
 
-		distance(point1, point2) {
+		distance(point1: Point, point2: Point): number {
 			return Math.sqrt(Math.pow(point1.x - point2.x, 2) + Math.pow(point1.y - point2.y, 2));
 		}
 
-		handleMouseDown(event) {
+		handleMouseDown(event: MouseEvent): void {
 			const rect = this.canvas.getBoundingClientRect();
 			const x = event.clientX - rect.left;
 			const y = event.clientY - rect.top;
@@ -337,7 +363,7 @@
 			}
 		}
 
-		handleMouseMove(event) {
+		handleMouseMove(event: MouseEvent): void {
 			if (this.selectedPlayer && this.selectedPlayer.isDragging) {
 				const rect = this.canvas.getBoundingClientRect();
 				const x = event.clientX - rect.left;
@@ -348,14 +374,14 @@
 			}
 		}
 
-		handleMouseUp() {
+		handleMouseUp(): void {
 			if (this.selectedPlayer) {
 				this.selectedPlayer.isDragging = false;
 				this.selectedPlayer = null;
 			}
 		}
 
-		update() {
+		update(): void {
 			for (let player of this.players) {
 				player.update();
 				player.inBounds = this.isPlayerInBounds(player);
@@ -367,7 +393,7 @@
 			// Add more game logic here
 		}
 
-		draw() {
+		draw(): void {
 			// Clear the canvas
 			this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
@@ -392,7 +418,7 @@
 			// this.drawPackBoundaries();
 		}
 
-		drawGrid() {
+		drawGrid(): void {
 			const ctx = this.ctx;
 			const scale = this.PIXELS_PER_METER;
 			const gridSize = scale; // 1 meter grid
@@ -417,10 +443,10 @@
 			}
 		}
 
-		drawTrack() {
+		drawTrack(): void {
 			const p = this.points;
-
 			const ctx = this.ctx;
+
 			ctx.lineWidth = this.LINE_WIDTH;
 
 			// Set fill style for grey color
@@ -486,39 +512,51 @@
 
 			// Draw pivot line
 			ctx.strokeStyle = 'orange';
-			this.drawPivotLine(p);
+			this.drawPivotLine();
 
 			// Draw jammer line
 			ctx.strokeStyle = 'cyan';
-			this.drawJammerLine(p);
+			this.drawJammerLine();
 
 			// Draw points
-			this.drawPoints(p);
+			this.drawPoints();
 		}
 
-		drawArc(x, y, radius, startAngle, endAngle, clockwise) {
+		drawArc(
+			x: number,
+			y: number,
+			radius: number,
+			startAngle: number,
+			endAngle: number,
+			clockwise: boolean
+		): void {
 			this.ctx.beginPath();
 			this.ctx.arc(x, y, radius, startAngle, endAngle, clockwise);
 			this.ctx.stroke();
 		}
 
-		drawPivotLine(p) {
+		drawPivotLine(): void {
+			const p = this.points;
 			const ctx = this.ctx;
+
 			ctx.beginPath();
 			ctx.moveTo(p.I.x, p.I.y);
 			ctx.lineTo(p.C.x, p.C.y);
 			ctx.stroke();
 		}
 
-		drawJammerLine(p) {
+		drawJammerLine(): void {
+			const p = this.points;
 			const ctx = this.ctx;
+
 			ctx.beginPath();
 			ctx.moveTo(p.K.x, p.K.y);
 			ctx.lineTo(p.E.x, p.E.y);
 			ctx.stroke();
 		}
 
-		drawPoints(p) {
+		drawPoints(): void {
+			const p = this.points;
 			const ctx = this.ctx;
 
 			ctx.fillStyle = 'black';
@@ -543,13 +581,13 @@
 			}
 		}
 
-		drawMidTrackLine() {
+		drawMidTrackLine(): void {
 			const ctx = this.ctx;
 			const scale = this.PIXELS_PER_METER;
 			const p = this.points;
 
 			// Transform points to canvas coordinates
-			const transformPoint = (point) => ({
+			const transformPoint = (point: Point): Point => ({
 				x: point.x * scale + this.canvas.width / 2,
 				y: -point.y * scale + this.canvas.height / 2
 			});
@@ -584,15 +622,15 @@
 		// This is a placeholder and needs to be implemented based on how you want to represent the pack
 		// }
 
-		gameLoop() {
+		gameLoop(): void {
 			this.update();
 			this.draw();
 			requestAnimationFrame(() => this.gameLoop());
 		}
 	}
 
-	let canvas;
-	let game;
+	let canvas: HTMLCanvasElement;
+	let game: Game;
 
 	onMount(() => {
 		if (canvas) {
