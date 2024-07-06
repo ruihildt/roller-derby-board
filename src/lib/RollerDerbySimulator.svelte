@@ -227,35 +227,68 @@
 		}
 
 		isPlayerInTurn(player) {
-			const { A, G, C, D, I, J } = this.points;
+			const { A, B, G, H, C, D, E, F, I, J, K, L } = this.points;
 
-			// Calculate distances from player to centers of arcs
-			const distToA = this.distance(player, A);
-			const distToG = this.distance(player, G);
+			// Check right turn
+			const inRightTurn = this.isPlayerInSingleTurn(player, A, G, C, D, I, J);
 
-			// Calculate radii of arcs
-			const innerRadius = this.distance(A, C);
-			const outerRadius = this.distance(G, I);
+			// Check left turn
+			const inLeftTurn = this.isPlayerInSingleTurn(player, B, H, F, E, L, K);
 
-			// Check if player is between the two arcs
-			if (distToA >= innerRadius && distToG <= outerRadius) {
-				// Calculate angles
-				const angleAC = Math.atan2(C.y - A.y, C.x - A.x);
-				const angleAD = Math.atan2(D.y - A.y, D.x - A.x);
-				const angleAPlayer = Math.atan2(player.y - A.y, player.x - A.x);
+			return inRightTurn || inLeftTurn;
+		}
 
-				const angleGI = Math.atan2(I.y - G.y, I.x - G.x);
-				const angleGJ = Math.atan2(J.y - G.y, J.x - G.x);
-				const angleGPlayer = Math.atan2(player.y - G.y, player.x - G.x);
+		isPlayerInSingleTurn(
+			player,
+			centerInner,
+			centerOuter,
+			innerPoint1,
+			innerPoint2,
+			outerPoint1,
+			outerPoint2
+		) {
+			const distToInner = this.distance(player, centerInner);
+			const distToOuter = this.distance(player, centerOuter);
 
-				// Check if player is within the correct arc segments
-				const inInnerArc = angleAPlayer >= angleAC && angleAPlayer <= angleAD;
-				const inOuterArc = angleGPlayer >= angleGI && angleGPlayer <= angleGJ;
+			const innerRadius = this.distance(centerInner, innerPoint1);
+			const outerRadius = this.distance(centerOuter, outerPoint1);
+
+			if (distToInner >= innerRadius && distToOuter <= outerRadius) {
+				const angleInner1 = Math.atan2(
+					innerPoint1.y - centerInner.y,
+					innerPoint1.x - centerInner.x
+				);
+				const angleInner2 = Math.atan2(
+					innerPoint2.y - centerInner.y,
+					innerPoint2.x - centerInner.x
+				);
+				const angleInnerPlayer = Math.atan2(player.y - centerInner.y, player.x - centerInner.x);
+
+				const angleOuter1 = Math.atan2(
+					outerPoint1.y - centerOuter.y,
+					outerPoint1.x - centerOuter.x
+				);
+				const angleOuter2 = Math.atan2(
+					outerPoint2.y - centerOuter.y,
+					outerPoint2.x - centerOuter.x
+				);
+				const angleOuterPlayer = Math.atan2(player.y - centerOuter.y, player.x - centerOuter.x);
+
+				const inInnerArc = this.isAngleBetween(angleInnerPlayer, angleInner1, angleInner2);
+				const inOuterArc = this.isAngleBetween(angleOuterPlayer, angleOuter1, angleOuter2);
 
 				return inInnerArc || inOuterArc;
 			}
 
 			return false;
+		}
+
+		isAngleBetween(angle, start, end) {
+			const normalizeDifference = (a) => (a + 2 * Math.PI) % (2 * Math.PI);
+			const normalizedAngle = normalizeDifference(angle - start);
+			const normalizedEnd = normalizeDifference(end - start);
+
+			return normalizedAngle <= normalizedEnd;
 		}
 
 		// isPlayerInStraightaway(player) {
