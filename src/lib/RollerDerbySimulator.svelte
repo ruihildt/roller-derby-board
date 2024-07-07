@@ -1,13 +1,11 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import fixWebmDuration from 'fix-webm-duration';
+	import RecordingControls from './RecordingControls.svelte';
 
 	type Point = {
 		x: number;
 		y: number;
 	};
-
-	let recordingStartTime: number;
 
 	class Player {
 		x: number;
@@ -674,8 +672,10 @@
 	}
 
 	let canvas: HTMLCanvasElement;
-	let highResCanvas: HTMLCanvasElement;
 	let game: Game;
+
+	let highResCanvas: HTMLCanvasElement;
+	let isRecording = false;
 
 	function calculateCanvasSize(
 		containerWidth: number,
@@ -691,98 +691,6 @@
 		}
 
 		return { width, height };
-	}
-
-	let mediaRecorder: MediaRecorder | null = null;
-	let recordedChunks: Blob[] = [];
-	let isRecording = false;
-
-	let audioStream: MediaStream | null = null;
-	let audioRecorder: MediaRecorder | null = null;
-	let audioChunks: Blob[] = [];
-
-	async function startRecording() {
-		if (highResCanvas) {
-			recordedChunks = [];
-			audioChunks = [];
-
-			// Get audio stream
-			try {
-				audioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-			} catch (err) {
-				console.error('Error accessing the microphone', err);
-				return;
-			}
-
-			const canvasStream = highResCanvas.captureStream(60); // 60 FPS
-
-			// Combine audio and video streams
-			const combinedStream = new MediaStream([
-				...canvasStream.getVideoTracks(),
-				...audioStream.getAudioTracks()
-			]);
-
-			mediaRecorder = new MediaRecorder(combinedStream, { mimeType: 'video/webm' });
-
-			mediaRecorder.ondataavailable = (event) => {
-				if (event.data.size > 0) {
-					recordedChunks.push(event.data);
-				}
-			};
-
-			mediaRecorder.onstop = async () => {
-				const blob = new Blob(recordedChunks, { type: 'video/webm' });
-
-				// Get the recording duration
-				const duration = Date.now() - recordingStartTime;
-
-				// Fix the WebM duration
-				const fixedBlob = await fixWebmDuration(blob, duration);
-
-				const url = URL.createObjectURL(fixedBlob);
-				const a = document.createElement('a');
-				document.body.appendChild(a);
-				a.style.display = 'none';
-				a.href = url;
-				a.download = 'roller-derby-simulation.webm';
-				a.click();
-				window.URL.revokeObjectURL(url);
-
-				// Stop audio stream tracks
-				if (audioStream) {
-					audioStream.getTracks().forEach((track) => track.stop());
-				}
-			};
-
-			recordingStartTime = Date.now();
-			mediaRecorder.start();
-			isRecording = true;
-		}
-	}
-
-	function stopRecording() {
-		if (mediaRecorder && isRecording) {
-			mediaRecorder.stop();
-			isRecording = false;
-
-			// Stop audio stream tracks
-			if (audioStream) {
-				audioStream.getTracks().forEach((track) => track.stop());
-			}
-		}
-	}
-
-	async function toggleRecording() {
-		if (isRecording) {
-			stopRecording();
-		} else {
-			try {
-				await startRecording();
-			} catch (error) {
-				console.error('Failed to start recording:', error);
-				// Optionally, you could show an error message to the user here
-			}
-		}
 	}
 
 	onMount(() => {
@@ -811,9 +719,6 @@
 					canvas.removeEventListener('mousemove', game.handleMouseMove);
 					canvas.removeEventListener('mouseup', game.handleMouseUp);
 				}
-				if (audioStream) {
-					audioStream.getTracks().forEach((track) => track.stop());
-				}
 			};
 		}
 	});
@@ -822,9 +727,7 @@
 <div class="canvas-container">
 	<canvas bind:this={canvas}></canvas>
 	<canvas bind:this={highResCanvas} style="display: none;"></canvas>
-	<button on:click={toggleRecording}>
-		{isRecording ? 'Stop Recording' : 'Start Recording'}
-	</button>
+	<RecordingControls bind:highResCanvas bind:isRecording />
 </div>
 
 <style>
@@ -840,9 +743,5 @@
 	canvas {
 		max-width: 100%;
 		max-height: 100%;
-	}
-
-	button {
-		margin-top: 10px;
 	}
 </style>
