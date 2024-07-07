@@ -404,13 +404,13 @@
 			this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
 			// Draw the grid
-			this.drawGrid();
+			this.drawGrid(this.ctx);
 
 			// Draw the track
-			this.drawTrack();
+			this.drawTrack(this.ctx);
 
 			// Draw midtrack line
-			this.drawMidTrackLine();
+			this.drawMidTrackLine(this.ctx);
 
 			// Draw players
 			for (let player of this.players) {
@@ -420,8 +420,48 @@
 			// this.drawPackBoundaries();
 		}
 
-		drawGrid(): void {
-			const ctx = this.ctx;
+		drawHighRes(): void {
+			if (!highResCanvas) return;
+
+			const ctx = highResCanvas.getContext('2d')!;
+			const scale = 2; // Increase this for higher resolution
+
+			// Set canvas size
+			highResCanvas.width = this.canvas.width * scale;
+			highResCanvas.height = this.canvas.height * scale;
+
+			// Scale the context
+			ctx.scale(scale, scale);
+
+			// Clear the canvas
+			ctx.clearRect(0, 0, highResCanvas.width, highResCanvas.height);
+
+			// Set background color
+			ctx.fillStyle = '#f0f0f0';
+			ctx.fillRect(0, 0, highResCanvas.width, highResCanvas.height);
+
+			// Draw the grid
+			this.drawGrid(ctx);
+
+			// Draw the track
+			this.drawTrack(ctx);
+
+			// Draw midtrack line
+			this.drawMidTrackLine(ctx);
+
+			// Draw players
+			for (let player of this.players) {
+				player.draw(ctx);
+			}
+
+			// Optionally, add any additional high-resolution elements here
+			// For example, you could add text overlays, statistics, etc.
+			ctx.fillStyle = 'black';
+			ctx.font = '24px Arial';
+			ctx.fillText('HD', 100, 100);
+		}
+
+		drawGrid(ctx: CanvasRenderingContext2D): void {
 			const scale = this.PIXELS_PER_METER;
 			const gridSize = scale; // 1 meter grid
 
@@ -445,9 +485,8 @@
 			}
 		}
 
-		drawTrack(): void {
+		drawTrack(ctx: CanvasRenderingContext2D): void {
 			const p = this.points;
-			const ctx = this.ctx;
 
 			ctx.lineWidth = this.LINE_WIDTH;
 
@@ -486,8 +525,8 @@
 
 			// Draw inside arcs
 			ctx.strokeStyle = 'blue';
-			this.drawArc(p.A.x, p.A.y, Math.abs(p.C.y - p.A.y), Math.PI / 2, -Math.PI / 2, true);
-			this.drawArc(p.B.x, p.B.y, Math.abs(p.E.y - p.B.y), -Math.PI / 2, Math.PI / 2, true);
+			this.drawArc(p.A.x, p.A.y, Math.abs(p.C.y - p.A.y), Math.PI / 2, -Math.PI / 2, true, ctx);
+			this.drawArc(p.B.x, p.B.y, Math.abs(p.E.y - p.B.y), -Math.PI / 2, Math.PI / 2, true, ctx);
 
 			// Draw inside straight lines
 			ctx.strokeStyle = 'green';
@@ -500,8 +539,8 @@
 
 			// Draw outside arcs
 			ctx.strokeStyle = 'red';
-			this.drawArc(p.G.x, p.G.y, Math.abs(p.I.y - p.G.y), Math.PI / 2, -Math.PI / 2, true);
-			this.drawArc(p.H.x, p.H.y, Math.abs(p.K.y - p.H.y), -Math.PI / 2, Math.PI / 2, true);
+			this.drawArc(p.G.x, p.G.y, Math.abs(p.I.y - p.G.y), Math.PI / 2, -Math.PI / 2, true, ctx);
+			this.drawArc(p.H.x, p.H.y, Math.abs(p.K.y - p.H.y), -Math.PI / 2, Math.PI / 2, true, ctx);
 
 			// Draw outside straight lines
 			ctx.strokeStyle = 'purple';
@@ -514,14 +553,14 @@
 
 			// Draw pivot line
 			ctx.strokeStyle = 'orange';
-			this.drawPivotLine();
+			this.drawPivotLine(ctx);
 
 			// Draw jammer line
 			ctx.strokeStyle = 'cyan';
-			this.drawJammerLine();
+			this.drawJammerLine(ctx);
 
 			// Draw points
-			this.drawPoints();
+			this.drawPoints(ctx);
 		}
 
 		drawArc(
@@ -530,16 +569,16 @@
 			radius: number,
 			startAngle: number,
 			endAngle: number,
-			clockwise: boolean
+			clockwise: boolean,
+			ctx: CanvasRenderingContext2D
 		): void {
-			this.ctx.beginPath();
-			this.ctx.arc(x, y, radius, startAngle, endAngle, clockwise);
-			this.ctx.stroke();
+			ctx.beginPath();
+			ctx.arc(x, y, radius, startAngle, endAngle, clockwise);
+			ctx.stroke();
 		}
 
-		drawPivotLine(): void {
+		drawPivotLine(ctx: CanvasRenderingContext2D): void {
 			const p = this.points;
-			const ctx = this.ctx;
 
 			ctx.beginPath();
 			ctx.moveTo(p.I.x, p.I.y);
@@ -547,9 +586,8 @@
 			ctx.stroke();
 		}
 
-		drawJammerLine(): void {
+		drawJammerLine(ctx: CanvasRenderingContext2D): void {
 			const p = this.points;
-			const ctx = this.ctx;
 
 			ctx.beginPath();
 			ctx.moveTo(p.K.x, p.K.y);
@@ -557,9 +595,8 @@
 			ctx.stroke();
 		}
 
-		drawPoints(): void {
+		drawPoints(ctx: CanvasRenderingContext2D): void {
 			const p = this.points;
-			const ctx = this.ctx;
 
 			ctx.fillStyle = 'black';
 			ctx.font = '12px Arial';
@@ -583,8 +620,7 @@
 			}
 		}
 
-		drawMidTrackLine(): void {
-			const ctx = this.ctx;
+		drawMidTrackLine(ctx: CanvasRenderingContext2D): void {
 			const scale = this.PIXELS_PER_METER;
 			const p = this.points;
 
@@ -615,8 +651,8 @@
 			// Draw curved sections
 			const midRadius = Math.abs((tp.C.y + tp.I.y) / 2 - tp.A.y);
 
-			this.drawArc(tp.G.x, (tp.G.y + tp.A.y) / 2, midRadius, Math.PI / 2, -Math.PI / 2, true);
-			this.drawArc(tp.H.x, (tp.B.y + tp.H.y) / 2, midRadius, -Math.PI / 2, Math.PI / 2, true);
+			this.drawArc(tp.G.x, (tp.G.y + tp.A.y) / 2, midRadius, Math.PI / 2, -Math.PI / 2, true, ctx);
+			this.drawArc(tp.H.x, (tp.B.y + tp.H.y) / 2, midRadius, -Math.PI / 2, Math.PI / 2, true, ctx);
 		}
 
 		// drawPackBoundaries() {
@@ -627,11 +663,15 @@
 		gameLoop(): void {
 			this.update();
 			this.draw();
+			if (isRecording) {
+				this.drawHighRes();
+			}
 			requestAnimationFrame(() => this.gameLoop());
 		}
 	}
 
 	let canvas: HTMLCanvasElement;
+	let highResCanvas: HTMLCanvasElement;
 	let game: Game;
 
 	function calculateCanvasSize(
@@ -659,7 +699,7 @@
 	let audioChunks: Blob[] = [];
 
 	async function startRecording() {
-		if (canvas) {
+		if (highResCanvas) {
 			recordedChunks = [];
 			audioChunks = [];
 
@@ -671,7 +711,7 @@
 				return;
 			}
 
-			const canvasStream = canvas.captureStream(60); // 60 FPS
+			const canvasStream = highResCanvas.captureStream(60); // 60 FPS
 
 			// Combine audio and video streams
 			const combinedStream = new MediaStream([
@@ -770,6 +810,7 @@
 
 <div class="canvas-container">
 	<canvas bind:this={canvas}></canvas>
+	<canvas bind:this={highResCanvas} style="display: none;"></canvas>
 	<button on:click={toggleRecording}>
 		{isRecording ? 'Stop Recording' : 'Start Recording'}
 	</button>
