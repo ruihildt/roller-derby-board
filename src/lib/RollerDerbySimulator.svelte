@@ -654,11 +654,32 @@
 	let recordedChunks: Blob[] = [];
 	let isRecording = false;
 
-	function startRecording() {
+	let audioStream: MediaStream | null = null;
+	let audioRecorder: MediaRecorder | null = null;
+	let audioChunks: Blob[] = [];
+
+	async function startRecording() {
 		if (canvas) {
 			recordedChunks = [];
-			const stream = canvas.captureStream(60); // 60 FPS
-			mediaRecorder = new MediaRecorder(stream, { mimeType: 'video/webm' });
+			audioChunks = [];
+
+			// Get audio stream
+			try {
+				audioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+			} catch (err) {
+				console.error('Error accessing the microphone', err);
+				return;
+			}
+
+			const canvasStream = canvas.captureStream(60); // 60 FPS
+
+			// Combine audio and video streams
+			const combinedStream = new MediaStream([
+				...canvasStream.getVideoTracks(),
+				...audioStream.getAudioTracks()
+			]);
+
+			mediaRecorder = new MediaRecorder(combinedStream, { mimeType: 'video/webm' });
 
 			mediaRecorder.ondataavailable = (event) => {
 				if (event.data.size > 0) {
@@ -676,6 +697,11 @@
 				a.download = 'roller-derby-simulation.webm';
 				a.click();
 				window.URL.revokeObjectURL(url);
+
+				// Stop audio stream tracks
+				if (audioStream) {
+					audioStream.getTracks().forEach((track) => track.stop());
+				}
 			};
 
 			mediaRecorder.start();
@@ -687,14 +713,24 @@
 		if (mediaRecorder && isRecording) {
 			mediaRecorder.stop();
 			isRecording = false;
+
+			// Stop audio stream tracks
+			if (audioStream) {
+				audioStream.getTracks().forEach((track) => track.stop());
+			}
 		}
 	}
 
-	function toggleRecording() {
+	async function toggleRecording() {
 		if (isRecording) {
 			stopRecording();
 		} else {
-			startRecording();
+			try {
+				await startRecording();
+			} catch (error) {
+				console.error('Failed to start recording:', error);
+				// Optionally, you could show an error message to the user here
+			}
 		}
 	}
 
@@ -723,6 +759,9 @@
 					canvas.removeEventListener('mousedown', game.handleMouseDown);
 					canvas.removeEventListener('mousemove', game.handleMouseMove);
 					canvas.removeEventListener('mouseup', game.handleMouseUp);
+				}
+				if (audioStream) {
+					audioStream.getTracks().forEach((track) => track.stop());
 				}
 			};
 		}
