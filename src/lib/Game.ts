@@ -180,27 +180,65 @@ export class Game {
 	isPlayerInStraightaway(player: Player): boolean {
 		const { K, E, I, C, L, F, D, J } = this.points;
 
-		// Define both quadrilaterals
-		const quad1 = [K, E, C, I];
-		const quad2 = [L, F, D, J];
+		// Check if player is in the top straightaway
+		const inTopStraightaway = this.isPlayerInSingleStraightaway(player, I, K, C, E);
 
-		// Check if the player is in either quadrilateral
-		return this.isPointInQuad(player, quad1) || this.isPointInQuad(player, quad2);
+		// Check if player is in the bottom straightaway
+		const inBottomStraightaway = this.isPlayerInSingleStraightaway(player, D, F, J, L);
+
+		return inTopStraightaway || inBottomStraightaway;
 	}
 
-	isPointInQuad(point: Point, quad: Array<Point>): boolean {
-		let inside = false;
-		for (let i = 0, j = quad.length - 1; i < quad.length; j = i++) {
-			const xi = quad[i].x,
-				yi = quad[i].y;
-			const xj = quad[j].x,
-				yj = quad[j].y;
+	isPlayerInSingleStraightaway(
+		player: Player,
+		innerStart: Point,
+		innerEnd: Point,
+		outerStart: Point,
+		outerEnd: Point
+	): boolean {
+		// Calculate the midpoint of the inner and outer start points
+		const midStart = {
+			x: (innerStart.x + outerStart.x) / 2,
+			y: (innerStart.y + outerStart.y) / 2
+		};
 
-			const intersect =
-				yi > point.y !== yj > point.y && point.x < ((xj - xi) * (point.y - yi)) / (yj - yi) + xi;
-			if (intersect) inside = !inside;
+		// Calculate the midpoint of the inner and outer end points
+		const midEnd = {
+			x: (innerEnd.x + outerEnd.x) / 2,
+			y: (innerEnd.y + outerEnd.y) / 2
+		};
+
+		// Calculate the distance from the player to the median line
+		const distToMedian = this.distanceToLine(player, midStart, midEnd);
+
+		// Calculate the width of the track (distance between inner and outer bounds)
+		const trackWidth = distance(innerStart, outerStart);
+
+		// Check if the player is within the track width from the median line
+		if (distToMedian <= trackWidth / 2) {
+			// Check if the player is between the start and end points of the straightaway
+			const t =
+				((player.x - midStart.x) * (midEnd.x - midStart.x) +
+					(player.y - midStart.y) * (midEnd.y - midStart.y)) /
+				(Math.pow(midEnd.x - midStart.x, 2) + Math.pow(midEnd.y - midStart.y, 2));
+
+			return t >= 0 && t <= 1;
 		}
-		return inside;
+
+		return false;
+	}
+
+	distanceToLine(point: Point, lineStart: Point, lineEnd: Point): number {
+		const numerator = Math.abs(
+			(lineEnd.y - lineStart.y) * point.x -
+				(lineEnd.x - lineStart.x) * point.y +
+				lineEnd.x * lineStart.y -
+				lineEnd.y * lineStart.x
+		);
+		const denominator = Math.sqrt(
+			Math.pow(lineEnd.y - lineStart.y, 2) + Math.pow(lineEnd.x - lineStart.x, 2)
+		);
+		return numerator / denominator;
 	}
 
 	handleMouseDown(event: MouseEvent): void {
