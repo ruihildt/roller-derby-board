@@ -650,6 +650,54 @@
 		return { width, height };
 	}
 
+	let mediaRecorder: MediaRecorder | null = null;
+	let recordedChunks: Blob[] = [];
+	let isRecording = false;
+
+	function startRecording() {
+		if (canvas) {
+			recordedChunks = [];
+			const stream = canvas.captureStream(60); // 60 FPS
+			mediaRecorder = new MediaRecorder(stream, { mimeType: 'video/webm' });
+
+			mediaRecorder.ondataavailable = (event) => {
+				if (event.data.size > 0) {
+					recordedChunks.push(event.data);
+				}
+			};
+
+			mediaRecorder.onstop = () => {
+				const blob = new Blob(recordedChunks, { type: 'video/webm' });
+				const url = URL.createObjectURL(blob);
+				const a = document.createElement('a');
+				document.body.appendChild(a);
+				a.style.display = 'none';
+				a.href = url;
+				a.download = 'roller-derby-simulation.webm';
+				a.click();
+				window.URL.revokeObjectURL(url);
+			};
+
+			mediaRecorder.start();
+			isRecording = true;
+		}
+	}
+
+	function stopRecording() {
+		if (mediaRecorder && isRecording) {
+			mediaRecorder.stop();
+			isRecording = false;
+		}
+	}
+
+	function toggleRecording() {
+		if (isRecording) {
+			stopRecording();
+		} else {
+			startRecording();
+		}
+	}
+
 	onMount(() => {
 		if (canvas) {
 			const resizeCanvas = () => {
@@ -683,6 +731,9 @@
 
 <div class="canvas-container">
 	<canvas bind:this={canvas}></canvas>
+	<button on:click={toggleRecording}>
+		{isRecording ? 'Stop Recording' : 'Start Recording'}
+	</button>
 </div>
 
 <style>
@@ -690,6 +741,7 @@
 		width: 100%;
 		height: 100%;
 		display: flex;
+		flex-direction: column;
 		justify-content: center;
 		align-items: center;
 	}
@@ -697,5 +749,9 @@
 	canvas {
 		max-width: 100%;
 		max-height: 100%;
+	}
+
+	button {
+		margin-top: 10px;
 	}
 </style>
