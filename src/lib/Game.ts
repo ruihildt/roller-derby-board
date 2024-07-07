@@ -181,64 +181,69 @@ export class Game {
 		const { K, E, I, C, L, F, D, J } = this.points;
 
 		// Check if player is in the top straightaway
-		const inTopStraightaway = this.isPlayerInSingleStraightaway(player, I, K, C, E);
+		const innerStraight1 = { start: C, end: E };
+		const outerStraight1 = { start: I, end: K };
+		const inStraightaway1 = this.isPlayerInSingleStraightaway(
+			player,
+			innerStraight1,
+			outerStraight1
+		);
 
 		// Check if player is in the bottom straightaway
-		const inBottomStraightaway = this.isPlayerInSingleStraightaway(player, D, F, J, L);
+		const innerStraight2 = { start: F, end: D };
+		const outerStraight2 = { start: L, end: J };
+		const inStraightaway2 = this.isPlayerInSingleStraightaway(
+			player,
+			innerStraight2,
+			outerStraight2
+		);
 
-		return inTopStraightaway || inBottomStraightaway;
+		return inStraightaway1 || inStraightaway2;
 	}
 
 	isPlayerInSingleStraightaway(
 		player: Player,
-		innerStart: Point,
-		innerEnd: Point,
-		outerStart: Point,
-		outerEnd: Point
+		innerStraight: { start: Point; end: Point },
+		outerStraight: { start: Point; end: Point }
 	): boolean {
-		// Calculate the midpoint of the inner and outer start points
-		const midStart = {
-			x: (innerStart.x + outerStart.x) / 2,
-			y: (innerStart.y + outerStart.y) / 2
-		};
+		// Calculate the direction vector of the inner straightaway
+		const innerDx = innerStraight.end.x - innerStraight.start.x;
+		const innerDy = innerStraight.end.y - innerStraight.start.y;
+		const innerLength = Math.sqrt(innerDx * innerDx + innerDy * innerDy);
 
-		// Calculate the midpoint of the inner and outer end points
-		const midEnd = {
-			x: (innerEnd.x + outerEnd.x) / 2,
-			y: (innerEnd.y + outerEnd.y) / 2
-		};
+		// Normalize the inner direction vector
+		const innerNormalizedDx = innerDx / innerLength;
+		const innerNormalizedDy = innerDy / innerLength;
 
-		// Calculate the distance from the player to the median line
-		const distToMedian = this.distanceToLine(player, midStart, midEnd);
+		// Calculate the perpendicular vector to the inner straight
+		const perpDx = -innerNormalizedDy;
+		const perpDy = innerNormalizedDx;
 
-		// Calculate the width of the track (distance between inner and outer bounds)
-		const trackWidth = distance(innerStart, outerStart);
+		// Calculate the player's position relative to the inner straight start
+		const relativeX = player.x - innerStraight.start.x;
+		const relativeY = player.y - innerStraight.start.y;
 
-		// Check if the player is within the track width from the median line
-		if (distToMedian <= trackWidth / 2) {
-			// Check if the player is between the start and end points of the straightaway
-			const t =
-				((player.x - midStart.x) * (midEnd.x - midStart.x) +
-					(player.y - midStart.y) * (midEnd.y - midStart.y)) /
-				(Math.pow(midEnd.x - midStart.x, 2) + Math.pow(midEnd.y - midStart.y, 2));
+		// Project the player's position onto the inner straightaway direction
+		const projectionOnTrack = relativeX * innerNormalizedDx + relativeY * innerNormalizedDy;
 
-			return t >= 0 && t <= 1;
-		}
+		// Calculate the perpendicular distance from the player to the inner straight
+		const perpendicularDistance = Math.abs(relativeX * perpDx + relativeY * perpDy);
 
-		return false;
-	}
+		// Check if the player is within the length of the straightaway
+		const isWithinLength = projectionOnTrack >= 0 && projectionOnTrack <= innerLength;
 
-	distanceToLine(point: Point, lineStart: Point, lineEnd: Point): number {
-		const numerator = Math.abs(
-			(lineEnd.y - lineStart.y) * point.x -
-				(lineEnd.x - lineStart.x) * point.y +
-				lineEnd.x * lineStart.y -
-				lineEnd.y * lineStart.x
-		);
-		const denominator = Math.sqrt(
-			Math.pow(lineEnd.y - lineStart.y, 2) + Math.pow(lineEnd.x - lineStart.x, 2)
-		);
-		return numerator / denominator;
+		// Calculate the width at the player's projection point
+		const tRatio = projectionOnTrack / innerLength;
+		const widthStart = distance(innerStraight.start, outerStraight.start);
+		const widthEnd = distance(innerStraight.end, outerStraight.end);
+		const widthAtPlayer = widthStart + (widthEnd - widthStart) * tRatio;
+
+		// Check if the player's center is within the track boundaries, including the player's radius
+		const isWithinWidth =
+			perpendicularDistance >= player.radius &&
+			perpendicularDistance <= widthAtPlayer - player.radius;
+
+		return isWithinLength && isWithinWidth;
 	}
 
 	handleMouseDown(event: MouseEvent): void {
