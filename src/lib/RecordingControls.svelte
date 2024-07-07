@@ -2,13 +2,12 @@
 	import fixWebmDuration from 'fix-webm-duration';
 
 	export let highResCanvas: HTMLCanvasElement;
+	export let isRecording = false;
+	export let audioStream: MediaStream | null = null;
 
 	let mediaRecorder: MediaRecorder | null = null;
 	let recordedChunks: Blob[] = [];
-	export let isRecording = false;
 	let recordingStartTime: number;
-
-	export let audioStream: MediaStream | null = null;
 
 	async function startRecording() {
 		if (highResCanvas) {
