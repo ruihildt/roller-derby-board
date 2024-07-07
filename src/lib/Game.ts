@@ -474,38 +474,31 @@ export class Game {
 	}
 
 	drawMidTrackLine(ctx: CanvasRenderingContext2D): void {
-		const scale = this.PIXELS_PER_METER;
 		const p = this.points;
 
-		// Transform points to canvas coordinates
-		const transformPoint = (point: Point): Point => ({
-			x: point.x * scale + this.canvas.width / 2,
-			y: -point.y * scale + this.canvas.height / 2
-		});
-
-		const tp = Object.fromEntries(
-			Object.entries(p).map(([key, value]) => [key, transformPoint(value)])
-		);
-
-		ctx.strokeStyle = 'pink';
+		ctx.strokeStyle = 'black';
 		ctx.lineWidth = 3;
 
-		// Draw straight sections
-		const midYStart = (tp.C.y + tp.I.y) / 2;
-		const midYEnd = (tp.E.y + tp.K.y) / 2;
+		// Calculate the exact midpoints for straight sections
+		const midYStartTop = (p.C.y + p.I.y) / 2;
+		const midYEndTop = (p.E.y + p.K.y) / 2;
+		const midYStartBottom = (p.D.y + p.J.y) / 2;
+		const midYEndBottom = (p.F.y + p.L.y) / 2;
 
+		// Draw straight sections
 		ctx.beginPath();
-		ctx.moveTo(tp.C.x, midYStart);
-		ctx.lineTo(tp.E.x, midYEnd);
-		ctx.moveTo(tp.D.x, this.canvas.height - midYEnd);
-		ctx.lineTo(tp.F.x, this.canvas.height - midYStart);
+		ctx.moveTo(p.C.x, midYStartTop);
+		ctx.lineTo(p.E.x, midYEndTop);
+		ctx.moveTo(p.D.x, midYStartBottom);
+		ctx.lineTo(p.F.x, midYEndBottom);
 		ctx.stroke();
 
 		// Draw curved sections
-		const midRadius = Math.abs((tp.C.y + tp.I.y) / 2 - tp.A.y);
+		const midRadiusTop = (Math.abs(p.C.y - p.A.y) + Math.abs(p.I.y - p.G.y)) / 2;
+		const midRadiusBottom = (Math.abs(p.D.y - p.A.y) + Math.abs(p.J.y - p.G.y)) / 2;
 
-		this.drawArc(tp.G.x, (tp.G.y + tp.A.y) / 2, midRadius, Math.PI / 2, -Math.PI / 2, true, ctx);
-		this.drawArc(tp.H.x, (tp.B.y + tp.H.y) / 2, midRadius, -Math.PI / 2, Math.PI / 2, true, ctx);
+		this.drawArc(p.G.x, (p.G.y + p.A.y) / 2, midRadiusTop, Math.PI / 2, -Math.PI / 2, true, ctx);
+		this.drawArc(p.H.x, (p.B.y + p.H.y) / 2, midRadiusBottom, -Math.PI / 2, Math.PI / 2, true, ctx);
 	}
 
 	// drawPackBoundaries() {
