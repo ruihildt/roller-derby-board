@@ -158,7 +158,8 @@ export class Game {
 		const innerRadius = distance(centerInner, innerPoint1);
 		const outerRadius = distance(centerOuter, outerPoint1);
 
-		if (distToInner >= innerRadius && distToOuter <= outerRadius) {
+		// Check if any part of the player is within the turn
+		if (distToInner - player.radius >= innerRadius && distToOuter + player.radius <= outerRadius) {
 			const angleInner1 = Math.atan2(innerPoint1.y - centerInner.y, innerPoint1.x - centerInner.x);
 			const angleInner2 = Math.atan2(innerPoint2.y - centerInner.y, innerPoint2.x - centerInner.x);
 			const angleInnerPlayer = Math.atan2(player.y - centerInner.y, player.x - centerInner.x);
