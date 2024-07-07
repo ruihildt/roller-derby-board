@@ -1,10 +1,13 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import fixWebmDuration from 'fix-webm-duration';
 
 	type Point = {
 		x: number;
 		y: number;
 	};
+
+	let recordingStartTime: number;
 
 	class Player {
 		x: number;
@@ -727,9 +730,16 @@
 				}
 			};
 
-			mediaRecorder.onstop = () => {
+			mediaRecorder.onstop = async () => {
 				const blob = new Blob(recordedChunks, { type: 'video/webm' });
-				const url = URL.createObjectURL(blob);
+
+				// Get the recording duration
+				const duration = Date.now() - recordingStartTime;
+
+				// Fix the WebM duration
+				const fixedBlob = await fixWebmDuration(blob, duration);
+
+				const url = URL.createObjectURL(fixedBlob);
 				const a = document.createElement('a');
 				document.body.appendChild(a);
 				a.style.display = 'none';
@@ -744,6 +754,7 @@
 				}
 			};
 
+			recordingStartTime = Date.now();
 			mediaRecorder.start();
 			isRecording = true;
 		}
