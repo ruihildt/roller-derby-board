@@ -21,6 +21,13 @@ What's missing to cover the basics:
 
 Everything else is up for you to suggest!
 
+Ideas:
+
+- Add common start strategies
+- Make it closer to a game simulator like in NURDS
+- Assign players to keyboard shortcut and control them with the direction keys
+- Save an animation not only as a video, but also as a set of instructions the user can reload at a later point in time
+
 ## Prior art & inspiration
 
 I would be nothing without the work of others. Quite litteraly, since I have been using LLM to help me code this.
