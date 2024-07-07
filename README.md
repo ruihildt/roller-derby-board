@@ -4,7 +4,7 @@ Roller Derby Board is a web app that lets you record a video of a roller derby s
 
 ## Features
 
-This is a work in progress. I started implenting the basics and add will add features based on your feedback and usecases.
+This is a work in progress. I started implenting the basics.
 
 What we have so far:
 
@@ -19,8 +19,6 @@ What's missing to cover the basics:
 - physics and collision detection
 - improve the design
 
-Everything else is up for you to suggest!
-
 Ideas:
 
 - Add common start strategies
@@ -28,11 +26,11 @@ Ideas:
 - Assign players to keyboard shortcut and control them with the direction keys
 - Save an animation not only as a video, but also as a set of instructions the user can reload at a later point in time
 
+I will implement new features based on your feedback and usecases, please open an issue (or send an email to ruihildt@protonmail.com ) if you have any.
+
 ## Prior art & inspiration
 
-I would be nothing without the work of others. Quite litteraly, since I have been using LLM to help me code this.
-
-cI would like to thank the following projects for inspiration.
+I would be nothing without the work of others. Quite litteraly, since I have been using LLM to help me code this. And I would like to thank the following projects for inspiration.
 
 ### New Ultimate Roller Derby Simulator
 
@@ -52,7 +50,7 @@ Haven't looked at it in detail, the 3D visualization is pretty cool.
 
 ### Technologies
 
-This is using HTML Canvas to draw the board, and the MediaRecorder API for the audio recording. The video is saved as webm and is actually scaled up from what is shown in the browser (it apparently is a potential issue in terms of performance).
+This is using HTML Canvas to draw the board, and the MediaRecorder API for the audio recording. The video is saved as webm and is actually scaled up from what is shown in the browser.
 
 ### About the LLM usage
 
