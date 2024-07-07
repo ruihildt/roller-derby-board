@@ -1,20 +1,61 @@
-# create-svelte
+# Roller Derby Board
 
-Everything you need to build a Svelte project, powered by [`create-svelte`](https://github.com/sveltejs/kit/tree/main/packages/create-svelte).
+Roller Derby Board is a web app that lets you record a video of a roller derby strategy with audio, directly in your browser.
 
-## Creating a project
+## Features
 
-If you're seeing this, you've probably already done this step. Congrats!
+This is a work in progress. I started implenting the basics and add will add features based on your feedback and usecases.
 
-```bash
-# create a new project in the current directory
-npm create svelte@latest
+What we have so far:
 
-# create a new project in my-app
-npm create svelte@latest my-app
-```
+- a track
+- working track and audio recording
+- out of bounds detection
 
-## Developing
+What's missing to cover the basics:
+
+- pack definition and visualization
+- 10 feet lines
+- physics and collision detection
+- improve the design
+
+Everything else is up for you to suggest!
+
+## Prior art & inspiration
+
+I would be nothing without the work of others. Quite litteraly, since I have been using LLM to help me code this.
+
+cI would like to thank the following projects for inspiration.
+
+### New Ultimate Roller Derby Simulator
+
+NURDS is great and I initially tried to record the track with it, but it turns out SVG animation doesn't work well for that usecase.
+
+I am tempted to call this project YARDS (Yet Another Roller Derby Simulator) in homage to NURDS.
+
+[Source code](https://github.com/fa-bien/nurds) | [Demo](https://nurds.space/)
+
+### Roller Derby Track Visualization
+
+Haven't looked at it in detail, the 3D visualization is pretty cool.
+
+[Source code](https://github.com/webdingens/track-viz) | [Demo](https://trackviz.netlify.app/)
+
+## Technical details
+
+### Technologies
+
+This is using HTML Canvas to draw the board, and the MediaRecorder API for the audio recording. The video is saved as webm and is actually scaled up from what is shown in the browser (it apparently is a potential issue in terms of performance).
+
+### About the LLM usage
+
+I'm not entirely sure how many lines of code I have actually wrote in this project (very few), and it's really weird. It's the first time I prompt engineer my way to a project.
+
+While I'm an ok frontend developer, without LLM help, I would have probably never been able to get this far. I suck at geometry and I can't even double check if everything is correct `¯\_(ツ)\_/¯`.
+
+If you have any suggestions on how to improve the code, I would love to hear them.
+
+### Developing
 
 Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
 
@@ -25,7 +66,7 @@ npm run dev
 npm run dev -- --open
 ```
 
-## Building
+### Building
 
 To create a production version of your app:
 
@@ -35,4 +76,10 @@ npm run build
 
 You can preview the production build with `npm run preview`.
 
-> To deploy your app, you may need to install an [adapter](https://kit.svelte.dev/docs/adapters) for your target environment.
+## License
+
+It's really debatable, since what the license of content produced by LLM is hotly debated and there are multiple ongoing lawsuits.
+
+Assuming that the code here is mine, I hereby license it under the [AGPL license](https://www.gnu.org/licenses/agpl-3.0.en.html).
+
+I am not a lawyer, but alternatively, do what you want, I'm not going to sue anyone for it.
