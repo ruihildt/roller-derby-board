@@ -1,8 +1,6 @@
 <script>
-	import RollerDerbySimulator from '$lib/RollerDerbySimulator.svelte';
+	import RollerDerbySimulator from '$lib/RollerDerbyBoard.svelte';
 </script>
-
-<h1>Roller derby simulator</h1>
 
 <div class="container">
 	<RollerDerbySimulator />
