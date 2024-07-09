@@ -132,7 +132,8 @@ export class Renderer {
 		this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
 		this.drawTrack(this.ctx);
-		// this.drawMidTrackLine(this.ctx);
+		this.drawMidTrackLine(this.ctx);
+		this.drawPoints(this.ctx);
 
 		for (const player of players) {
 			player.draw(this.ctx);
@@ -191,5 +192,30 @@ export class Renderer {
 		ctx.strokeStyle = 'black';
 		ctx.lineWidth = 3;
 		ctx.stroke(this.midTrackPath);
+	}
+
+	drawPoints(ctx: CanvasRenderingContext2D): void {
+		const p = this.points;
+
+		ctx.fillStyle = 'black';
+		ctx.font = '12px Arial';
+		ctx.textAlign = 'left';
+		ctx.textBaseline = 'middle';
+
+		for (const [label, point] of Object.entries(p)) {
+			// Draw point
+			ctx.beginPath();
+			ctx.arc(point.x, point.y, 3, 0, Math.PI * 2);
+			ctx.fill();
+
+			// Draw label
+			if (label === 'G' || label === 'H') {
+				ctx.textAlign = 'right';
+				ctx.fillText(label, point.x - 6, point.y);
+			} else {
+				ctx.textAlign = 'left';
+				ctx.fillText(label, point.x + 6, point.y);
+			}
+		}
 	}
 }
