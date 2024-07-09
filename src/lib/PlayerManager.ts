@@ -1,4 +1,5 @@
 import { Player } from '$lib/Player';
+import { PackManager } from '$lib/PackManager';
 import { Renderer } from '$lib/Renderer';
 import type { Point } from '$lib/types';
 
@@ -11,6 +12,7 @@ export class PlayerManager {
 	private renderer: Renderer;
 	private playerRadius: number;
 	private blockerStartAreaPath: Path2D;
+	private packManager: PackManager;
 
 	constructor(
 		canvas: HTMLCanvasElement,
@@ -28,6 +30,7 @@ export class PlayerManager {
 
 		this.playerRadius = Math.max(0, Math.floor(this.canvas.width / 70));
 		this.initializePlayers();
+		this.packManager = new PackManager(PIXELS_PER_METER);
 	}
 
 	initializePlayers(): void {
@@ -209,5 +212,7 @@ export class PlayerManager {
 		if (this.selectedPlayer) {
 			this.selectedPlayer.inBounds = this.isPlayerInBounds(this.selectedPlayer);
 		}
+
+		this.packManager.updatePlayers(this.players);
 	}
 }

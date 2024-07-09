@@ -8,6 +8,7 @@ export class Player {
 	speed: number;
 	direction: number;
 	inBounds: boolean;
+	isInPack: boolean;
 	isDragging: boolean;
 	dragOffsetX: number;
 	dragOffsetY: number;
@@ -22,6 +23,7 @@ export class Player {
 		this.speed = 0;
 		this.direction = 0;
 		this.inBounds = false;
+		this.isInPack = false;
 		this.isDragging = false;
 		this.dragOffsetX = 0;
 		this.dragOffsetY = 0;
@@ -38,8 +40,8 @@ export class Player {
 		ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
 		ctx.fillStyle = this.color;
 		ctx.fill();
-		ctx.strokeStyle = this.inBounds ? 'black' : 'red'; // Modify this line
-		ctx.lineWidth = 4; // Add this line to make the border more visible
+		ctx.strokeStyle = this.isInPack ? 'pink' : this.inBounds ? 'black' : 'red';
+		ctx.lineWidth = 4;
 		ctx.stroke();
 
 		// Draw role indicator
