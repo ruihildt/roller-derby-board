@@ -40,14 +40,14 @@ export class Renderer {
 		this.midTrackPath = this.createMidTrackPath();
 	}
 
-	private createTrackSurfacePath(): Path2D {
+	createTrackSurfacePath(): Path2D {
 		const trackSurface = new Path2D();
 		trackSurface.addPath(this.outerTrackPath);
 		trackSurface.addPath(this.innerTrackPath);
 		return trackSurface;
 	}
 
-	private createInnerTrackPath(): Path2D {
+	createInnerTrackPath(): Path2D {
 		const path = new Path2D();
 		const p = this.points;
 
@@ -60,7 +60,7 @@ export class Renderer {
 		return path;
 	}
 
-	private createOuterTrackPath(): Path2D {
+	createOuterTrackPath(): Path2D {
 		const path = new Path2D();
 		const p = this.points;
 
@@ -73,7 +73,7 @@ export class Renderer {
 		return path;
 	}
 
-	private createPivotLinePath(): Path2D {
+	createPivotLinePath(): Path2D {
 		const path = new Path2D();
 		const p = this.points;
 
@@ -83,7 +83,7 @@ export class Renderer {
 		return path;
 	}
 
-	private createJammerLinePath(): Path2D {
+	createJammerLinePath(): Path2D {
 		const path = new Path2D();
 		const p = this.points;
 
@@ -93,7 +93,7 @@ export class Renderer {
 		return path;
 	}
 
-	private createblockerStartAreaPath(): Path2D {
+	createblockerStartAreaPath(): Path2D {
 		const path = new Path2D();
 		const p = this.points;
 
@@ -106,7 +106,7 @@ export class Renderer {
 		return path;
 	}
 
-	private createMidTrackPath(): Path2D {
+	createMidTrackPath(): Path2D {
 		const path = new Path2D();
 		const p = this.points;
 

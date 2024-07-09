@@ -2,8 +2,8 @@ import { Player } from './Player';
 import { distance } from './utils';
 
 export class PackManager {
-	private players: Player[];
-	private PACK_DISTANCE: number;
+	players: Player[];
+	PACK_DISTANCE: number;
 
 	constructor(pixelsPerMeter: number) {
 		this.players = [];
@@ -15,7 +15,7 @@ export class PackManager {
 		this.determinePack();
 	}
 
-	private determinePack() {
+	determinePack() {
 		const inBoundsBlockers = this.players.filter((p) => p.inBounds && p.role === 'blocker');
 		const groups = this.groupBlockers(inBoundsBlockers);
 		const validGroups = groups.filter(this.isValidGroup);
@@ -39,11 +39,11 @@ export class PackManager {
 		}
 	}
 
-	private isValidGroup(group: Player[]): boolean {
+	isValidGroup(group: Player[]): boolean {
 		return group.some((p) => p.team === 'A') && group.some((p) => p.team === 'B');
 	}
 
-	private groupBlockers(blockers: Player[]): Player[][] {
+	groupBlockers(blockers: Player[]): Player[][] {
 		const groups: Player[][] = [];
 		const ungrouped = [...blockers];
 
@@ -65,7 +65,7 @@ export class PackManager {
 		return groups;
 	}
 
-	private updatePlayerPackStatus(packGroup: Player[]) {
+	updatePlayerPackStatus(packGroup: Player[]) {
 		this.players.forEach((player) => {
 			player.isInPack = packGroup.includes(player);
 		});

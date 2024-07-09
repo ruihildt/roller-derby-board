@@ -9,10 +9,10 @@ export class PlayerManager {
 	PIXELS_PER_METER: number;
 	players: Player[];
 	selectedPlayer: Player | null;
-	private renderer: Renderer;
-	private playerRadius: number;
-	private blockerStartAreaPath: Path2D;
-	private packManager: PackManager;
+	renderer: Renderer;
+	playerRadius: number;
+	blockerStartAreaPath: Path2D;
+	packManager: PackManager;
 
 	constructor(
 		canvas: HTMLCanvasElement,
