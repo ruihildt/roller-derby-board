@@ -137,6 +137,11 @@ export class Renderer {
 
 		for (const player of players) {
 			player.draw(this.ctx);
+
+			// Draw perpendicular line if player is on the track
+			if (this.isPlayerOnTrack(player)) {
+				this.drawPerpendicularLine({ x: player.x, y: player.y });
+			}
 		}
 	}
 
@@ -159,6 +164,11 @@ export class Renderer {
 
 		for (const player of players) {
 			player.draw(ctx);
+
+			// Draw perpendicular line if player is on the track
+			if (this.isPlayerOnTrack(player)) {
+				this.drawPerpendicularLine({ x: player.x, y: player.y }, ctx);
+			}
 		}
 	}
 
@@ -217,5 +227,79 @@ export class Renderer {
 				ctx.fillText(label, point.x + 6, point.y);
 			}
 		}
+	}
+
+	isPlayerOnTrack(player: Player): boolean {
+		return this.ctx.isPointInPath(this.trackSurfacePath, player.x, player.y);
+	}
+
+	drawPerpendicularLine(point: Point, ctx: CanvasRenderingContext2D = this.ctx): void {
+		const p = this.points;
+		let startPoint: Point, endPoint: Point;
+
+		// Check if the point is on the curved section or straight section
+		if (point.x <= p.B.x || point.x >= p.A.x) {
+			// Curved section
+			const innerCenter = point.x >= p.A.x ? p.A : p.B;
+			const outerCenter = point.x >= p.A.x ? p.G : p.H;
+
+			const innerRadius = Math.abs(p.C.y - p.A.y);
+			const outerRadius = Math.abs(p.I.y - p.G.y);
+
+			const angleInner = Math.atan2(point.y - innerCenter.y, point.x - innerCenter.x);
+			const angleOuter = Math.atan2(point.y - outerCenter.y, point.x - outerCenter.x);
+
+			startPoint = {
+				x: innerCenter.x + innerRadius * Math.cos(angleInner),
+				y: innerCenter.y + innerRadius * Math.sin(angleInner)
+			};
+			endPoint = {
+				x: outerCenter.x + outerRadius * Math.cos(angleOuter),
+				y: outerCenter.y + outerRadius * Math.sin(angleOuter)
+			};
+		} else {
+			// Straight section
+			let innerStart: Point, innerEnd: Point, outerStart: Point, outerEnd: Point;
+
+			if (point.y < this.canvas.height / 2) {
+				// Top straightaway
+				innerStart = p.C;
+				innerEnd = p.E;
+				outerStart = p.I;
+				outerEnd = p.K;
+			} else {
+				// Bottom straightaway
+				innerStart = p.D;
+				innerEnd = p.F;
+				outerStart = p.J;
+				outerEnd = p.L;
+			}
+
+			const innerSlope = (innerEnd.y - innerStart.y) / (innerEnd.x - innerStart.x);
+			const outerSlope = (outerEnd.y - outerStart.y) / (outerEnd.x - outerStart.x);
+
+			startPoint = {
+				x: point.x,
+				y: innerStart.y + innerSlope * (point.x - innerStart.x)
+			};
+			endPoint = {
+				x: point.x,
+				y: outerStart.y + outerSlope * (point.x - outerStart.x)
+			};
+		}
+
+		// Ensure startPoint and endPoint are defined
+		if (!startPoint || !endPoint) {
+			console.error('Failed to calculate perpendicular line points');
+			return;
+		}
+
+		// Draw the perpendicular line
+		ctx.beginPath();
+		ctx.moveTo(startPoint.x, startPoint.y);
+		ctx.lineTo(endPoint.x, endPoint.y);
+		ctx.strokeStyle = 'red';
+		ctx.lineWidth = 2;
+		ctx.stroke();
 	}
 }
