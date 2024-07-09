@@ -30,7 +30,12 @@ export class Game {
 			this.LINE_WIDTH,
 			this.PIXELS_PER_METER
 		);
-		this.playerManager = new PlayerManager(this.canvas, this.points, this.PIXELS_PER_METER);
+		this.playerManager = new PlayerManager(
+			this.canvas,
+			this.points,
+			this.PIXELS_PER_METER,
+			this.renderer
+		);
 
 		this.canvas.addEventListener(
 			'mousedown',
@@ -84,5 +89,20 @@ export class Game {
 		this.draw();
 		this.drawHighRes();
 		requestAnimationFrame(() => this.gameLoop());
+	}
+
+	cleanup(): void {
+		this.canvas.removeEventListener(
+			'mousedown',
+			this.playerManager.handleMouseDown.bind(this.playerManager)
+		);
+		this.canvas.removeEventListener(
+			'mousemove',
+			this.playerManager.handleMouseMove.bind(this.playerManager)
+		);
+		this.canvas.removeEventListener(
+			'mouseup',
+			this.playerManager.handleMouseUp.bind(this.playerManager)
+		);
 	}
 }

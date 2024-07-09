@@ -37,9 +37,7 @@
 			return () => {
 				window.removeEventListener('resize', resizeCanvas);
 				if (game) {
-					canvas.removeEventListener('mousedown', game.handleMouseDown);
-					canvas.removeEventListener('mousemove', game.handleMouseMove);
-					canvas.removeEventListener('mouseup', game.handleMouseUp);
+					game.cleanup();
 				}
 			};
 		}
