@@ -9,7 +9,7 @@ This is a work in progress. I started implenting the basics.
 What we have so far:
 
 - a track
-- working track and audio recording
+- working animation and audio recording
 - out of bounds detection
 
 What's missing to cover the basics:
@@ -18,6 +18,7 @@ What's missing to cover the basics:
 - 10 feet lines
 - physics and collision detection
 - improve the design
+- record without audio
 
 Ideas:
 
@@ -25,6 +26,8 @@ Ideas:
 - Make it closer to a game simulator like in NURDS
 - Assign players to keyboard shortcut and control them with the direction keys
 - Save an animation not only as a video, but also as a set of instructions the user can reload at a later point in time
+- Show recorded video before offering to download it
+- Basic video editing. (Cutting unwanted parts)
 
 I will implement new features based on your feedback and usecases, please open an issue (or send an email to ruihildt@protonmail.com ) if you have any.
 
