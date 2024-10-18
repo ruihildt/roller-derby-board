@@ -16,7 +16,9 @@ export class PackManager {
 	}
 
 	determinePack() {
+		console.log('Determining pack...');
 		const inBoundsBlockers = this.players.filter((p) => p.inBounds && p.role === 'blocker');
+		console.log('In-bounds blockers:', inBoundsBlockers.length);
 		const groups = this.groupBlockers(inBoundsBlockers);
 		const validGroups = groups.filter(this.isValidGroup);
 
@@ -33,6 +35,7 @@ export class PackManager {
 		if (largestGroups.length === 1) {
 			// Single largest group, this is the pack
 			this.updatePlayerPackStatus(largestGroups[0]);
+			console.log('Valid pack found:', largestGroups[0]);
 		} else {
 			// Multiple largest groups of equal size, no pack
 			this.players.forEach((p) => (p.isInPack = false));

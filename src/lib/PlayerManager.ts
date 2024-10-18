@@ -29,8 +29,10 @@ export class PlayerManager {
 		this.blockerStartAreaPath = renderer.blockerStartAreaPath;
 
 		this.playerRadius = Math.max(0, Math.floor(this.canvas.width / 70));
-		this.initializePlayers();
 		this.packManager = new PackManager(PIXELS_PER_METER);
+		this.initializePlayers();
+		this.evaluatePack();
+		console.log('Initial pack evaluation complete');
 	}
 
 	initializePlayers(): void {
@@ -51,6 +53,11 @@ export class PlayerManager {
 		const jammerPosB = this.getJammerLinePosition();
 		this.players.push(new Player(jammerPosA.x, jammerPosA.y, 'A', 'jammer', this.playerRadius));
 		this.players.push(new Player(jammerPosB.x, jammerPosB.y, 'B', 'jammer', this.playerRadius));
+
+		this.players.forEach((player) => {
+			player.inBounds = this.isPlayerInBounds(player);
+			player.onPositionChange = () => this.evaluatePack();
+		});
 	}
 
 	getRandomBlockerPosition(): Point {
@@ -193,6 +200,7 @@ export class PlayerManager {
 
 			this.selectedPlayer.x = x - this.selectedPlayer.dragOffsetX;
 			this.selectedPlayer.y = y - this.selectedPlayer.dragOffsetY;
+			this.evaluatePack();
 		}
 	}
 
@@ -212,7 +220,9 @@ export class PlayerManager {
 		if (this.selectedPlayer) {
 			this.selectedPlayer.inBounds = this.isPlayerInBounds(this.selectedPlayer);
 		}
+	}
 
+	evaluatePack(): void {
 		this.packManager.updatePlayers(this.players);
 	}
 }

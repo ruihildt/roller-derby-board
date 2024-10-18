@@ -57,4 +57,14 @@ export class Player {
 		this.x += Math.cos(this.direction) * this.speed;
 		this.y += Math.sin(this.direction) * this.speed;
 	}
+
+	onPositionChange: (() => void) | null = null;
+
+	updatePosition(x: number, y: number): void {
+		this.x = x;
+		this.y = y;
+		if (this.onPositionChange) {
+			this.onPositionChange();
+		}
+	}
 }
