@@ -56,7 +56,10 @@ export class PlayerManager {
 
 		this.players.forEach((player) => {
 			player.inBounds = this.isPlayerInBounds(player);
-			player.onPositionChange = () => this.evaluatePack();
+			player.onPositionChange = () => {
+				player.inBounds = this.isPlayerInBounds(player);
+				this.evaluatePack();
+			};
 		});
 	}
 
@@ -200,6 +203,7 @@ export class PlayerManager {
 
 			this.selectedPlayer.x = x - this.selectedPlayer.dragOffsetX;
 			this.selectedPlayer.y = y - this.selectedPlayer.dragOffsetY;
+			this.selectedPlayer.inBounds = this.isPlayerInBounds(this.selectedPlayer);
 			this.evaluatePack();
 		}
 	}
@@ -214,11 +218,6 @@ export class PlayerManager {
 	updatePlayers(): void {
 		for (const player of this.players) {
 			player.update();
-			player.inBounds = this.isPlayerInBounds(player);
-		}
-
-		if (this.selectedPlayer) {
-			this.selectedPlayer.inBounds = this.isPlayerInBounds(this.selectedPlayer);
 		}
 	}
 
