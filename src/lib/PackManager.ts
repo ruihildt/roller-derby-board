@@ -24,7 +24,11 @@ export class PackManager {
 
 		if (validGroups.length === 0) {
 			// No valid groups, no pack
-			this.players.forEach((p) => (p.isInPack = false));
+			this.players.forEach((p) => {
+				p.isInPack = false;
+				p.isRearmost = false;
+				p.isForemost = false;
+			});
 			return;
 		}
 
@@ -34,8 +38,10 @@ export class PackManager {
 
 		if (largestGroups.length === 1) {
 			// Single largest group, this is the pack
-			this.updatePlayerPackStatus(largestGroups[0]);
-			console.log('Valid pack found:', largestGroups[0]);
+			const packGroup = largestGroups[0];
+			this.updatePlayerPackStatus(packGroup);
+			// this.updateRearAndForemostPlayers(packGroup);
+			console.log('Valid pack found:', packGroup);
 		} else {
 			// Multiple largest groups of equal size, no pack
 			this.players.forEach((p) => (p.isInPack = false));
