@@ -5,13 +5,17 @@ import type { Point } from '$lib/types';
 
 export class PlayerManager {
 	canvas: HTMLCanvasElement;
+	ctx: CanvasRenderingContext2D;
 	points: Record<string, Point>;
 	PIXELS_PER_METER: number;
 	players: Player[];
 	selectedPlayer: Player | null;
 	renderer: Renderer;
 	playerRadius: number;
-	blockerStartAreaPath: Path2D;
+	straight1Area: Path2D;
+	straight2Area: Path2D;
+	turn1Area: Path2D;
+	turn2Area: Path2D;
 	packManager: PackManager;
 
 	constructor(
@@ -21,12 +25,16 @@ export class PlayerManager {
 		renderer: Renderer
 	) {
 		this.canvas = canvas;
+		this.ctx = this.canvas.getContext('2d')!;
 		this.points = points;
 		this.PIXELS_PER_METER = PIXELS_PER_METER;
 		this.players = [];
 		this.selectedPlayer = null;
 		this.renderer = renderer;
-		this.blockerStartAreaPath = renderer.blockerStartAreaPath;
+		this.straight1Area = renderer.straight1Area;
+		this.straight2Area = renderer.straight2Area;
+		this.turn1Area = renderer.turn1Area;
+		this.turn2Area = renderer.turn2Area;
 
 		this.playerRadius = Math.max(0, Math.floor(this.canvas.width / 70));
 		this.packManager = new PackManager(PIXELS_PER_METER);
@@ -58,6 +66,7 @@ export class PlayerManager {
 			player.inBounds = this.isPlayerInBounds(player);
 			player.onPositionChange = () => {
 				player.inBounds = this.isPlayerInBounds(player);
+				this.updatePlayerZone(player);
 				this.evaluatePack();
 			};
 		});
@@ -81,10 +90,10 @@ export class PlayerManager {
 				{ x, y: y - this.playerRadius } // Top
 			];
 
-			// Check if all points are inside the blockerStartAreaPath and in bounds
+			// Check if all points are inside the straight1Area and in bounds
 			const allPointsValid = pointsToCheck.every(
 				(point) =>
-					ctx.isPointInPath(this.blockerStartAreaPath, point.x, point.y) &&
+					ctx.isPointInPath(this.straight1Area, point.x, point.y) &&
 					this.isPlayerInBounds(new Player(point.x, point.y, 'A', 'blocker', this.playerRadius))
 			);
 
@@ -151,8 +160,7 @@ export class PlayerManager {
 	}
 
 	isPlayerInBounds(player: Player): boolean {
-		const ctx = this.canvas.getContext('2d')!;
-
+		// TODO Consider using the zones instead, since we're already using them anyway
 		// Check the center and four points on the circumference of the player's circle
 		const pointsToCheck = [
 			{ x: player.x, y: player.y }, // Center
@@ -164,10 +172,18 @@ export class PlayerManager {
 
 		for (const point of pointsToCheck) {
 			// Check if the point is inside the outer track path
-			const insideOuterTrack = ctx.isPointInPath(this.renderer.outerTrackPath, point.x, point.y);
+			const insideOuterTrack = this.ctx.isPointInPath(
+				this.renderer.outerTrackPath,
+				point.x,
+				point.y
+			);
 
 			// Check if the point is outside the inner track path
-			const outsideInnerTrack = !ctx.isPointInPath(this.renderer.innerTrackPath, point.x, point.y);
+			const outsideInnerTrack = !this.ctx.isPointInPath(
+				this.renderer.innerTrackPath,
+				point.x,
+				point.y
+			);
 
 			// If any point is out of bounds, the player is out of bounds
 			if (!insideOuterTrack || !outsideInnerTrack) {
@@ -177,6 +193,59 @@ export class PlayerManager {
 
 		// If all points are in bounds, the player is in bounds
 		return true;
+	}
+
+	isPlayerInStraight1(player: Player): boolean {
+		return this.ctx.isPointInPath(this.straight1Area, player.x, player.y);
+	}
+
+	isPlayerInStraight2(player: Player): boolean {
+		return this.ctx.isPointInPath(this.straight2Area, player.x, player.y);
+	}
+
+	isPlayerInTurn1(player: Player): boolean {
+		return this.ctx.isPointInPath(this.turn1Area, player.x, player.y);
+	}
+	isPlayerInTurn2(player: Player): boolean {
+		return this.ctx.isPointInPath(this.turn2Area, player.x, player.y);
+	}
+
+	updatePlayerZone(player: Player): void {
+		const isInZone1 = this.isPlayerInStraight1(player);
+		const isInZone2 = this.isPlayerInTurn1(player);
+		const isInZone3 = this.isPlayerInStraight2(player);
+		const isInZone4 = this.isPlayerInTurn2(player);
+
+		if (isInZone1) {
+			player.zone = 1;
+		} else if (isInZone2) {
+			player.zone = 2;
+		} else if (isInZone3) {
+			player.zone = 3;
+		} else if (isInZone4) {
+			player.zone = 4;
+		} else {
+			player.zone = 0; // Outside track
+		}
+		console.log(player.role + ' is in ' + player.zone);
+	}
+
+	isPointInTriangle(point: Point, triangle: Point[]): boolean {
+		const [p1, p2, p3] = triangle;
+
+		const areaOrig = Math.abs((p2.x - p1.x) * (p3.y - p1.y) - (p3.x - p1.x) * (p2.y - p1.y));
+
+		const area1 = Math.abs(
+			(p1.x - point.x) * (p2.y - point.y) - (p2.x - point.x) * (p1.y - point.y)
+		);
+		const area2 = Math.abs(
+			(p2.x - point.x) * (p3.y - point.y) - (p3.x - point.x) * (p2.y - point.y)
+		);
+		const area3 = Math.abs(
+			(p3.x - point.x) * (p1.y - point.y) - (p1.x - point.x) * (p3.y - point.y)
+		);
+
+		return Math.abs(area1 + area2 + area3 - areaOrig) < 0.00001;
 	}
 
 	handleMouseDown(event: MouseEvent): void {
@@ -204,6 +273,7 @@ export class PlayerManager {
 			this.selectedPlayer.x = x - this.selectedPlayer.dragOffsetX;
 			this.selectedPlayer.y = y - this.selectedPlayer.dragOffsetY;
 			this.selectedPlayer.inBounds = this.isPlayerInBounds(this.selectedPlayer);
+			this.updatePlayerZone(this.selectedPlayer);
 			this.evaluatePack();
 		}
 	}

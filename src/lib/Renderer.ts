@@ -13,8 +13,11 @@ export class Renderer {
 	outerTrackPath: Path2D;
 	pivotLinePath: Path2D;
 	jammerLinePath: Path2D;
-	blockerStartAreaPath: Path2D;
-	trackSurfacePath: Path2D;
+	straight1Area: Path2D;
+	straight2Area: Path2D;
+	turn1Area: Path2D;
+	turn2Area: Path2D;
+	trackSurface: Path2D;
 	midTrackPath: Path2D;
 
 	constructor(
@@ -33,10 +36,13 @@ export class Renderer {
 
 		this.innerTrackPath = this.createInnerTrackPath();
 		this.outerTrackPath = this.createOuterTrackPath();
-		this.trackSurfacePath = this.createTrackSurfacePath();
+		this.trackSurface = this.createTrackSurfacePath();
 		this.pivotLinePath = this.createPivotLinePath();
 		this.jammerLinePath = this.createJammerLinePath();
-		this.blockerStartAreaPath = this.createblockerStartAreaPath();
+		this.straight1Area = this.createStraight1Path();
+		this.straight2Area = this.createStraight2Path();
+		this.turn1Area = this.createTurn1Path();
+		this.turn2Area = this.createTurn2Path();
 		this.midTrackPath = this.createMidTrackPath();
 	}
 
@@ -93,7 +99,7 @@ export class Renderer {
 		return path;
 	}
 
-	createblockerStartAreaPath(): Path2D {
+	createStraight1Path(): Path2D {
 		const path = new Path2D();
 		const p = this.points;
 
@@ -101,6 +107,47 @@ export class Renderer {
 		path.lineTo(p.C.x, p.C.y);
 		path.lineTo(p.E.x, p.E.y);
 		path.lineTo(p.K.x, p.K.y);
+		path.closePath();
+
+		return path;
+	}
+
+	createStraight2Path(): Path2D {
+		const path = new Path2D();
+		const p = this.points;
+
+		path.moveTo(p.D.x, p.D.y);
+		path.lineTo(p.J.x, p.J.y);
+		path.lineTo(p.L.x, p.L.y);
+		path.lineTo(p.F.x, p.F.y);
+		path.closePath();
+
+		return path;
+	}
+
+	createTurn1Path(): Path2D {
+		const path = new Path2D();
+		const p = this.points;
+
+		path.moveTo(p.K.x, p.K.y);
+		path.lineTo(p.E.x, p.E.y);
+		path.arc(p.B.x, p.B.y, Math.abs(p.E.y - p.B.y), -Math.PI / 2, Math.PI / 2, true);
+		path.lineTo(p.F.x, p.F.y);
+		path.arc(p.H.x, p.H.y, Math.abs(p.K.y - p.H.y), Math.PI / 2, -Math.PI / 2, false);
+		path.closePath();
+
+		return path;
+	}
+
+	createTurn2Path(): Path2D {
+		const path = new Path2D();
+		const p = this.points;
+
+		path.moveTo(p.I.x, p.I.y);
+		path.lineTo(p.C.x, p.C.y);
+		path.arc(p.A.x, p.A.y, Math.abs(p.C.y - p.A.y), Math.PI / 2, -Math.PI / 2, true);
+		path.lineTo(p.D.x, p.D.y);
+		path.arc(p.G.x, p.G.y, Math.abs(p.I.y - p.G.y), -Math.PI / 2, Math.PI / 2, false);
 		path.closePath();
 
 		return path;
@@ -175,7 +222,7 @@ export class Renderer {
 	drawTrack(ctx: CanvasRenderingContext2D): void {
 		// Fill only the area between outer and inner tracks
 		ctx.fillStyle = '#D3D3D3';
-		ctx.fill(this.trackSurfacePath, 'evenodd');
+		ctx.fill(this.trackSurface, 'evenodd');
 
 		// Draw the inner and outer track lines
 		ctx.strokeStyle = 'blue';
@@ -207,7 +254,7 @@ export class Renderer {
 	drawPoints(ctx: CanvasRenderingContext2D): void {
 		const p = this.points;
 
-		ctx.fillStyle = 'black';
+		ctx.fillStyle = 'blue';
 		ctx.font = '12px Arial';
 		ctx.textAlign = 'left';
 		ctx.textBaseline = 'middle';
@@ -230,7 +277,7 @@ export class Renderer {
 	}
 
 	isPlayerOnTrack(player: Player): boolean {
-		return this.ctx.isPointInPath(this.trackSurfacePath, player.x, player.y);
+		return this.ctx.isPointInPath(this.trackSurface, player.x, player.y);
 	}
 
 	drawPerpendicularLine(point: Point, ctx: CanvasRenderingContext2D = this.ctx): void {

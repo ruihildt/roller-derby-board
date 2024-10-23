@@ -10,6 +10,7 @@ export class Player {
 	color: string;
 	radius: number;
 	speed: number;
+	zone: number;
 	direction: number;
 	inBounds: boolean;
 	isInPack: boolean;
@@ -29,6 +30,7 @@ export class Player {
 		this.color = team === 'A' ? 'teal' : 'orange';
 		this.radius = radius;
 		this.speed = 0;
+		this.zone = 0;
 		this.direction = 0;
 		this.inBounds = false;
 		this.isInPack = false;
