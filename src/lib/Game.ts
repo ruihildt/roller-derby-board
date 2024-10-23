@@ -34,7 +34,8 @@ export class Game {
 			this.canvas,
 			this.points,
 			this.PIXELS_PER_METER,
-			this.renderer
+			this.renderer,
+			true
 		);
 
 		this.canvas.addEventListener(
@@ -49,6 +50,27 @@ export class Game {
 			'mouseup',
 			this.playerManager.handleMouseUp.bind(this.playerManager)
 		);
+	}
+
+	resize(canvas: HTMLCanvasElement, highResCanvas: HTMLCanvasElement): void {
+		this.canvas = canvas;
+		this.highResCanvas = highResCanvas;
+		this.ctx = canvas.getContext('2d')!;
+
+		this.LINE_WIDTH = Math.max(1, Math.floor(this.canvas.width / 330));
+		this.PIXELS_PER_METER = Math.floor(this.canvas.width / 33);
+
+		this.points = this.initializePoints();
+		this.renderer = new Renderer(
+			this.canvas,
+			this.highResCanvas,
+			this.points,
+			this.LINE_WIDTH,
+			this.PIXELS_PER_METER
+		);
+
+		// Update player manager with new dimensions while keeping existing players
+		this.playerManager.resize(this.canvas, this.points, this.PIXELS_PER_METER, this.renderer);
 	}
 
 	initializePoints(): Record<string, Point> {

@@ -84,12 +84,34 @@
 	}
 </script>
 
-<button on:click={toggleRecording}>
+<button class="record-button" on:click={toggleRecording}>
 	{isRecording ? 'Stop Recording' : 'Start Recording'}
 </button>
 
 <style>
-	button {
-		margin-top: 10px;
+	.record-button {
+		position: absolute;
+		bottom: 20px;
+		right: 20px;
+		padding: 10px 20px;
+		border-radius: 4px;
+		background: #ff3e00;
+		color: white;
+		border: none;
+		cursor: pointer;
+		font-family:
+			system-ui,
+			-apple-system,
+			sans-serif;
+		font-weight: 500;
+		transition: background-color 0.2s ease;
+	}
+
+	.record-button:hover {
+		background: #ff2d00;
+	}
+
+	.record-button:active {
+		transform: scale(0.98);
 	}
 </style>

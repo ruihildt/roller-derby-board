@@ -1,67 +1,51 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-
 	import { Game } from '$lib/Game';
-	import RecordingControls from '$lib/RecordingControls.svelte';
 	import { calculateCanvasSize } from '$lib/utils';
+	import RecordingControls from '$lib/RecordingControls.svelte';
 
+	let container: HTMLDivElement;
 	let canvas: HTMLCanvasElement;
+	let highResCanvas: HTMLCanvasElement;
 	let game: Game;
 
-	let highResCanvas: HTMLCanvasElement;
-	let isRecording = false;
+	function handleResize() {
+		const { width, height } = calculateCanvasSize(container.clientWidth, container.clientHeight);
 
-	$: if (game && isRecording !== undefined) {
-		game.isRecording = isRecording;
+		canvas.width = width;
+		canvas.height = height;
+		highResCanvas.width = width * 2;
+		highResCanvas.height = height * 2;
+
+		if (game) {
+			game.resize(canvas, highResCanvas);
+		}
 	}
 
 	onMount(() => {
-		if (canvas) {
-			const resizeCanvas = () => {
-				const container = canvas.parentElement;
-				if (container) {
-					const { width, height } = calculateCanvasSize(
-						container.clientWidth,
-						container.clientHeight
-					);
-					canvas.width = width;
-					canvas.height = height;
-					game = new Game(canvas, highResCanvas, isRecording);
-					game.gameLoop();
-				}
-			};
+		handleResize();
+		game = new Game(canvas, highResCanvas, false);
+		game.gameLoop();
 
-			window.addEventListener('resize', resizeCanvas);
-			resizeCanvas();
+		window.addEventListener('resize', handleResize);
 
-			return () => {
-				window.removeEventListener('resize', resizeCanvas);
-				if (game) {
-					game.cleanup();
-				}
-			};
-		}
+		return () => {
+			window.removeEventListener('resize', handleResize);
+			game.cleanup();
+		};
 	});
 </script>
 
-<div class="canvas-container">
+<div bind:this={container} class="container">
 	<canvas bind:this={canvas}></canvas>
 	<canvas bind:this={highResCanvas} style="display: none;"></canvas>
-	<RecordingControls bind:highResCanvas bind:isRecording />
+	<RecordingControls {highResCanvas} />
 </div>
 
 <style>
-	.canvas-container {
+	.container {
 		width: 100%;
 		height: 100%;
-		display: flex;
-		flex-direction: column;
-		justify-content: center;
-		align-items: center;
-	}
-
-	canvas {
-		max-width: 100%;
-		max-height: 100%;
+		position: relative;
 	}
 </style>
