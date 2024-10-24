@@ -38,7 +38,7 @@ export class PlayerManager {
 		this.turn2Area = renderer.turn2Area;
 
 		this.playerRadius = Math.max(0, Math.floor(this.canvas.width / 70));
-		this.packManager = new PackManager(PIXELS_PER_METER);
+		this.packManager = new PackManager(PIXELS_PER_METER, points);
 
 		if (isInitialLoad) {
 			this.initializePlayers();
@@ -119,9 +119,9 @@ export class PlayerManager {
 
 		this.players.forEach((player) => {
 			player.inBounds = this.isPlayerInBounds(player);
+			this.updatePlayerZone(player);
 			player.onPositionChange = () => {
 				player.inBounds = this.isPlayerInBounds(player);
-				this.updatePlayerZone(player);
 				this.evaluatePack();
 			};
 		});
