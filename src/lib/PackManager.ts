@@ -94,16 +94,19 @@ export class PackManager {
 			player.isForemost = false;
 		});
 
-		// Only consider blockers in the pack that are in zone 1 or 3
+		// Only consider blockers in the pack that are in zones 1, 2, or 3
 		const packBlockers = packGroup.filter(
 			(player) =>
-				player.isInPack && player.role === 'blocker' && (player.zone === 1 || player.zone === 3)
+				player.isInPack &&
+				player.role === 'blocker' &&
+				(player.zone === 1 || player.zone === 2 || player.zone === 3)
 		);
 
 		if (packBlockers.length < 2) return;
 
 		// Group blockers by zone
 		const zone1Blockers = packBlockers.filter((p) => p.zone === 1);
+		const zone2Blockers = packBlockers.filter((p) => p.zone === 2);
 		const zone3Blockers = packBlockers.filter((p) => p.zone === 3);
 
 		// Handle zone 1
@@ -114,6 +117,39 @@ export class PackManager {
 			const foremost = zone1Blockers.reduce((foremost, player) =>
 				player.x < foremost.x ? player : foremost
 			);
+			rearmost.isRearmost = true;
+			foremost.isForemost = true;
+		}
+
+		// Handle zone 2 (turn1)
+		if (zone2Blockers.length >= 2) {
+			const turnCenterX = (this.points.B.x + this.points.H.x) / 2;
+			const turnCenterY = (this.points.B.y + this.points.H.y) / 2;
+
+			const normalizeAngle = (angle: number): number => {
+				return angle < 0 ? angle + 2 * Math.PI : angle;
+			};
+
+			const rearmost = zone2Blockers.reduce((rearmost, player) => {
+				const currentAngle = normalizeAngle(
+					Math.atan2(player.y - turnCenterY, player.x - turnCenterX)
+				);
+				const rearmostAngle = normalizeAngle(
+					Math.atan2(rearmost.y - turnCenterY, rearmost.x - turnCenterX)
+				);
+				return currentAngle > rearmostAngle ? player : rearmost;
+			});
+
+			const foremost = zone2Blockers.reduce((foremost, player) => {
+				const currentAngle = normalizeAngle(
+					Math.atan2(player.y - turnCenterY, player.x - turnCenterX)
+				);
+				const foremostAngle = normalizeAngle(
+					Math.atan2(foremost.y - turnCenterY, foremost.x - turnCenterX)
+				);
+				return currentAngle < foremostAngle ? player : foremost;
+			});
+
 			rearmost.isRearmost = true;
 			foremost.isForemost = true;
 		}

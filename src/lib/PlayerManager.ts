@@ -285,24 +285,6 @@ export class PlayerManager {
 		console.log(player.role + ' is in ' + player.zone);
 	}
 
-	isPointInTriangle(point: Point, triangle: Point[]): boolean {
-		const [p1, p2, p3] = triangle;
-
-		const areaOrig = Math.abs((p2.x - p1.x) * (p3.y - p1.y) - (p3.x - p1.x) * (p2.y - p1.y));
-
-		const area1 = Math.abs(
-			(p1.x - point.x) * (p2.y - point.y) - (p2.x - point.x) * (p1.y - point.y)
-		);
-		const area2 = Math.abs(
-			(p2.x - point.x) * (p3.y - point.y) - (p3.x - point.x) * (p2.y - point.y)
-		);
-		const area3 = Math.abs(
-			(p3.x - point.x) * (p1.y - point.y) - (p1.x - point.x) * (p3.y - point.y)
-		);
-
-		return Math.abs(area1 + area2 + area3 - areaOrig) < 0.00001;
-	}
-
 	handleMouseDown(event: MouseEvent): void {
 		const rect = this.canvas.getBoundingClientRect();
 		const x = event.clientX - rect.left;
