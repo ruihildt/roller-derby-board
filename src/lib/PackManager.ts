@@ -88,97 +88,96 @@ export class PackManager {
 	}
 
 	updateRearAndForemostPlayers(packGroup: Player[]): void {
-		// Reset all players first
+		// Reset all players
 		this.players.forEach((player) => {
 			player.isRearmost = false;
 			player.isForemost = false;
 		});
 
-		// Only consider blockers in the pack that are in zones 1, 2, or 3
 		const packBlockers = packGroup.filter((player) => player.isInPack);
-
 		if (packBlockers.length < 2) return;
 
-		// Group blockers by zone
-		const zone1Blockers = packBlockers.filter((p) => p.zone === 1);
-		const zone2Blockers = packBlockers.filter((p) => p.zone === 2);
-		const zone3Blockers = packBlockers.filter((p) => p.zone === 3);
-		const zone4Blockers = packBlockers.filter((p) => p.zone === 4);
+		// Get unique zones in ascending order
+		let zones = [...new Set(packBlockers.map((p) => p.zone))].sort((a, b) => a - b);
 
-		// Handle zone 1
-		if (zone1Blockers.length >= 2) {
-			const rearmost = zone1Blockers.reduce((rearmost, player) =>
-				player.x > rearmost.x ? player : rearmost
-			);
-			const foremost = zone1Blockers.reduce((foremost, player) =>
-				player.x < foremost.x ? player : foremost
-			);
-			rearmost.isRearmost = true;
-			foremost.isForemost = true;
+		// If we have zone 4 and zone 1, add 5 (virtual zone 1) to maintain sequence
+		if (zones.includes(4) && zones.includes(1)) {
+			zones = zones.filter((z) => z !== 1).concat(5);
 		}
 
-		// Handle zone 2 (turn1)
-		if (zone2Blockers.length >= 2) {
+		const firstZone = zones[0];
+		const lastZone = zones[zones.length - 1];
+
+		// Map zone 5 back to 1 for filtering
+		const firstZoneBlockers = packBlockers.filter((p) => p.zone === firstZone);
+		const lastZoneBlockers = packBlockers.filter((p) => p.zone === (lastZone === 5 ? 1 : lastZone));
+
+		if (firstZoneBlockers.length > 0) {
+			const rearmost = this.getRearmost(firstZoneBlockers, firstZone);
+			rearmost.isRearmost = true;
+		}
+
+		if (lastZoneBlockers.length > 0) {
+			const foremost = this.getForemost(lastZoneBlockers, lastZone === 5 ? 1 : lastZone);
+			foremost.isForemost = true;
+		}
+	}
+
+	private getRearmost(blockers: Player[], zone: number): Player {
+		if (zone === 1) {
+			return blockers.reduce((rear, player) => (player.x > rear.x ? player : rear));
+		}
+		if (zone === 2) {
 			const turnCenterX = (this.points.B.x + this.points.H.x) / 2;
 			const turnCenterY = (this.points.B.y + this.points.H.y) / 2;
-
-			const getAngleFromVertical = (player: Player): number => {
-				const angle = Math.atan2(player.x - turnCenterX, -(player.y - turnCenterY));
-				return angle < 0 ? angle + 2 * Math.PI : angle;
-			};
-
-			const rearmost = zone2Blockers.reduce((rearmost, player) => {
-				const currentAngle = getAngleFromVertical(player);
-				const rearmostAngle = getAngleFromVertical(rearmost);
-				return currentAngle > rearmostAngle ? player : rearmost;
-			});
-
-			const foremost = zone2Blockers.reduce((foremost, player) => {
-				const currentAngle = getAngleFromVertical(player);
-				const foremostAngle = getAngleFromVertical(foremost);
-				return currentAngle < foremostAngle ? player : foremost;
-			});
-
-			rearmost.isRearmost = true;
-			foremost.isForemost = true;
+			return this.getPlayerByAngle(blockers, turnCenterX, turnCenterY, 'max');
 		}
-
-		// Handle zone 3
-		if (zone3Blockers.length >= 2) {
-			const rearmost = zone3Blockers.reduce((rearmost, player) =>
-				player.x < rearmost.x ? player : rearmost
-			);
-			const foremost = zone3Blockers.reduce((foremost, player) =>
-				player.x > foremost.x ? player : foremost
-			);
-			rearmost.isRearmost = true;
-			foremost.isForemost = true;
+		if (zone === 3) {
+			return blockers.reduce((rear, player) => (player.x < rear.x ? player : rear));
 		}
+		// zone 4
+		const turnCenterX = (this.points.A.x + this.points.G.x) / 2;
+		const turnCenterY = (this.points.A.y + this.points.G.y) / 2;
+		return this.getPlayerByAngle(blockers, turnCenterX, turnCenterY, 'max');
+	}
 
-		// Handle zone 4 (turn2)
-		if (zone4Blockers.length >= 2) {
-			const turnCenterX = (this.points.A.x + this.points.G.x) / 2;
-			const turnCenterY = (this.points.A.y + this.points.G.y) / 2;
-
-			const getAngleFromVertical = (player: Player): number => {
-				const angle = Math.atan2(player.x - turnCenterX, -(player.y - turnCenterY));
-				return angle < 0 ? angle + 2 * Math.PI : angle;
-			};
-
-			const rearmost = zone4Blockers.reduce((rearmost, player) => {
-				const currentAngle = getAngleFromVertical(player);
-				const rearmostAngle = getAngleFromVertical(rearmost);
-				return currentAngle > rearmostAngle ? player : rearmost;
-			});
-
-			const foremost = zone4Blockers.reduce((foremost, player) => {
-				const currentAngle = getAngleFromVertical(player);
-				const foremostAngle = getAngleFromVertical(foremost);
-				return currentAngle < foremostAngle ? player : foremost;
-			});
-
-			rearmost.isRearmost = true;
-			foremost.isForemost = true;
+	private getForemost(blockers: Player[], zone: number): Player {
+		if (zone === 1) {
+			return blockers.reduce((fore, player) => (player.x < fore.x ? player : fore));
 		}
+		if (zone === 2) {
+			const turnCenterX = (this.points.B.x + this.points.H.x) / 2;
+			const turnCenterY = (this.points.B.y + this.points.H.y) / 2;
+			return this.getPlayerByAngle(blockers, turnCenterX, turnCenterY, 'min');
+		}
+		if (zone === 3) {
+			return blockers.reduce((fore, player) => (player.x > fore.x ? player : fore));
+		}
+		// zone 4
+		const turnCenterX = (this.points.A.x + this.points.G.x) / 2;
+		const turnCenterY = (this.points.A.y + this.points.G.y) / 2;
+		return this.getPlayerByAngle(blockers, turnCenterX, turnCenterY, 'min');
+	}
+
+	private getPlayerByAngle(
+		blockers: Player[],
+		centerX: number,
+		centerY: number,
+		type: 'min' | 'max'
+	): Player {
+		return blockers.reduce((selected, player) => {
+			const currentAngle = Math.atan2(player.x - centerX, -(player.y - centerY));
+			const selectedAngle = Math.atan2(selected.x - centerX, -(selected.y - centerY));
+			const normalizedCurrent = (currentAngle + 2 * Math.PI) % (2 * Math.PI);
+			const normalizedSelected = (selectedAngle + 2 * Math.PI) % (2 * Math.PI);
+
+			return type === 'max'
+				? normalizedCurrent > normalizedSelected
+					? player
+					: selected
+				: normalizedCurrent < normalizedSelected
+					? player
+					: selected;
+		});
 	}
 }

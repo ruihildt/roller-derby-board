@@ -11,10 +11,11 @@ What we have so far:
 - a track
 - working animation and audio recording
 - out of bounds detection
+- pack definition
 
 What's missing to cover the basics:
 
-- pack definition and visualization
+- visualization of play zones
 - 10 feet lines
 - physics and collision detection
 - improve the design
@@ -23,11 +24,9 @@ What's missing to cover the basics:
 Ideas:
 
 - Add common start strategies
-- Make it closer to a game simulator like in NURDS
+- Show recorded video before offering to download it
 - Assign players to keyboard shortcut and control them with the direction keys
 - Save an animation not only as a video, but also as a set of instructions the user can reload at a later point in time
-- Show recorded video before offering to download it
-- Basic video editing. (Cutting unwanted parts)
 
 I will implement new features based on your feedback and usecases, please open an issue (or send an email to ruihildt@protonmail.com ) if you have any.
 
