@@ -95,12 +95,7 @@ export class PackManager {
 		});
 
 		// Only consider blockers in the pack that are in zones 1, 2, or 3
-		const packBlockers = packGroup.filter(
-			(player) =>
-				player.isInPack &&
-				player.role === 'blocker' &&
-				(player.zone === 1 || player.zone === 2 || player.zone === 3)
-		);
+		const packBlockers = packGroup.filter((player) => player.isInPack);
 
 		if (packBlockers.length < 2) return;
 
@@ -108,6 +103,7 @@ export class PackManager {
 		const zone1Blockers = packBlockers.filter((p) => p.zone === 1);
 		const zone2Blockers = packBlockers.filter((p) => p.zone === 2);
 		const zone3Blockers = packBlockers.filter((p) => p.zone === 3);
+		const zone4Blockers = packBlockers.filter((p) => p.zone === 4);
 
 		// Handle zone 1
 		if (zone1Blockers.length >= 2) {
@@ -126,27 +122,20 @@ export class PackManager {
 			const turnCenterX = (this.points.B.x + this.points.H.x) / 2;
 			const turnCenterY = (this.points.B.y + this.points.H.y) / 2;
 
-			const normalizeAngle = (angle: number): number => {
+			const getAngleFromVertical = (player: Player): number => {
+				const angle = Math.atan2(player.x - turnCenterX, -(player.y - turnCenterY));
 				return angle < 0 ? angle + 2 * Math.PI : angle;
 			};
 
 			const rearmost = zone2Blockers.reduce((rearmost, player) => {
-				const currentAngle = normalizeAngle(
-					Math.atan2(player.y - turnCenterY, player.x - turnCenterX)
-				);
-				const rearmostAngle = normalizeAngle(
-					Math.atan2(rearmost.y - turnCenterY, rearmost.x - turnCenterX)
-				);
+				const currentAngle = getAngleFromVertical(player);
+				const rearmostAngle = getAngleFromVertical(rearmost);
 				return currentAngle > rearmostAngle ? player : rearmost;
 			});
 
 			const foremost = zone2Blockers.reduce((foremost, player) => {
-				const currentAngle = normalizeAngle(
-					Math.atan2(player.y - turnCenterY, player.x - turnCenterX)
-				);
-				const foremostAngle = normalizeAngle(
-					Math.atan2(foremost.y - turnCenterY, foremost.x - turnCenterX)
-				);
+				const currentAngle = getAngleFromVertical(player);
+				const foremostAngle = getAngleFromVertical(foremost);
 				return currentAngle < foremostAngle ? player : foremost;
 			});
 
@@ -162,6 +151,32 @@ export class PackManager {
 			const foremost = zone3Blockers.reduce((foremost, player) =>
 				player.x > foremost.x ? player : foremost
 			);
+			rearmost.isRearmost = true;
+			foremost.isForemost = true;
+		}
+
+		// Handle zone 4 (turn2)
+		if (zone4Blockers.length >= 2) {
+			const turnCenterX = (this.points.A.x + this.points.G.x) / 2;
+			const turnCenterY = (this.points.A.y + this.points.G.y) / 2;
+
+			const getAngleFromVertical = (player: Player): number => {
+				const angle = Math.atan2(player.x - turnCenterX, -(player.y - turnCenterY));
+				return angle < 0 ? angle + 2 * Math.PI : angle;
+			};
+
+			const rearmost = zone4Blockers.reduce((rearmost, player) => {
+				const currentAngle = getAngleFromVertical(player);
+				const rearmostAngle = getAngleFromVertical(rearmost);
+				return currentAngle > rearmostAngle ? player : rearmost;
+			});
+
+			const foremost = zone4Blockers.reduce((foremost, player) => {
+				const currentAngle = getAngleFromVertical(player);
+				const foremostAngle = getAngleFromVertical(foremost);
+				return currentAngle < foremostAngle ? player : foremost;
+			});
+
 			rearmost.isRearmost = true;
 			foremost.isForemost = true;
 		}
