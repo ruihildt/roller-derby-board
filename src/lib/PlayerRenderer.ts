@@ -3,18 +3,22 @@ import { TrackGeometry } from './TrackGeometry';
 
 export class PlayerRenderer {
 	canvas: HTMLCanvasElement;
-	highResCanvas: HTMLCanvasElement;
 	ctx: CanvasRenderingContext2D;
+	highResCanvas: HTMLCanvasElement;
+	highResCtx: CanvasRenderingContext2D;
 	trackGeometry: TrackGeometry;
 
 	constructor(
 		canvas: HTMLCanvasElement,
+		ctx: CanvasRenderingContext2D,
 		highResCanvas: HTMLCanvasElement,
+		highResCtx: CanvasRenderingContext2D,
 		trackGeometry: TrackGeometry
 	) {
 		this.canvas = canvas;
+		this.ctx = ctx;
 		this.highResCanvas = highResCanvas;
-		this.ctx = canvas.getContext('2d')!;
+		this.highResCtx = highResCtx;
 		this.trackGeometry = trackGeometry;
 	}
 
@@ -30,7 +34,7 @@ export class PlayerRenderer {
 	drawPlayersHighRes(players: Player[]): void {
 		if (!this.highResCanvas) return;
 
-		const ctx = this.highResCanvas.getContext('2d')!;
+		const ctx = this.highResCtx;
 		for (const player of players) {
 			this.drawPlayer(player, ctx);
 			if (this.trackGeometry.isPlayerInBounds(player)) {

@@ -7,6 +7,7 @@ export class Game {
 	canvas: HTMLCanvasElement;
 	highResCanvas: HTMLCanvasElement;
 	ctx: CanvasRenderingContext2D;
+	highResCtx: CanvasRenderingContext2D;
 	isRecording: boolean;
 	LINE_WIDTH: number;
 	PIXELS_PER_METER: number;
@@ -17,8 +18,9 @@ export class Game {
 
 	constructor(canvas: HTMLCanvasElement, highResCanvas: HTMLCanvasElement, isRecording: boolean) {
 		this.canvas = canvas;
-		this.highResCanvas = highResCanvas;
 		this.ctx = canvas.getContext('2d')!;
+		this.highResCanvas = highResCanvas;
+		this.highResCtx = highResCanvas.getContext('2d')!;
 		this.isRecording = isRecording;
 
 		this.LINE_WIDTH = Math.max(1, Math.floor(this.canvas.width / 330));
@@ -27,18 +29,23 @@ export class Game {
 		this.points = this.initializePoints();
 		this.renderer = new Renderer(
 			this.canvas,
+			this.ctx,
 			this.highResCanvas,
+			this.highResCtx,
 			this.points,
 			this.LINE_WIDTH,
 			this.PIXELS_PER_METER
 		);
 		this.playerRenderer = new PlayerRenderer(
 			this.canvas,
+			this.ctx,
 			this.highResCanvas,
+			this.highResCtx,
 			this.renderer.trackGeometry
 		);
 		this.playerManager = new PlayerManager(
 			this.canvas,
+			this.ctx,
 			this.points,
 			this.PIXELS_PER_METER,
 			this.renderer,
@@ -59,25 +66,29 @@ export class Game {
 		);
 	}
 
-	resize(canvas: HTMLCanvasElement, highResCanvas: HTMLCanvasElement): void {
-		this.canvas = canvas;
-		this.highResCanvas = highResCanvas;
-		this.ctx = canvas.getContext('2d')!;
-
+	resize(): void {
 		this.LINE_WIDTH = Math.max(1, Math.floor(this.canvas.width / 330));
 		this.PIXELS_PER_METER = Math.floor(this.canvas.width / 33);
 
 		this.points = this.initializePoints();
 		this.renderer = new Renderer(
 			this.canvas,
+			this.ctx,
 			this.highResCanvas,
+			this.highResCtx,
 			this.points,
 			this.LINE_WIDTH,
 			this.PIXELS_PER_METER
 		);
 
 		// Update player manager with new dimensions while keeping existing players
-		this.playerManager.resize(this.canvas, this.points, this.PIXELS_PER_METER, this.renderer);
+		this.playerManager.resize(
+			this.canvas,
+			this.ctx,
+			this.points,
+			this.PIXELS_PER_METER,
+			this.renderer
+		);
 	}
 
 	initializePoints(): Record<string, Point> {

@@ -3,8 +3,9 @@ import { TrackGeometry } from './TrackGeometry';
 
 export class Renderer {
 	canvas: HTMLCanvasElement;
-	highResCanvas: HTMLCanvasElement;
 	ctx: CanvasRenderingContext2D;
+	highResCanvas: HTMLCanvasElement;
+	highResCtx: CanvasRenderingContext2D;
 	points: Record<string, Point>;
 	LINE_WIDTH: number;
 	PIXELS_PER_METER: number;
@@ -22,18 +23,21 @@ export class Renderer {
 	midTrackPath: Path2D;
 	constructor(
 		canvas: HTMLCanvasElement,
+		ctx: CanvasRenderingContext2D,
 		highResCanvas: HTMLCanvasElement,
+		highResCtx: CanvasRenderingContext2D,
 		points: Record<string, Point>,
 		LINE_WIDTH: number,
 		PIXELS_PER_METER: number
 	) {
 		this.canvas = canvas;
+		this.ctx = ctx;
 		this.highResCanvas = highResCanvas;
-		this.ctx = canvas.getContext('2d')!;
+		this.highResCtx = highResCtx;
 		this.points = points;
 		this.LINE_WIDTH = LINE_WIDTH;
 		this.PIXELS_PER_METER = PIXELS_PER_METER;
-		this.trackGeometry = new TrackGeometry(canvas, this.ctx, this.points, PIXELS_PER_METER);
+		this.trackGeometry = new TrackGeometry(canvas, ctx, points, PIXELS_PER_METER);
 
 		this.innerTrackPath = this.trackGeometry.innerTrackPath;
 		this.outerTrackPath = this.trackGeometry.outerTrackPath;
@@ -60,7 +64,7 @@ export class Renderer {
 	drawHighRes(): void {
 		if (!this.highResCanvas) return;
 
-		const ctx = this.highResCanvas.getContext('2d')!;
+		const ctx = this.highResCtx;
 		const scale = 2;
 
 		this.highResCanvas.width = this.canvas.width * scale;

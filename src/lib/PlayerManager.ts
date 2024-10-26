@@ -22,18 +22,19 @@ export class PlayerManager {
 
 	constructor(
 		canvas: HTMLCanvasElement,
+		ctx: CanvasRenderingContext2D,
 		points: Record<string, Point>,
 		PIXELS_PER_METER: number,
 		renderer: Renderer,
 		isInitialLoad: boolean
 	) {
 		this.canvas = canvas;
-		this.ctx = this.canvas.getContext('2d')!;
+		this.ctx = ctx;
 		this.points = points;
 		this.PIXELS_PER_METER = PIXELS_PER_METER;
 		this.players = [];
 		this.selectedPlayer = null;
-		this.trackGeometry = new TrackGeometry(canvas, this.ctx, points, PIXELS_PER_METER);
+		this.trackGeometry = new TrackGeometry(canvas, ctx, points, PIXELS_PER_METER);
 		this.renderer = renderer;
 		this.straight1Area = renderer.straight1Area;
 		this.straight2Area = renderer.straight2Area;
@@ -52,6 +53,7 @@ export class PlayerManager {
 
 	resize(
 		canvas: HTMLCanvasElement,
+		ctx: CanvasRenderingContext2D,
 		points: Record<string, Point>,
 		PIXELS_PER_METER: number,
 		renderer: Renderer
@@ -70,7 +72,7 @@ export class PlayerManager {
 
 		// Update instance properties
 		this.canvas = canvas;
-		this.ctx = canvas.getContext('2d')!;
+		this.ctx = ctx;
 		this.points = points;
 		this.PIXELS_PER_METER = PIXELS_PER_METER;
 		this.renderer = renderer;
@@ -131,7 +133,7 @@ export class PlayerManager {
 	}
 
 	getRandomBlockerPosition(): Point {
-		const ctx = this.canvas.getContext('2d')!;
+		const ctx = this.ctx;
 		let attempts = 0;
 		const maxAttempts = 1000; // Adjust this value as needed
 
