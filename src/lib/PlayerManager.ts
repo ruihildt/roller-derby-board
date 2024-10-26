@@ -58,49 +58,35 @@ export class PlayerManager {
 		PIXELS_PER_METER: number,
 		renderer: Renderer
 	): void {
-		// Calculate track center from new points
-		const centerX = (points.A.x + points.B.x) / 2;
-		const centerY = (points.A.y + points.B.y) / 2;
+		// Calculate scale factors based on track dimensions
+		const oldTrackWidth = this.points.A.x - this.points.B.x;
+		const newTrackWidth = points.A.x - points.B.x;
+		const scale = newTrackWidth / oldTrackWidth;
 
-		// Calculate old track center
-		const oldCenterX = (this.points.A.x + this.points.B.x) / 2;
-		const oldCenterY = (this.points.A.y + this.points.B.y) / 2;
-
-		// Calculate scale factors relative to track size
-		const scaleX = (points.A.x - points.B.x) / (this.points.A.x - this.points.B.x);
-		const scaleY = (points.I.y - points.J.y) / (this.points.I.y - this.points.J.y);
-
-		// Update instance properties
+		// Update core properties
 		this.canvas = canvas;
 		this.ctx = ctx;
 		this.points = points;
 		this.PIXELS_PER_METER = PIXELS_PER_METER;
-		this.renderer = renderer;
+		this.playerRadius = Math.max(0, Math.floor(canvas.width / 70));
 
-		// Scale player positions relative to track center
-		this.players.forEach((player) => {
-			// Translate to origin relative to old center
-			const relX = player.x - oldCenterX;
-			const relY = player.y - oldCenterY;
-
-			// Scale
-			const newX = relX * scaleX;
-			const newY = relY * scaleY;
-
-			// Translate back using new center
-			player.x = newX + centerX;
-			player.y = newY + centerY;
-
-			// Update radius
-			player.radius = Math.max(0, Math.floor(canvas.width / 70));
-		});
-
-		// Update track areas and pack distance
+		// Update track areas
 		this.straight1Area = renderer.straight1Area;
 		this.straight2Area = renderer.straight2Area;
 		this.turn1Area = renderer.turn1Area;
 		this.turn2Area = renderer.turn2Area;
-		this.packManager.PACK_DISTANCE = 3.05 * PIXELS_PER_METER;
+
+		// Scale player positions
+		this.players.forEach((player) => {
+			player.x = player.x * scale;
+			player.y = player.y * scale;
+			player.radius = this.playerRadius;
+		});
+
+		// Update track geometry and pack manager
+		this.trackGeometry = new TrackGeometry(canvas, ctx, points, PIXELS_PER_METER);
+		this.packManager = new PackManager(PIXELS_PER_METER, points);
+		this.packManager.updatePlayers(this.players);
 	}
 
 	initializePlayers(): void {

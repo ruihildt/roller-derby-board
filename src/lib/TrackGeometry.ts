@@ -168,6 +168,23 @@ export class TrackGeometry {
 		return path;
 	}
 
+	// Add a resize method to TrackGeometry class
+	resize(newPoints: Record<string, Point>): void {
+		this.points = newPoints;
+
+		// Recreate all path geometries with new points
+		this.straight1Area = this.createStraight1Path();
+		this.straight2Area = this.createStraight2Path();
+		this.turn1Area = this.createTurn1Path();
+		this.turn2Area = this.createTurn2Path();
+		this.innerTrackPath = this.createInnerTrackPath();
+		this.outerTrackPath = this.createOuterTrackPath();
+		this.trackSurface = this.createTrackSurfacePath();
+		this.midTrackPath = this.createMidTrackPath();
+		this.pivotLinePath = this.createPivotLinePath();
+		this.jammerLinePath = this.createJammerLinePath();
+	}
+
 	isPlayerInBounds(player: Player): boolean {
 		// TODO Consider using the zones instead, since we're already using them anyway
 		// Check the center and four points on the circumference of the player's circle

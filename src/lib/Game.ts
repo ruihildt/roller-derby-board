@@ -70,7 +70,10 @@ export class Game {
 		this.LINE_WIDTH = Math.max(1, Math.floor(this.canvas.width / 330));
 		this.PIXELS_PER_METER = Math.floor(this.canvas.width / 33);
 
-		this.points = this.initializePoints();
+		const newPoints = this.initializePoints();
+		this.points = newPoints;
+
+		// Update renderer with new dimensions
 		this.renderer = new Renderer(
 			this.canvas,
 			this.ctx,
@@ -81,7 +84,16 @@ export class Game {
 			this.PIXELS_PER_METER
 		);
 
-		// Update player manager with new dimensions while keeping existing players
+		// Update player renderer with new dimensions
+		this.playerRenderer = new PlayerRenderer(
+			this.canvas,
+			this.ctx,
+			this.highResCanvas,
+			this.highResCtx,
+			this.renderer.trackGeometry
+		);
+
+		// Update player manager and maintain existing players
 		this.playerManager.resize(
 			this.canvas,
 			this.ctx,
@@ -89,6 +101,9 @@ export class Game {
 			this.PIXELS_PER_METER,
 			this.renderer
 		);
+
+		// Draw the players in their new positions
+		this.playerRenderer.drawPlayers(this.playerManager.players);
 	}
 
 	initializePoints(): Record<string, Point> {
