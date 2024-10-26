@@ -1,4 +1,3 @@
-import type { Player } from '$lib/Player';
 import type { Point } from '$lib/types';
 import { TrackGeometry } from './TrackGeometry';
 
@@ -38,17 +37,17 @@ export class Renderer {
 
 		this.innerTrackPath = this.trackGeometry.innerTrackPath;
 		this.outerTrackPath = this.trackGeometry.outerTrackPath;
-		this.pivotLinePath = this.trackGeometry.createPivotLinePath();
-		this.jammerLinePath = this.trackGeometry.createJammerLinePath();
-		this.straight1Area = this.trackGeometry.createStraight1Path();
-		this.straight2Area = this.trackGeometry.createStraight2Path();
-		this.turn1Area = this.trackGeometry.createTurn1Path();
-		this.turn2Area = this.trackGeometry.createTurn2Path();
-		this.trackSurface = this.trackGeometry.createTrackSurfacePath();
-		this.midTrackPath = this.trackGeometry.createMidTrackPath();
+		this.pivotLinePath = this.trackGeometry.pivotLinePath;
+		this.jammerLinePath = this.trackGeometry.jammerLinePath;
+		this.straight1Area = this.trackGeometry.straight1Area;
+		this.straight2Area = this.trackGeometry.straight2Area;
+		this.turn1Area = this.trackGeometry.turn1Area;
+		this.turn2Area = this.trackGeometry.turn2Area;
+		this.trackSurface = this.trackGeometry.trackSurface;
+		this.midTrackPath = this.trackGeometry.midTrackPath;
 	}
 
-	draw(players: Player[]): void {
+	draw(): void {
 		this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 		this.ctx.fillStyle = '#f0f0f0';
 		this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
@@ -56,18 +55,9 @@ export class Renderer {
 		this.drawTrack(this.ctx);
 		this.drawMidTrackLine(this.ctx);
 		this.drawPoints(this.ctx);
-
-		for (const player of players) {
-			player.draw(this.ctx);
-
-			// Draw perpendicular line if player is on the track
-			if (this.isPlayerOnTrack(player)) {
-				this.trackGeometry.drawPerpendicularLine({ x: player.x, y: player.y });
-			}
-		}
 	}
 
-	drawHighRes(players: Player[]): void {
+	drawHighRes(): void {
 		if (!this.highResCanvas) return;
 
 		const ctx = this.highResCanvas.getContext('2d')!;
@@ -83,15 +73,6 @@ export class Renderer {
 		ctx.fillRect(0, 0, this.highResCanvas.width, this.highResCanvas.height);
 
 		this.drawTrack(ctx);
-
-		for (const player of players) {
-			player.draw(ctx);
-
-			// Draw perpendicular line if player is on the track
-			if (this.isPlayerOnTrack(player)) {
-				this.trackGeometry.drawPerpendicularLine({ x: player.x, y: player.y }, ctx);
-			}
-		}
 	}
 
 	drawTrack(ctx: CanvasRenderingContext2D): void {
@@ -127,20 +108,16 @@ export class Renderer {
 	}
 
 	drawPoints(ctx: CanvasRenderingContext2D): void {
-		const p = this.points;
-
 		ctx.fillStyle = 'blue';
 		ctx.font = '12px Arial';
 		ctx.textAlign = 'left';
 		ctx.textBaseline = 'middle';
 
-		for (const [label, point] of Object.entries(p)) {
-			// Draw point
+		for (const [label, point] of Object.entries(this.points)) {
 			ctx.beginPath();
 			ctx.arc(point.x, point.y, 3, 0, Math.PI * 2);
 			ctx.fill();
 
-			// Draw label
 			if (label === 'G' || label === 'H') {
 				ctx.textAlign = 'right';
 				ctx.fillText(label, point.x - 6, point.y);
@@ -149,9 +126,5 @@ export class Renderer {
 				ctx.fillText(label, point.x + 6, point.y);
 			}
 		}
-	}
-
-	isPlayerOnTrack(player: Player): boolean {
-		return this.ctx.isPointInPath(this.trackSurface, player.x, player.y);
 	}
 }

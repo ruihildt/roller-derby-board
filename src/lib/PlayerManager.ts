@@ -45,7 +45,7 @@ export class PlayerManager {
 
 		if (isInitialLoad) {
 			this.initializePlayers();
-			this.evaluatePack();
+			this.packManager.updatePlayers(this.players);
 			console.log('Initial pack evaluation complete');
 		}
 	}
@@ -125,7 +125,7 @@ export class PlayerManager {
 			this.trackGeometry.updatePlayerZone(player);
 			player.onPositionChange = () => {
 				player.inBounds = this.trackGeometry.isPlayerInBounds(player);
-				this.evaluatePack();
+				this.packManager.updatePlayers(this.players);
 			};
 		});
 	}
@@ -247,7 +247,7 @@ export class PlayerManager {
 			this.selectedPlayer.y = y - this.selectedPlayer.dragOffsetY;
 			this.selectedPlayer.inBounds = this.trackGeometry.isPlayerInBounds(this.selectedPlayer);
 			this.trackGeometry.updatePlayerZone(this.selectedPlayer);
-			this.evaluatePack();
+			this.packManager.updatePlayers(this.players);
 		}
 	}
 
@@ -262,9 +262,5 @@ export class PlayerManager {
 		for (const player of this.players) {
 			player.update();
 		}
-	}
-
-	evaluatePack(): void {
-		this.packManager.updatePlayers(this.players);
 	}
 }

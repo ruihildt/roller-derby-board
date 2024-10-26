@@ -13,6 +13,10 @@ export class TrackGeometry {
 	turn2Area: Path2D;
 	innerTrackPath: Path2D;
 	outerTrackPath: Path2D;
+	trackSurface: Path2D;
+	midTrackPath: Path2D;
+	pivotLinePath: Path2D;
+	jammerLinePath: Path2D;
 
 	constructor(
 		canvas: HTMLCanvasElement,
@@ -31,6 +35,10 @@ export class TrackGeometry {
 		this.turn2Area = this.createTurn2Path();
 		this.innerTrackPath = this.createInnerTrackPath();
 		this.outerTrackPath = this.createOuterTrackPath();
+		this.trackSurface = this.createTrackSurfacePath();
+		this.midTrackPath = this.createMidTrackPath();
+		this.pivotLinePath = this.createPivotLinePath();
+		this.jammerLinePath = this.createJammerLinePath();
 	}
 
 	createInnerTrackPath(): Path2D {

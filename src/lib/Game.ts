@@ -1,6 +1,7 @@
 import type { Point } from '$lib/types';
 import { Renderer } from '$lib/Renderer';
 import { PlayerManager } from '$lib/PlayerManager';
+import { PlayerRenderer } from './PlayerRenderer';
 
 export class Game {
 	canvas: HTMLCanvasElement;
@@ -11,6 +12,7 @@ export class Game {
 	PIXELS_PER_METER: number;
 	points: Record<string, Point>;
 	renderer: Renderer;
+	playerRenderer: PlayerRenderer;
 	playerManager: PlayerManager;
 
 	constructor(canvas: HTMLCanvasElement, highResCanvas: HTMLCanvasElement, isRecording: boolean) {
@@ -29,6 +31,11 @@ export class Game {
 			this.points,
 			this.LINE_WIDTH,
 			this.PIXELS_PER_METER
+		);
+		this.playerRenderer = new PlayerRenderer(
+			this.canvas,
+			this.highResCanvas,
+			this.renderer.trackGeometry
 		);
 		this.playerManager = new PlayerManager(
 			this.canvas,
@@ -99,11 +106,13 @@ export class Game {
 	}
 
 	draw(): void {
-		this.renderer.draw(this.playerManager.players);
+		this.renderer.draw();
+		this.playerRenderer.drawPlayers(this.playerManager.players);
 	}
 
 	drawHighRes(): void {
-		this.renderer.drawHighRes(this.playerManager.players);
+		this.renderer.drawHighRes();
+		this.playerRenderer.drawPlayersHighRes(this.playerManager.players);
 	}
 
 	gameLoop(): void {

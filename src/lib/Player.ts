@@ -47,31 +47,6 @@ export class Player {
 		return dx * dx + dy * dy <= this.radius * this.radius;
 	}
 
-	draw(ctx: CanvasRenderingContext2D): void {
-		ctx.beginPath();
-		ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-
-		if (this.isRearmost) {
-			ctx.fillStyle = 'magenta';
-		} else if (this.isForemost) {
-			ctx.fillStyle = 'cyan';
-		} else {
-			ctx.fillStyle = this.color;
-		}
-		ctx.fill();
-
-		ctx.strokeStyle = this.isInPack ? 'pink' : this.inBounds ? 'black' : 'red';
-		ctx.lineWidth = 4;
-		ctx.stroke();
-
-		// Draw role indicator
-		ctx.fillStyle = 'white';
-		ctx.font = '10px Arial';
-		ctx.textAlign = 'center';
-		ctx.textBaseline = 'middle';
-		ctx.fillText(this.role[0].toUpperCase(), this.x, this.y);
-	}
-
 	update(): void {
 		// Update player position based on speed and direction
 		this.x += Math.cos(this.direction) * this.speed;
