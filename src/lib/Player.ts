@@ -1,4 +1,4 @@
-import type { Point } from './types';
+import type { TrackGeometry } from './TrackGeometry';
 
 export class Player {
 	x: number;
@@ -80,54 +80,12 @@ export class Player {
 
 	onPositionChange: (() => void) | null = null;
 
-	updatePosition(x: number, y: number): void {
+	updatePosition(x: number, y: number, trackGeometry: TrackGeometry): void {
 		this.x = x;
 		this.y = y;
+		trackGeometry.updateTrackCoordinates(this);
 		if (this.onPositionChange) {
 			this.onPositionChange();
 		}
-	}
-
-	updateTrackCoordinates(points: Record<string, Point>, canvasHeight: number): void {
-		const p = points;
-		let startPoint: Point, endPoint: Point;
-
-		if (this.x <= p.B.x || this.x >= p.A.x) {
-			// Curved section logic
-			const innerCenter = this.x >= p.A.x ? p.A : p.B;
-			const outerCenter = this.x >= p.A.x ? p.G : p.H;
-			const innerRadius = Math.abs(p.C.y - p.A.y);
-			const outerRadius = Math.abs(p.I.y - p.G.y);
-			const angle = Math.atan2(this.y - innerCenter.y, this.x - innerCenter.x);
-
-			startPoint = {
-				x: innerCenter.x + innerRadius * Math.cos(angle),
-				y: innerCenter.y + innerRadius * Math.sin(angle)
-			};
-			endPoint = {
-				x: outerCenter.x + outerRadius * Math.cos(angle),
-				y: outerCenter.y + outerRadius * Math.sin(angle)
-			};
-		} else {
-			// Straight section logic
-			const [innerStart, innerEnd, outerStart, outerEnd] =
-				this.y < canvasHeight / 2 ? [p.C, p.E, p.I, p.K] : [p.D, p.F, p.J, p.L];
-
-			const innerSlope = (innerEnd.y - innerStart.y) / (innerEnd.x - innerStart.x);
-			const outerSlope = (outerEnd.y - outerStart.y) / (outerEnd.x - outerStart.x);
-
-			startPoint = {
-				x: this.x,
-				y: innerStart.y + innerSlope * (this.x - innerStart.x)
-			};
-			endPoint = {
-				x: this.x,
-				y: outerStart.y + outerSlope * (this.x - outerStart.x)
-			};
-		}
-
-		// Calculate midpoint
-		this.tX = (startPoint.x + endPoint.x) / 2;
-		this.tY = (startPoint.y + endPoint.y) / 2;
 	}
 }
