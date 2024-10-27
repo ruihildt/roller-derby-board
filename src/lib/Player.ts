@@ -1,10 +1,10 @@
-import type { TrackGeometry } from './TrackGeometry';
-
 export class Player {
 	x: number;
 	y: number;
 	tX: number;
 	tY: number;
+	startPoint: { x: number; y: number };
+	endPoint: { x: number; y: number };
 	team: string;
 	role: string;
 	color: string;
@@ -23,8 +23,10 @@ export class Player {
 	constructor(x: number, y: number, team: string, role: string, radius: number) {
 		this.x = x;
 		this.y = y;
-		this.tX = x;
-		this.tY = y;
+		this.startPoint = { x, y };
+		this.endPoint = { x, y };
+		this.tX = (this.startPoint.x + this.endPoint.x) / 2;
+		this.tY = (this.startPoint.y + this.endPoint.y) / 2;
 		this.team = team;
 		this.role = role;
 		this.color = team === 'A' ? 'teal' : 'orange';
@@ -51,16 +53,5 @@ export class Player {
 		// Update player position based on speed and direction
 		this.x += Math.cos(this.direction) * this.speed;
 		this.y += Math.sin(this.direction) * this.speed;
-	}
-
-	onPositionChange: (() => void) | null = null;
-
-	updatePosition(x: number, y: number, trackGeometry: TrackGeometry): void {
-		this.x = x;
-		this.y = y;
-		trackGeometry.updateTrackCoordinates(this);
-		if (this.onPositionChange) {
-			this.onPositionChange();
-		}
 	}
 }

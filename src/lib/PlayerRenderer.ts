@@ -26,8 +26,20 @@ export class PlayerRenderer {
 		for (const player of players) {
 			this.drawPlayer(player, this.ctx);
 			if (this.trackGeometry.isPlayerInBounds(player)) {
-				this.trackGeometry.drawPerpendicularLine({ x: player.x, y: player.y });
+				this.trackGeometry.drawPerpendicularLine(player);
 			}
+		}
+	}
+
+	drawPackZone(players: Player[]): void {
+		const packPlayers = players.filter((p) => p.isInPack);
+		const rearmost = packPlayers.find((p) => p.isRearmost);
+		const foremost = packPlayers.find((p) => p.isForemost);
+
+		if (rearmost && foremost) {
+			const packZonePath = this.trackGeometry.createPackZonePath(rearmost, foremost);
+			this.ctx.fillStyle = 'rgba(144, 238, 144, 0.2)'; // Light green with transparency
+			this.ctx.fill(packZonePath);
 		}
 	}
 
@@ -38,7 +50,7 @@ export class PlayerRenderer {
 		for (const player of players) {
 			this.drawPlayer(player, ctx);
 			if (this.trackGeometry.isPlayerInBounds(player)) {
-				this.trackGeometry.drawPerpendicularLine({ x: player.x, y: player.y }, ctx);
+				this.trackGeometry.drawPerpendicularLine(player);
 			}
 		}
 	}

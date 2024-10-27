@@ -6,11 +6,13 @@ export class PackManager {
 	players: Player[];
 	PACK_DISTANCE: number;
 	points: Record<string, Point>;
+	zones: number[];
 
 	constructor(pixelsPerMeter: number, points: Record<string, Point>) {
 		this.players = [];
 		this.PACK_DISTANCE = 3.05 * pixelsPerMeter;
 		this.points = points;
+		this.zones = [];
 	}
 
 	updatePlayers(players: Player[]) {
@@ -25,9 +27,9 @@ export class PackManager {
 			player.isForemost = false;
 		});
 
-		console.log('Determining pack...');
+		// console.log('Determining pack...');
 		const inBoundsBlockers = this.players.filter((p) => p.inBounds && p.role === 'blocker');
-		console.log('In-bounds blockers:', inBoundsBlockers.length);
+		// console.log('In-bounds blockers:', inBoundsBlockers.length);
 		const groups = this.groupBlockers(inBoundsBlockers);
 		const validGroups = groups.filter(this.isValidGroup);
 
@@ -48,7 +50,7 @@ export class PackManager {
 			const packGroup = largestGroups[0];
 			this.updatePlayerPackStatus(packGroup);
 			this.updateRearAndForemostPlayers(packGroup);
-			console.log('Valid pack found:', packGroup);
+			// console.log('Valid pack found:', packGroup);
 		} else {
 			// Multiple largest groups of equal size, no pack
 			this.players.forEach((p) => (p.isInPack = false));
@@ -99,6 +101,7 @@ export class PackManager {
 
 		// Get unique zones in ascending order
 		let zones = [...new Set(packBlockers.map((p) => p.zone))].sort((a, b) => a - b);
+		this.zones = zones;
 
 		// If we have zone 4 and zone 1, add 5 (virtual zone 1) to maintain sequence
 		if (zones.includes(4) && zones.includes(1)) {
@@ -113,17 +116,17 @@ export class PackManager {
 		const lastZoneBlockers = packBlockers.filter((p) => p.zone === (lastZone === 5 ? 1 : lastZone));
 
 		if (firstZoneBlockers.length > 0) {
-			const rearmost = this.getRearmost(firstZoneBlockers, firstZone);
+			const rearmost = this.findRearmost(firstZoneBlockers, firstZone);
 			rearmost.isRearmost = true;
 		}
 
 		if (lastZoneBlockers.length > 0) {
-			const foremost = this.getForemost(lastZoneBlockers, lastZone === 5 ? 1 : lastZone);
+			const foremost = this.findForemost(lastZoneBlockers, lastZone === 5 ? 1 : lastZone);
 			foremost.isForemost = true;
 		}
 	}
 
-	private getRearmost(blockers: Player[], zone: number): Player {
+	private findRearmost(blockers: Player[], zone: number): Player {
 		if (zone === 1) {
 			return blockers.reduce((rear, player) => (player.x > rear.x ? player : rear));
 		}
@@ -141,7 +144,7 @@ export class PackManager {
 		return this.getPlayerByAngle(blockers, turnCenterX, turnCenterY, 'max');
 	}
 
-	private getForemost(blockers: Player[], zone: number): Player {
+	private findForemost(blockers: Player[], zone: number): Player {
 		if (zone === 1) {
 			return blockers.reduce((fore, player) => (player.x < fore.x ? player : fore));
 		}

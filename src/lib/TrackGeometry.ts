@@ -245,10 +245,24 @@ export class TrackGeometry {
 		} else {
 			player.zone = 0; // Outside track
 		}
-		console.log(player.role + ' is in ' + player.zone);
+		// console.log(player.role + ' is in ' + player.zone);
 	}
 
-	updateTrackCoordinates(player: Player): void {
+	createPackZonePath(rearmost: Player, foremost: Player): Path2D {
+		const path = new Path2D();
+
+		if (rearmost.zone === 1 || rearmost.zone === 3) {
+			path.moveTo(rearmost.startPoint.x, rearmost.startPoint.y);
+			path.lineTo(foremost.startPoint.x, foremost.startPoint.y);
+			path.lineTo(foremost.endPoint.x, foremost.endPoint.y);
+			path.lineTo(rearmost.endPoint.x, rearmost.endPoint.y);
+			path.closePath();
+		}
+
+		return path;
+	}
+
+	updatePlayerCoordinates(player: Player): void {
 		const p = this.points;
 		const { x, y } = player;
 
@@ -288,78 +302,18 @@ export class TrackGeometry {
 			};
 		}
 
-		// Calculate midpoint
-		player.tX = (startPoint.x + endPoint.x) / 2;
-		player.tY = (startPoint.y + endPoint.y) / 2;
+		player.startPoint = startPoint;
+		player.endPoint = endPoint;
 	}
 
-	drawPerpendicularLine(point: Point, ctx: CanvasRenderingContext2D = this.ctx): void {
-		const p = this.points;
-		let startPoint: Point, endPoint: Point;
+	drawPerpendicularLine(player: Player): void {
+		const { startPoint, endPoint } = player;
 
-		// Check if the point is on the curved section or straight section
-		if (point.x <= p.B.x || point.x >= p.A.x) {
-			// Curved section
-			const innerCenter = point.x >= p.A.x ? p.A : p.B;
-			const outerCenter = point.x >= p.A.x ? p.G : p.H;
-
-			const innerRadius = Math.abs(p.C.y - p.A.y);
-			const outerRadius = Math.abs(p.I.y - p.G.y);
-
-			const angleInner = Math.atan2(point.y - innerCenter.y, point.x - innerCenter.x);
-			const angleOuter = Math.atan2(point.y - outerCenter.y, point.x - outerCenter.x);
-
-			startPoint = {
-				x: innerCenter.x + innerRadius * Math.cos(angleInner),
-				y: innerCenter.y + innerRadius * Math.sin(angleInner)
-			};
-			endPoint = {
-				x: outerCenter.x + outerRadius * Math.cos(angleOuter),
-				y: outerCenter.y + outerRadius * Math.sin(angleOuter)
-			};
-		} else {
-			// Straight section
-			let innerStart: Point, innerEnd: Point, outerStart: Point, outerEnd: Point;
-
-			if (point.y < this.canvas.height / 2) {
-				// Top straightaway
-				innerStart = p.C;
-				innerEnd = p.E;
-				outerStart = p.I;
-				outerEnd = p.K;
-			} else {
-				// Bottom straightaway
-				innerStart = p.D;
-				innerEnd = p.F;
-				outerStart = p.J;
-				outerEnd = p.L;
-			}
-
-			const innerSlope = (innerEnd.y - innerStart.y) / (innerEnd.x - innerStart.x);
-			const outerSlope = (outerEnd.y - outerStart.y) / (outerEnd.x - outerStart.x);
-
-			startPoint = {
-				x: point.x,
-				y: innerStart.y + innerSlope * (point.x - innerStart.x)
-			};
-			endPoint = {
-				x: point.x,
-				y: outerStart.y + outerSlope * (point.x - outerStart.x)
-			};
-		}
-
-		// Ensure startPoint and endPoint are defined
-		if (!startPoint || !endPoint) {
-			console.error('Failed to calculate perpendicular line points');
-			return;
-		}
-
-		// Draw the perpendicular line
-		ctx.beginPath();
-		ctx.moveTo(startPoint.x, startPoint.y);
-		ctx.lineTo(endPoint.x, endPoint.y);
-		ctx.strokeStyle = 'red';
-		ctx.lineWidth = 2;
-		ctx.stroke();
+		this.ctx.beginPath();
+		this.ctx.moveTo(startPoint.x, startPoint.y);
+		this.ctx.lineTo(endPoint.x, endPoint.y);
+		this.ctx.strokeStyle = 'red';
+		this.ctx.lineWidth = 2;
+		this.ctx.stroke();
 	}
 }

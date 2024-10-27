@@ -111,10 +111,7 @@ export class PlayerManager {
 		this.players.forEach((player) => {
 			player.inBounds = this.trackGeometry.isPlayerInBounds(player);
 			this.trackGeometry.updatePlayerZone(player);
-			player.onPositionChange = () => {
-				player.inBounds = this.trackGeometry.isPlayerInBounds(player);
-				this.packManager.updatePlayers(this.players);
-			};
+			this.trackGeometry.updatePlayerCoordinates(player);
 		});
 	}
 
@@ -235,6 +232,7 @@ export class PlayerManager {
 			this.selectedPlayer.y = y - this.selectedPlayer.dragOffsetY;
 			this.selectedPlayer.inBounds = this.trackGeometry.isPlayerInBounds(this.selectedPlayer);
 			this.trackGeometry.updatePlayerZone(this.selectedPlayer);
+			this.trackGeometry.updatePlayerCoordinates(this.selectedPlayer);
 			this.packManager.updatePlayers(this.players);
 		}
 	}

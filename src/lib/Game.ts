@@ -134,11 +134,13 @@ export class Game {
 	draw(): void {
 		this.renderer.draw();
 		this.playerRenderer.drawPlayers(this.playerManager.players);
+		this.playerRenderer.drawPackZone(this.playerManager.players);
 	}
 
 	drawHighRes(): void {
 		this.renderer.drawHighRes();
 		this.playerRenderer.drawPlayersHighRes(this.playerManager.players);
+		this.playerRenderer.drawPackZone(this.playerManager.players); // TODO Fix this
 	}
 
 	gameLoop(): void {
