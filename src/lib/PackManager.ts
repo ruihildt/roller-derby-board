@@ -126,7 +126,7 @@ export class PackManager {
 		}
 	}
 
-	private findRearmost(blockers: Player[], zone: number): Player {
+	findRearmost(blockers: Player[], zone: number): Player {
 		if (zone === 1) {
 			return blockers.reduce((rear, player) => (player.x > rear.x ? player : rear));
 		}
@@ -144,7 +144,7 @@ export class PackManager {
 		return this.getPlayerByAngle(blockers, turnCenterX, turnCenterY, 'max');
 	}
 
-	private findForemost(blockers: Player[], zone: number): Player {
+	findForemost(blockers: Player[], zone: number): Player {
 		if (zone === 1) {
 			return blockers.reduce((fore, player) => (player.x < fore.x ? player : fore));
 		}
@@ -162,7 +162,7 @@ export class PackManager {
 		return this.getPlayerByAngle(blockers, turnCenterX, turnCenterY, 'min');
 	}
 
-	private getPlayerByAngle(
+	getPlayerByAngle(
 		blockers: Player[],
 		centerX: number,
 		centerY: number,
@@ -182,5 +182,9 @@ export class PackManager {
 					? player
 					: selected;
 		});
+	}
+
+	getZones(): number[] {
+		return this.zones;
 	}
 }

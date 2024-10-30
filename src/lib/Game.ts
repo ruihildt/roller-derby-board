@@ -27,6 +27,7 @@ export class Game {
 		this.PIXELS_PER_METER = Math.floor(this.canvas.width / 33);
 
 		this.points = this.initializePoints();
+
 		this.renderer = new Renderer(
 			this.canvas,
 			this.ctx,
@@ -36,13 +37,7 @@ export class Game {
 			this.LINE_WIDTH,
 			this.PIXELS_PER_METER
 		);
-		this.playerRenderer = new PlayerRenderer(
-			this.canvas,
-			this.ctx,
-			this.highResCanvas,
-			this.highResCtx,
-			this.renderer.trackGeometry
-		);
+
 		this.playerManager = new PlayerManager(
 			this.canvas,
 			this.ctx,
@@ -50,6 +45,15 @@ export class Game {
 			this.PIXELS_PER_METER,
 			this.renderer,
 			true
+		);
+
+		this.playerRenderer = new PlayerRenderer(
+			this.canvas,
+			this.ctx,
+			this.highResCanvas,
+			this.highResCtx,
+			this.renderer.trackGeometry,
+			this.playerManager.packManager
 		);
 
 		this.canvas.addEventListener(
@@ -90,7 +94,8 @@ export class Game {
 			this.ctx,
 			this.highResCanvas,
 			this.highResCtx,
-			this.renderer.trackGeometry
+			this.renderer.trackGeometry,
+			this.playerManager.packManager
 		);
 
 		// Update player manager and maintain existing players

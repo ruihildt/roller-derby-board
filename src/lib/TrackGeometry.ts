@@ -248,76 +248,19 @@ export class TrackGeometry {
 		// console.log(player.role + ' is in ' + player.zone);
 	}
 
-	createPackZonePath(rearmost: Player, foremost: Player): Path2D {
+	createPackZonePath(rearmost: Player, foremost: Player, zones: number[]): Path2D {
 		const path = new Path2D();
-		const p = this.points;
+		// const p = this.points;
 
-		if (rearmost.zone === 1 || rearmost.zone === 3) {
-			// Straight section logic
-			path.moveTo(rearmost.startPoint.x, rearmost.startPoint.y);
-			path.lineTo(foremost.startPoint.x, foremost.startPoint.y);
-			path.lineTo(foremost.endPoint.x, foremost.endPoint.y);
-			path.lineTo(rearmost.endPoint.x, rearmost.endPoint.y);
-			path.closePath();
-		} else if (foremost.zone === 2) {
-			// Turn 1
-			const startInnerPoint = rearmost.zone === 2 ? rearmost.startPoint : p.E;
-			const startOuterPoint = rearmost.zone === 2 ? rearmost.endPoint : p.K;
+		console.log(rearmost.startPoint, rearmost.endPoint);
+		console.log(foremost.startPoint, foremost.endPoint);
+		console.log(zones);
 
-			path.moveTo(startOuterPoint.x, startOuterPoint.y);
-			path.lineTo(startInnerPoint.x, startInnerPoint.y);
+		// Show the zone sequence
 
-			path.arc(
-				p.B.x,
-				p.B.y,
-				Math.abs(p.E.y - p.B.y),
-				Math.atan2(startInnerPoint.y - p.B.y, startInnerPoint.x - p.B.x),
-				Math.atan2(foremost.startPoint.y - p.B.y, foremost.startPoint.x - p.B.x),
-				true
-			);
-
-			path.lineTo(foremost.endPoint.x, foremost.endPoint.y);
-
-			path.arc(
-				p.H.x,
-				p.H.y,
-				Math.abs(p.K.y - p.H.y),
-				Math.atan2(foremost.endPoint.y - p.H.y, foremost.endPoint.x - p.H.x),
-				Math.atan2(startOuterPoint.y - p.H.y, startOuterPoint.x - p.H.x),
-				false
-			);
-
-			path.closePath();
-		} else if (foremost.zone === 4) {
-			// Turn 2
-			const startInnerPoint = rearmost.zone === 4 ? rearmost.startPoint : p.C;
-			const startOuterPoint = rearmost.zone === 4 ? rearmost.endPoint : p.I;
-
-			path.moveTo(startOuterPoint.x, startOuterPoint.y);
-			path.lineTo(startInnerPoint.x, startInnerPoint.y);
-
-			path.arc(
-				p.A.x,
-				p.A.y,
-				Math.abs(p.C.y - p.A.y),
-				Math.atan2(startInnerPoint.y - p.A.y, startInnerPoint.x - p.A.x),
-				Math.atan2(foremost.startPoint.y - p.A.y, foremost.startPoint.x - p.A.x),
-				true
-			);
-
-			path.lineTo(foremost.endPoint.x, foremost.endPoint.y);
-
-			path.arc(
-				p.G.x,
-				p.G.y,
-				Math.abs(p.I.y - p.G.y),
-				Math.atan2(foremost.endPoint.y - p.G.y, foremost.endPoint.x - p.G.x),
-				Math.atan2(startOuterPoint.y - p.G.y, startOuterPoint.x - p.G.x),
-				false
-			);
-
-			path.closePath();
-		}
+		// First point as rearmost.startPoint
+		// move to rearmost.endPoint
+		//
 
 		return path;
 	}

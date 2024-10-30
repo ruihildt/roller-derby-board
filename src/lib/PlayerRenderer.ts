@@ -1,3 +1,4 @@
+import type { PackManager } from './PackManager';
 import type { Player } from './Player';
 import { TrackGeometry } from './TrackGeometry';
 
@@ -7,19 +8,22 @@ export class PlayerRenderer {
 	highResCanvas: HTMLCanvasElement;
 	highResCtx: CanvasRenderingContext2D;
 	trackGeometry: TrackGeometry;
+	packManager: PackManager;
 
 	constructor(
 		canvas: HTMLCanvasElement,
 		ctx: CanvasRenderingContext2D,
 		highResCanvas: HTMLCanvasElement,
 		highResCtx: CanvasRenderingContext2D,
-		trackGeometry: TrackGeometry
+		trackGeometry: TrackGeometry,
+		packManager: PackManager
 	) {
 		this.canvas = canvas;
 		this.ctx = ctx;
 		this.highResCanvas = highResCanvas;
 		this.highResCtx = highResCtx;
 		this.trackGeometry = trackGeometry;
+		this.packManager = packManager;
 	}
 
 	drawPlayers(players: Player[]): void {
@@ -37,7 +41,11 @@ export class PlayerRenderer {
 		const foremost = packPlayers.find((p) => p.isForemost);
 
 		if (rearmost && foremost) {
-			const packZonePath = this.trackGeometry.createPackZonePath(rearmost, foremost);
+			const packZonePath = this.trackGeometry.createPackZonePath(
+				rearmost,
+				foremost,
+				this.packManager.getZones()
+			);
 			this.ctx.fillStyle = 'rgba(144, 238, 144, 0.2)'; // Light green with transparency
 			this.ctx.fill(packZonePath);
 		}
