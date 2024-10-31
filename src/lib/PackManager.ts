@@ -99,21 +99,50 @@ export class PackManager {
 		const packBlockers = packGroup.filter((player) => player.isInPack);
 		if (packBlockers.length < 2) return;
 
-		// Get unique zones in ascending order
-		let zones = [...new Set(packBlockers.map((p) => p.zone))].sort((a, b) => a - b);
+		// Helper function to compare zones in circular order
+
+		let zones = [...new Set(packBlockers.map((p) => p.zone))];
+
+		// Sort zones based on special cases involving zone 4
+		if (zones.includes(4)) {
+			// Case 1: Pack zones containing 1, 2, 4
+			if (zones.includes(1) && zones.includes(2)) {
+				zones.sort();
+				zones = [4, 1, 2];
+			}
+			// Case 2: Pack zones containing 1, 3, 4
+			else if (zones.includes(1) && zones.includes(3)) {
+				zones = [3, 4, 1];
+			}
+			// Case 3: Pack zones containing 2, 3, 4
+			else if (zones.includes(2) && zones.includes(3)) {
+				zones = [2, 3, 4];
+			}
+			// Case 4: Pack zones containing 1
+			else if (zones.includes(1)) {
+				zones = [4, 1];
+			}
+			// Case 4: Pack zones containing 1
+			else if (zones.includes(3)) {
+				zones = [3, 4];
+			}
+		} else {
+			// No zone 4 involved, sort sequentially
+			zones.sort();
+		}
+
 		this.zones = zones;
 
-		// If we have zone 4 and zone 1, add 5 (virtual zone 1) to maintain sequence
-		if (zones.includes(4) && zones.includes(1)) {
-			zones = zones.filter((z) => z !== 1).concat(5);
-		}
+		console.log('Zones:', zones);
 
 		const firstZone = zones[0];
 		const lastZone = zones[zones.length - 1];
 
-		// Map zone 5 back to 1 for filtering
+		console.log('First zone:', firstZone);
+		console.log('Last zone:', lastZone);
+
 		const firstZoneBlockers = packBlockers.filter((p) => p.zone === firstZone);
-		const lastZoneBlockers = packBlockers.filter((p) => p.zone === (lastZone === 5 ? 1 : lastZone));
+		const lastZoneBlockers = packBlockers.filter((p) => p.zone === lastZone);
 
 		if (firstZoneBlockers.length > 0) {
 			const rearmost = this.findRearmost(firstZoneBlockers, firstZone);
@@ -121,7 +150,7 @@ export class PackManager {
 		}
 
 		if (lastZoneBlockers.length > 0) {
-			const foremost = this.findForemost(lastZoneBlockers, lastZone === 5 ? 1 : lastZone);
+			const foremost = this.findForemost(lastZoneBlockers, lastZone);
 			foremost.isForemost = true;
 		}
 	}
