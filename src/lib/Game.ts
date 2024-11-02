@@ -2,6 +2,7 @@ import type { Point } from '$lib/types';
 import { Renderer } from '$lib/Renderer';
 import { PlayerManager } from '$lib/PlayerManager';
 import { PlayerRenderer } from './PlayerRenderer';
+import { PackZoneRenderer } from './PackZoneRenderer';
 
 export class Game {
 	canvas: HTMLCanvasElement;
@@ -15,6 +16,7 @@ export class Game {
 	renderer: Renderer;
 	playerRenderer: PlayerRenderer;
 	playerManager: PlayerManager;
+	packZoneRenderer: PackZoneRenderer;
 
 	constructor(canvas: HTMLCanvasElement, highResCanvas: HTMLCanvasElement, isRecording: boolean) {
 		this.canvas = canvas;
@@ -54,6 +56,14 @@ export class Game {
 			this.highResCtx,
 			this.renderer.trackGeometry,
 			this.playerManager.packManager
+		);
+
+		this.packZoneRenderer = new PackZoneRenderer(
+			this.canvas,
+			this.ctx,
+			this.renderer.trackGeometry,
+			this.playerManager.packManager,
+			this.PIXELS_PER_METER
 		);
 
 		this.canvas.addEventListener(
@@ -139,13 +149,11 @@ export class Game {
 	draw(): void {
 		this.renderer.draw();
 		this.playerRenderer.drawPlayers(this.playerManager.players);
-		this.playerRenderer.drawPackZone(this.playerManager.players);
 	}
 
 	drawHighRes(): void {
 		this.renderer.drawHighRes();
 		this.playerRenderer.drawPlayersHighRes(this.playerManager.players);
-		this.playerRenderer.drawPackZone(this.playerManager.players); // TODO Fix this
 	}
 
 	gameLoop(): void {

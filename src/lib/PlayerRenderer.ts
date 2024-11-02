@@ -35,22 +35,6 @@ export class PlayerRenderer {
 		}
 	}
 
-	drawPackZone(players: Player[]): void {
-		const packPlayers = players.filter((p) => p.isInPack);
-		const rearmost = packPlayers.find((p) => p.isRearmost);
-		const foremost = packPlayers.find((p) => p.isForemost);
-
-		if (rearmost && foremost) {
-			const packZonePath = this.trackGeometry.createPackZonePath(
-				rearmost,
-				foremost,
-				this.packManager.getZones()
-			);
-			this.ctx.fillStyle = 'rgba(144, 238, 144, 0.2)'; // Light green with transparency
-			this.ctx.fill(packZonePath);
-		}
-	}
-
 	drawPlayersHighRes(players: Player[]): void {
 		if (!this.highResCanvas) return;
 

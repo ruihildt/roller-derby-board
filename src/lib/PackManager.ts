@@ -2,13 +2,14 @@ import { Player } from './Player';
 import type { Point } from './types';
 import { distance } from './utils';
 
-export class PackManager {
+export class PackManager extends EventTarget {
 	players: Player[];
 	PACK_DISTANCE: number;
 	points: Record<string, Point>;
 	zones: number[];
 
 	constructor(pixelsPerMeter: number, points: Record<string, Point>) {
+		super();
 		this.players = [];
 		this.PACK_DISTANCE = 3.05 * pixelsPerMeter;
 		this.points = points;
@@ -55,6 +56,7 @@ export class PackManager {
 			// Multiple largest groups of equal size, no pack
 			this.players.forEach((p) => (p.isInPack = false));
 		}
+		this.dispatchEvent(new Event('packChanged'));
 	}
 
 	isValidGroup(group: Player[]): boolean {
@@ -133,13 +135,8 @@ export class PackManager {
 
 		this.zones = zones;
 
-		console.log('Zones:', zones);
-
 		const firstZone = zones[0];
 		const lastZone = zones[zones.length - 1];
-
-		console.log('First zone:', firstZone);
-		console.log('Last zone:', lastZone);
 
 		const firstZoneBlockers = packBlockers.filter((p) => p.zone === firstZone);
 		const lastZoneBlockers = packBlockers.filter((p) => p.zone === lastZone);
