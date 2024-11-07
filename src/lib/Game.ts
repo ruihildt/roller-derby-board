@@ -148,6 +148,7 @@ export class Game {
 
 	draw(): void {
 		this.renderer.draw();
+		this.packZoneRenderer.draw();
 		this.playerRenderer.drawPlayers(this.playerManager.players);
 	}
 

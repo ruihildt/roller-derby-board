@@ -1,10 +1,10 @@
 export class Player {
 	x: number;
 	y: number;
-	tX: number;
-	tY: number;
-	startPoint: { x: number; y: number };
-	endPoint: { x: number; y: number };
+
+	innerPoint: { x: number; y: number };
+	outerPoint: { x: number; y: number };
+	centerPoint: { x: number; y: number };
 	team: string;
 	role: string;
 	color: string;
@@ -23,10 +23,12 @@ export class Player {
 	constructor(x: number, y: number, team: string, role: string, radius: number) {
 		this.x = x;
 		this.y = y;
-		this.startPoint = { x, y };
-		this.endPoint = { x, y };
-		this.tX = (this.startPoint.x + this.endPoint.x) / 2;
-		this.tY = (this.startPoint.y + this.endPoint.y) / 2;
+		this.innerPoint = { x, y };
+		this.outerPoint = { x, y };
+		this.centerPoint = {
+			x: (this.innerPoint.x + this.outerPoint.x) / 2,
+			y: (this.innerPoint.y + this.outerPoint.y) / 2
+		};
 		this.team = team;
 		this.role = role;
 		this.color = team === 'A' ? 'teal' : 'orange';

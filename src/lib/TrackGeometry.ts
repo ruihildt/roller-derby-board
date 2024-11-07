@@ -114,6 +114,86 @@ export class TrackGeometry {
 		return path;
 	}
 
+	createPackTurn1Path(
+		rearmostStartPoint: Point,
+		rearmostEndPoint: Point,
+		foremostEndPoint: Point,
+		foremostStartPoint: Point
+	): Path2D {
+		const path = new Path2D();
+		const p = this.points;
+
+		// Start at rearmost inner point
+		path.moveTo(rearmostStartPoint.x, rearmostStartPoint.y);
+
+		// Inner track arc - using same radius as inner track
+		path.arc(
+			p.B.x,
+			p.B.y,
+			Math.abs(p.E.y - p.B.y),
+			Math.atan2(rearmostStartPoint.y - p.B.y, rearmostStartPoint.x - p.B.x),
+			Math.atan2(foremostStartPoint.y - p.B.y, foremostStartPoint.x - p.B.x),
+			true
+		);
+
+		// Line to foremost outer point
+		path.lineTo(foremostEndPoint.x, foremostEndPoint.y);
+
+		// Outer track arc - using same radius as outer track
+		path.arc(
+			p.H.x,
+			p.H.y,
+			Math.abs(p.K.y - p.H.y),
+			Math.atan2(foremostEndPoint.y - p.H.y, foremostEndPoint.x - p.H.x),
+			Math.atan2(rearmostEndPoint.y - p.H.y, rearmostEndPoint.x - p.H.x),
+			false
+		);
+
+		path.closePath();
+
+		return path;
+	}
+
+	createPackTurn2Path(
+		rearmostStartPoint: Point,
+		rearmostEndPoint: Point,
+		foremostEndPoint: Point,
+		foremostStartPoint: Point
+	): Path2D {
+		const path = new Path2D();
+		const p = this.points;
+
+		// Start at rearmost inner point
+		path.moveTo(rearmostStartPoint.x, rearmostStartPoint.y);
+
+		// Inner track arc - using same radius as inner track
+		path.arc(
+			p.A.x,
+			p.A.y,
+			Math.abs(p.C.y - p.A.y),
+			Math.atan2(rearmostStartPoint.y - p.A.y, rearmostStartPoint.x - p.A.x),
+			Math.atan2(foremostStartPoint.y - p.A.y, foremostStartPoint.x - p.A.x),
+			true
+		);
+
+		// Line to foremost outer point
+		path.lineTo(foremostEndPoint.x, foremostEndPoint.y);
+
+		// Outer track arc - using same radius as outer track
+		path.arc(
+			p.G.x,
+			p.G.y,
+			Math.abs(p.I.y - p.G.y),
+			Math.atan2(foremostEndPoint.y - p.G.y, foremostEndPoint.x - p.G.x),
+			Math.atan2(rearmostEndPoint.y - p.G.y, rearmostEndPoint.x - p.G.x),
+			false
+		);
+
+		path.closePath();
+
+		return path;
+	}
+
 	createTurn2Path(): Path2D {
 		const path = new Path2D();
 		const p = this.points;
@@ -122,7 +202,7 @@ export class TrackGeometry {
 		path.lineTo(p.C.x, p.C.y);
 		path.arc(p.A.x, p.A.y, Math.abs(p.C.y - p.A.y), Math.PI / 2, -Math.PI / 2, true);
 		path.lineTo(p.D.x, p.D.y);
-		path.arc(p.G.x, p.G.y, Math.abs(p.I.y - p.G.y), -Math.PI / 2, Math.PI / 2, false);
+		path.arc(p.G.x, p.G.y, Math.abs(p.I.y - p.G.y), -Math.PI / 2, Math.PI / 2, true);
 		path.closePath();
 
 		return path;
@@ -249,27 +329,19 @@ export class TrackGeometry {
 	}
 
 	createPackZonePath(rearmost: Player, foremost: Player, zones: number[]): Path2D {
-		const path = new Path2D();
-		// const p = this.points;
-
-		console.log(rearmost.startPoint, rearmost.endPoint);
-		console.log(foremost.startPoint, foremost.endPoint);
 		console.log(zones);
+		console.log(rearmost);
+		console.log(foremost);
 
-		// Show the zone sequence
+		// TODO
 
-		// First point as rearmost.startPoint
-		// move to rearmost.endPoint
-		//
-
+		const path = new Path2D();
 		return path;
 	}
 
 	updatePlayerCoordinates(player: Player): void {
 		const p = this.points;
 		const { x, y } = player;
-
-		let startPoint: Point, endPoint: Point;
 
 		if (x <= p.B.x || x >= p.A.x) {
 			// Curved section logic
@@ -279,11 +351,11 @@ export class TrackGeometry {
 			const outerRadius = Math.abs(p.I.y - p.G.y);
 			const angle = Math.atan2(y - innerCenter.y, x - innerCenter.x);
 
-			startPoint = {
+			player.innerPoint = {
 				x: innerCenter.x + innerRadius * Math.cos(angle),
 				y: innerCenter.y + innerRadius * Math.sin(angle)
 			};
-			endPoint = {
+			player.outerPoint = {
 				x: outerCenter.x + outerRadius * Math.cos(angle),
 				y: outerCenter.y + outerRadius * Math.sin(angle)
 			};
@@ -295,26 +367,23 @@ export class TrackGeometry {
 			const innerSlope = (innerEnd.y - innerStart.y) / (innerEnd.x - innerStart.x);
 			const outerSlope = (outerEnd.y - outerStart.y) / (outerEnd.x - outerStart.x);
 
-			startPoint = {
+			player.innerPoint = {
 				x: x,
 				y: innerStart.y + innerSlope * (x - innerStart.x)
 			};
-			endPoint = {
+			player.outerPoint = {
 				x: x,
 				y: outerStart.y + outerSlope * (x - outerStart.x)
 			};
 		}
-
-		player.startPoint = startPoint;
-		player.endPoint = endPoint;
 	}
 
 	drawPerpendicularLine(player: Player): void {
-		const { startPoint, endPoint } = player;
+		const { innerPoint, outerPoint } = player;
 
 		this.ctx.beginPath();
-		this.ctx.moveTo(startPoint.x, startPoint.y);
-		this.ctx.lineTo(endPoint.x, endPoint.y);
+		this.ctx.moveTo(innerPoint.x, innerPoint.y);
+		this.ctx.lineTo(outerPoint.x, outerPoint.y);
 		this.ctx.strokeStyle = 'red';
 		this.ctx.lineWidth = 2;
 		this.ctx.stroke();
