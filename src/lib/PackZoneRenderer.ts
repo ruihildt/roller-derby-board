@@ -34,10 +34,10 @@ export class PackZoneRenderer {
 				this.packManager.zones
 			);
 
-			this.ctx.fillStyle = 'rgba(255, 192, 203, 0.4)'; // Pink with transparency
+			this.ctx.fillStyle = 'rgba(255, 192, 203, 0.8)'; // Pink with transparency
 			this.ctx.fill(path, 'evenodd');
 
-			console.log('Pack zone updated');
+			// console.log('Pack zone updated');
 		}
 	}
 }

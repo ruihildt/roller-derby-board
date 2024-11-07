@@ -104,49 +104,100 @@ export class TrackGeometry {
 		const path = new Path2D();
 		const p = this.points;
 
-		path.moveTo(p.K.x, p.K.y);
-		path.lineTo(p.E.x, p.E.y);
-		path.arc(p.B.x, p.B.y, Math.abs(p.E.y - p.B.y), -Math.PI / 2, Math.PI / 2, true);
-		path.lineTo(p.F.x, p.F.y);
-		path.arc(p.H.x, p.H.y, Math.abs(p.K.y - p.H.y), Math.PI / 2, -Math.PI / 2, false);
+		const turn1 = {
+			innerStart: { x: p.E.x, y: p.E.y },
+			outerStart: { x: p.K.x, y: p.K.y },
+			innerEnd: { x: p.F.x, y: p.F.y },
+			outerEnd: { x: p.L.x, y: p.L.y },
+			centerInner: { x: p.B.x, y: p.B.y },
+			centerOuter: { x: p.H.x, y: p.H.y }
+		};
+
+		path.moveTo(turn1.outerStart.x, turn1.outerStart.y);
+		path.lineTo(turn1.innerStart.x, turn1.innerStart.y);
+		path.arc(
+			turn1.centerInner.x,
+			turn1.centerInner.y,
+			Math.abs(turn1.innerStart.y - turn1.centerInner.y),
+			-Math.PI / 2,
+			Math.PI / 2,
+			true
+		);
+		path.lineTo(turn1.innerEnd.x, turn1.innerEnd.y);
+		path.arc(
+			turn1.centerOuter.x,
+			turn1.centerOuter.y,
+			Math.abs(turn1.outerStart.y - turn1.centerOuter.y),
+			Math.PI / 2,
+			-Math.PI / 2,
+			false
+		);
 		path.closePath();
 
 		return path;
 	}
 
-	createPackTurn1Path(
-		rearmostStartPoint: Point,
-		rearmostEndPoint: Point,
-		foremostEndPoint: Point,
-		foremostStartPoint: Point
-	): Path2D {
+	createTurnZone(points: {
+		innerStart: Point;
+		outerStart: Point;
+		innerEnd: Point;
+		outerEnd: Point;
+		centerInner: Point;
+		centerOuter: Point;
+	}): Path2D {
 		const path = new Path2D();
-		const p = this.points;
 
-		// Start at rearmost inner point
-		path.moveTo(rearmostStartPoint.x, rearmostStartPoint.y);
-
-		// Inner track arc - using same radius as inner track
-		path.arc(
-			p.B.x,
-			p.B.y,
-			Math.abs(p.E.y - p.B.y),
-			Math.atan2(rearmostStartPoint.y - p.B.y, rearmostStartPoint.x - p.B.x),
-			Math.atan2(foremostStartPoint.y - p.B.y, foremostStartPoint.x - p.B.x),
-			true
+		// Calculate angles for inner arc
+		const innerStartAngle = Math.atan2(
+			points.innerStart.y - points.centerInner.y,
+			points.innerStart.x - points.centerInner.x
+		);
+		const innerEndAngle = Math.atan2(
+			points.innerEnd.y - points.centerInner.y,
+			points.innerEnd.x - points.centerInner.x
 		);
 
-		// Line to foremost outer point
-		path.lineTo(foremostEndPoint.x, foremostEndPoint.y);
+		// Calculate angles for outer arc
+		const outerStartAngle = Math.atan2(
+			points.outerStart.y - points.centerOuter.y,
+			points.outerStart.x - points.centerOuter.x
+		);
+		const outerEndAngle = Math.atan2(
+			points.outerEnd.y - points.centerOuter.y,
+			points.outerEnd.x - points.centerOuter.x
+		);
 
-		// Outer track arc - using same radius as outer track
+		// Start from outerStart, draw line to innerStart
+		path.moveTo(points.outerStart.x, points.outerStart.y);
+		path.lineTo(points.innerStart.x, points.innerStart.y);
+
+		// Draw inner arc
 		path.arc(
-			p.H.x,
-			p.H.y,
-			Math.abs(p.K.y - p.H.y),
-			Math.atan2(foremostEndPoint.y - p.H.y, foremostEndPoint.x - p.H.x),
-			Math.atan2(rearmostEndPoint.y - p.H.y, rearmostEndPoint.x - p.H.x),
-			false
+			points.centerInner.x,
+			points.centerInner.y,
+			Math.hypot(
+				points.innerStart.x - points.centerInner.x,
+				points.innerStart.y - points.centerInner.y
+			),
+			innerStartAngle,
+			innerEndAngle,
+			true // Ensure the arc direction is correct
+		);
+
+		// Draw line to outerEnd
+		path.lineTo(points.outerEnd.x, points.outerEnd.y);
+
+		// Draw outer arc
+		path.arc(
+			points.centerOuter.x,
+			points.centerOuter.y,
+			Math.hypot(
+				points.outerStart.x - points.centerOuter.x,
+				points.outerStart.y - points.centerOuter.y
+			),
+			outerEndAngle,
+			outerStartAngle,
+			false // Ensure the arc direction is correct
 		);
 
 		path.closePath();
@@ -266,7 +317,6 @@ export class TrackGeometry {
 	}
 
 	isPlayerInBounds(player: Player): boolean {
-		// TODO Consider using the zones instead, since we're already using them anyway
 		// Check the center and four points on the circumference of the player's circle
 		const pointsToCheck = [
 			{ x: player.x, y: player.y }, // Center
@@ -330,10 +380,24 @@ export class TrackGeometry {
 
 	createPackZonePath(rearmost: Player, foremost: Player, zones: number[]): Path2D {
 		console.log(zones);
-		console.log(rearmost);
-		console.log(foremost);
+		// console.log(rearmost);
+		// console.log(foremost);
 
 		// TODO
+		// If the pack is in a single zone
+		//    If the packs is in a straight
+		//      Draw the pack zone as a quadrilateral using rearmost innerpoint/outerpoint and foremost innerpoint/outerpoint
+		//    If the pack is in a turn
+		//      Draw the pack zone as
+
+		return this.createTurnZone({
+			innerStart: rearmost.innerPoint,
+			outerStart: rearmost.outerPoint,
+			innerEnd: foremost.innerPoint,
+			outerEnd: foremost.outerPoint,
+			centerInner: { x: this.points.B.x, y: this.points.B.y },
+			centerOuter: { x: this.points.H.x, y: this.points.H.y }
+		});
 
 		const path = new Path2D();
 		return path;

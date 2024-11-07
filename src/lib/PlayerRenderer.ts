@@ -48,6 +48,7 @@ export class PlayerRenderer {
 	}
 
 	drawPlayer(player: Player, ctx: CanvasRenderingContext2D): void {
+		// Draw existing player circle and details
 		ctx.beginPath();
 		ctx.arc(player.x, player.y, player.radius, 0, Math.PI * 2);
 
@@ -69,5 +70,19 @@ export class PlayerRenderer {
 		ctx.textAlign = 'center';
 		ctx.textBaseline = 'middle';
 		ctx.fillText(player.role[0].toUpperCase(), player.x, player.y);
+
+		// Draw inner, outer and center points
+		const pointRadius = 5;
+		ctx.fillStyle = 'black';
+
+		// Inner point
+		ctx.beginPath();
+		ctx.arc(player.innerPoint.x, player.innerPoint.y, pointRadius, 0, Math.PI * 2);
+		ctx.fill();
+
+		// Outer point
+		ctx.beginPath();
+		ctx.arc(player.outerPoint.x, player.outerPoint.y, pointRadius, 0, Math.PI * 2);
+		ctx.fill();
 	}
 }

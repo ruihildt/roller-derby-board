@@ -4,7 +4,6 @@ export class Player {
 
 	innerPoint: { x: number; y: number };
 	outerPoint: { x: number; y: number };
-	centerPoint: { x: number; y: number };
 	team: string;
 	role: string;
 	color: string;
@@ -25,10 +24,7 @@ export class Player {
 		this.y = y;
 		this.innerPoint = { x, y };
 		this.outerPoint = { x, y };
-		this.centerPoint = {
-			x: (this.innerPoint.x + this.outerPoint.x) / 2,
-			y: (this.innerPoint.y + this.outerPoint.y) / 2
-		};
+
 		this.team = team;
 		this.role = role;
 		this.color = team === 'A' ? 'teal' : 'orange';
