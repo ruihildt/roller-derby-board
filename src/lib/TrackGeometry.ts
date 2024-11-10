@@ -1,10 +1,34 @@
 import type { Point } from './types';
 import type { Player } from './Player';
 
+type Straight = {
+	innerStart: Point;
+	outerStart: Point;
+	innerEnd: Point;
+	outerEnd: Point;
+};
+
+type Turn = {
+	innerStart: Point;
+	outerStart: Point;
+	innerEnd: Point;
+	outerEnd: Point;
+	centerInner: Point;
+	centerOuter: Point;
+};
+
+type Zones = {
+	1: Straight;
+	2: Turn;
+	3: Straight;
+	4: Turn;
+};
+
 export class TrackGeometry {
 	canvas: HTMLCanvasElement;
 	ctx: CanvasRenderingContext2D;
 	points: Record<string, Point>;
+	zones: Zones;
 	PIXELS_PER_METER: number;
 
 	straight1Area: Path2D;
@@ -26,8 +50,38 @@ export class TrackGeometry {
 	) {
 		this.canvas = canvas;
 		this.ctx = ctx;
-		this.points = points;
 		this.PIXELS_PER_METER = PIXELS_PER_METER;
+		this.points = points;
+		this.zones = {
+			1: {
+				innerStart: { x: points.C.x, y: points.C.y },
+				outerStart: { x: points.I.x, y: points.I.y },
+				innerEnd: { x: points.E.x, y: points.E.y },
+				outerEnd: { x: points.K.x, y: points.K.y }
+			},
+			2: {
+				innerStart: { x: points.E.x, y: points.E.y },
+				outerStart: { x: points.K.x, y: points.K.y },
+				innerEnd: { x: points.F.x, y: points.F.y },
+				outerEnd: { x: points.L.x, y: points.L.y },
+				centerInner: { x: points.B.x, y: points.B.y },
+				centerOuter: { x: points.H.x, y: points.H.y }
+			},
+			3: {
+				innerStart: { x: points.F.x, y: points.F.y },
+				outerStart: { x: points.L.x, y: points.L.y },
+				innerEnd: { x: points.D.x, y: points.D.y },
+				outerEnd: { x: points.J.x, y: points.J.y }
+			},
+			4: {
+				innerStart: { x: points.D.x, y: points.D.y },
+				outerStart: { x: points.J.x, y: points.J.y },
+				innerEnd: { x: points.C.x, y: points.C.y },
+				outerEnd: { x: points.I.x, y: points.I.y },
+				centerInner: { x: points.A.x, y: points.A.y },
+				centerOuter: { x: points.G.x, y: points.G.y }
+			}
+		};
 
 		this.straight1Area = this.createStraight1Path();
 		this.straight2Area = this.createStraight2Path();
@@ -43,26 +97,54 @@ export class TrackGeometry {
 
 	createInnerTrackPath(): Path2D {
 		const path = new Path2D();
-		const p = this.points;
+		const zones = this.zones;
 
-		path.moveTo(p.C.x, p.C.y);
-		path.lineTo(p.E.x, p.E.y);
-		path.arc(p.B.x, p.B.y, Math.abs(p.E.y - p.B.y), -Math.PI / 2, Math.PI / 2, true);
-		path.lineTo(p.D.x, p.D.y);
-		path.arc(p.A.x, p.A.y, Math.abs(p.C.y - p.A.y), Math.PI / 2, -Math.PI / 2, true);
+		path.moveTo(zones[1].innerStart.x, zones[1].innerStart.y);
+		path.lineTo(zones[1].innerEnd.x, zones[1].innerEnd.y);
+		path.arc(
+			zones[2].centerInner.x,
+			zones[2].centerInner.y,
+			Math.abs(zones[2].innerStart.y - zones[2].centerInner.y),
+			-Math.PI / 2,
+			Math.PI / 2,
+			true
+		);
+		path.lineTo(zones[3].innerEnd.x, zones[3].innerEnd.y);
+		path.arc(
+			zones[4].centerInner.x,
+			zones[4].centerInner.y,
+			Math.abs(zones[4].innerEnd.y - zones[4].centerInner.y),
+			Math.PI / 2,
+			-Math.PI / 2,
+			true
+		);
 
 		return path;
 	}
 
 	createOuterTrackPath(): Path2D {
 		const path = new Path2D();
-		const p = this.points;
+		const zones = this.zones;
 
-		path.moveTo(p.I.x, p.I.y);
-		path.lineTo(p.K.x, p.K.y);
-		path.arc(p.H.x, p.H.y, Math.abs(p.K.y - p.H.y), -Math.PI / 2, Math.PI / 2, true);
-		path.lineTo(p.J.x, p.J.y);
-		path.arc(p.G.x, p.G.y, Math.abs(p.I.y - p.G.y), Math.PI / 2, -Math.PI / 2, true);
+		path.moveTo(zones[1].outerStart.x, zones[1].outerStart.y);
+		path.lineTo(zones[1].outerEnd.x, zones[1].outerEnd.y);
+		path.arc(
+			zones[2].centerOuter.x,
+			zones[2].centerOuter.y,
+			Math.abs(zones[2].outerStart.y - zones[2].centerOuter.y),
+			-Math.PI / 2,
+			Math.PI / 2,
+			true
+		);
+		path.lineTo(zones[3].outerEnd.x, zones[3].outerEnd.y);
+		path.arc(
+			zones[4].centerOuter.x,
+			zones[4].centerOuter.y,
+			Math.abs(zones[4].outerStart.y - zones[4].centerOuter.y),
+			Math.PI / 2,
+			-Math.PI / 2,
+			true
+		);
 
 		return path;
 	}
@@ -222,6 +304,15 @@ export class TrackGeometry {
 		return path;
 	}
 
+	createStraightTurnZone(packZones: number[], rearmost: Player, foremost: Player): Path2D {
+		const path = new Path2D();
+		// Create a straight segment from the rearmost innerPoint/outerPoint to the packZone 1 innerEnd/outerEnd
+		// Create a turn segment from the packZone 1 innerEnd + outerEnd to the foremost innerPoint/outerPoint
+		// Add the two created zone to the path
+
+		return path;
+	}
+
 	createTurn2Path(): Path2D {
 		const path = new Path2D();
 		const p = this.points;
@@ -357,15 +448,7 @@ export class TrackGeometry {
 
 	createPackZonePath(rearmost: Player, foremost: Player, zones: number[]): Path2D {
 		console.log(zones);
-		// console.log(rearmost);
-		// console.log(foremost);
 
-		// TODO
-		// If the pack is in a single zone
-		//    If the packs is in a straight
-		//      Draw the pack zone as a quadrilateral using rearmost innerpoint/outerpoint and foremost innerpoint/outerpoint
-		//    If the pack is in a turn
-		//      Draw the pack zone as
 		const singleZone = zones.length === 1;
 		const dualZone = zones.length === 2;
 
