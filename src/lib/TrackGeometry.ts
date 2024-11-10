@@ -200,200 +200,6 @@ export class TrackGeometry {
 		return path;
 	}
 
-	createStraightZone(
-		innerStart: Point,
-		outerStart: Point,
-		innerEnd: Point,
-		outerEnd: Point
-	): Path2D {
-		const path = new Path2D();
-
-		path.moveTo(innerStart.x, innerStart.y);
-		path.lineTo(innerEnd.x, innerEnd.y);
-		path.lineTo(outerEnd.x, outerEnd.y);
-		path.lineTo(outerStart.x, outerStart.y);
-		path.closePath();
-
-		return path;
-	}
-
-	createTurnZone(
-		innerStart: Point,
-		outerStart: Point,
-		innerEnd: Point,
-		outerEnd: Point,
-		zoneKey: TurnKey
-	): Path2D {
-		const path = new Path2D();
-		const centerInner = this.zones[zoneKey].centerInner;
-		const centerOuter = this.zones[zoneKey].centerOuter;
-
-		// Calculate angles for inner arc
-		const innerStartAngle = Math.atan2(innerStart.y - centerInner.y, innerStart.x - centerInner.x);
-		const innerEndAngle = Math.atan2(innerEnd.y - centerInner.y, innerEnd.x - centerInner.x);
-
-		// Calculate angles for outer arc
-		const outerStartAngle = Math.atan2(outerStart.y - centerOuter.y, outerStart.x - centerOuter.x);
-		const outerEndAngle = Math.atan2(outerEnd.y - centerOuter.y, outerEnd.x - centerOuter.x);
-
-		// Start from outerStart, draw line to innerStart
-		path.moveTo(outerStart.x, outerStart.y);
-		path.lineTo(innerStart.x, innerStart.y);
-
-		// Draw inner arc
-		path.arc(
-			centerInner.x,
-			centerInner.y,
-			Math.hypot(innerStart.x - centerInner.x, innerStart.y - centerInner.y),
-			innerStartAngle,
-			innerEndAngle,
-			true
-		);
-
-		// Draw line to outerEnd
-		path.lineTo(outerEnd.x, outerEnd.y);
-
-		// Draw outer arc
-		path.arc(
-			centerOuter.x,
-			centerOuter.y,
-			Math.hypot(outerStart.x - centerOuter.x, outerStart.y - centerOuter.y),
-			outerEndAngle,
-			outerStartAngle,
-			false
-		);
-
-		path.closePath();
-
-		return path;
-	}
-
-	createSingleZone(zone: number, rearmost: Player, foremost: Player): Path2D {
-		// for the straights
-		if (zone === 1 || zone === 3) {
-			return this.createStraightZone(
-				rearmost.innerPoint,
-				rearmost.outerPoint,
-				foremost.innerPoint,
-				foremost.outerPoint
-			);
-		} else {
-			return this.createTurnZone(
-				rearmost.innerPoint,
-				rearmost.outerPoint,
-				foremost.innerPoint,
-				foremost.outerPoint,
-				zone as TurnKey
-			);
-		}
-	}
-
-	createDualZone(packZones: number[], rearmost: Player, foremost: Player): Path2D {
-		const path = new Path2D();
-
-		// When first zone is a straight (1 or 3)
-		if (packZones[0] % 2 === 1) {
-			const straight = packZones[0] as StraightKey;
-			const turn = packZones[1] as TurnKey;
-
-			const straightZone = this.createStraightZone(
-				rearmost.innerPoint,
-				rearmost.outerPoint,
-				this.zones[straight].innerEnd,
-				this.zones[straight].outerEnd
-			);
-
-			const turnZone = this.createTurnZone(
-				this.zones[turn].innerStart,
-				this.zones[turn].outerStart,
-				foremost.innerPoint,
-				foremost.outerPoint,
-				turn
-			);
-
-			path.addPath(straightZone);
-			path.addPath(turnZone);
-		}
-		// When first zone is a turn (2 or 4)
-		else {
-			const turn = packZones[0] as TurnKey;
-			const straight = packZones[1] as StraightKey;
-
-			const turnZone = this.createTurnZone(
-				rearmost.innerPoint,
-				rearmost.outerPoint,
-				this.zones[turn].innerEnd,
-				this.zones[turn].outerEnd,
-				turn
-			);
-
-			const straightZone = this.createStraightZone(
-				this.zones[straight].innerStart,
-				this.zones[straight].outerStart,
-				foremost.innerPoint,
-				foremost.outerPoint
-			);
-
-			path.addPath(turnZone);
-			path.addPath(straightZone);
-		}
-
-		return path;
-	}
-
-	createTriZone(packZones: number[], rearmost: Player, foremost: Player): Path2D {
-		const path = new Path2D();
-		const firstZone = packZones[0];
-		const middleZone = packZones[1];
-		const lastZone = packZones[2];
-
-		// Create partial zone from rearmost player to end of first zone
-		const firstZonePath =
-			firstZone % 2 === 1
-				? this.createStraightZone(
-						rearmost.innerPoint,
-						rearmost.outerPoint,
-						this.zones[firstZone as StraightKey].innerEnd,
-						this.zones[firstZone as StraightKey].outerEnd
-					)
-				: this.createTurnZone(
-						rearmost.innerPoint,
-						rearmost.outerPoint,
-						this.zones[firstZone as TurnKey].innerEnd,
-						this.zones[firstZone as TurnKey].outerEnd,
-						firstZone as TurnKey
-					);
-
-		// Create full middle zone
-		const middleZonePath =
-			middleZone % 2 === 1
-				? this.createStraightPath(middleZone as StraightKey)
-				: this.createTurnPath(middleZone as TurnKey);
-
-		// Create partial zone from start of last zone to foremost player
-		const lastZonePath =
-			lastZone % 2 === 1
-				? this.createStraightZone(
-						this.zones[lastZone as StraightKey].innerStart,
-						this.zones[lastZone as StraightKey].outerStart,
-						foremost.innerPoint,
-						foremost.outerPoint
-					)
-				: this.createTurnZone(
-						this.zones[lastZone as TurnKey].innerStart,
-						this.zones[lastZone as TurnKey].outerStart,
-						foremost.innerPoint,
-						foremost.outerPoint,
-						lastZone as TurnKey
-					);
-
-		path.addPath(firstZonePath);
-		path.addPath(middleZonePath);
-		path.addPath(lastZonePath);
-
-		return path;
-	}
-
 	createMidTrackPath(): Path2D {
 		const path = new Path2D();
 		const p = this.points;
@@ -514,16 +320,100 @@ export class TrackGeometry {
 	}
 
 	createPackZonePath(rearmost: Player, foremost: Player, packZones: number[]): Path2D {
-		const singleZone = packZones.length === 1;
-		const dualZone = packZones.length === 2;
+		const path = new Path2D();
 
-		if (singleZone) {
-			return this.createSingleZone(packZones[0], rearmost, foremost);
-		} else if (dualZone) {
-			return this.createDualZone(packZones, rearmost, foremost);
-		} else {
-			return this.createTriZone(packZones, rearmost, foremost);
-		}
+		// Handle each zone sequentially
+		packZones.forEach((zone, index) => {
+			const isFirstZone = index === 0;
+			const isLastZone = index === packZones.length - 1;
+
+			// Cast zone to the appropriate type based on whether it's odd or even
+			const zoneKey = zone % 2 === 1 ? (zone as StraightKey) : (zone as TurnKey);
+
+			// Determine start and end points for this zone segment
+			const startPoints = isFirstZone
+				? { inner: rearmost.innerPoint, outer: rearmost.outerPoint }
+				: { inner: this.zones[zoneKey].innerStart, outer: this.zones[zoneKey].outerStart };
+
+			// Inside createPackZonePath method, modify the endPoints determination:
+			const endPoints = isLastZone
+				? { inner: foremost.innerPoint, outer: foremost.outerPoint }
+				: { inner: this.zones[zoneKey].innerEnd, outer: this.zones[zoneKey].outerEnd };
+
+			// Create zone segment based on zone type
+			if (zone % 2 === 1) {
+				// Straight zone
+				const straightZone = this.createStraightSegment(
+					startPoints.inner,
+					startPoints.outer,
+					endPoints.inner,
+					endPoints.outer
+				);
+				path.addPath(straightZone);
+			} else {
+				// Turn zone
+				const turnZone = this.createTurnSegment(
+					startPoints.inner,
+					startPoints.outer,
+					endPoints.inner,
+					endPoints.outer,
+					zone as TurnKey
+				);
+				path.addPath(turnZone);
+			}
+		});
+
+		return path;
+	}
+
+	private createStraightSegment(
+		innerStart: Point,
+		outerStart: Point,
+		innerEnd: Point,
+		outerEnd: Point
+	): Path2D {
+		const path = new Path2D();
+		path.moveTo(innerStart.x, innerStart.y);
+		path.lineTo(innerEnd.x, innerEnd.y);
+		path.lineTo(outerEnd.x, outerEnd.y);
+		path.lineTo(outerStart.x, outerStart.y);
+		path.closePath();
+		return path;
+	}
+
+	private createTurnSegment(
+		innerStart: Point,
+		outerStart: Point,
+		innerEnd: Point,
+		outerEnd: Point,
+		turnKey: TurnKey
+	): Path2D {
+		const path = new Path2D();
+		const { centerInner, centerOuter } = this.zones[turnKey];
+		const innerRadius = Math.hypot(innerStart.x - centerInner.x, innerStart.y - centerInner.y);
+		const outerRadius = Math.hypot(outerStart.x - centerOuter.x, outerStart.y - centerOuter.y);
+
+		path.moveTo(outerStart.x, outerStart.y);
+		path.lineTo(innerStart.x, innerStart.y);
+		path.arc(
+			centerInner.x,
+			centerInner.y,
+			innerRadius,
+			Math.atan2(innerStart.y - centerInner.y, innerStart.x - centerInner.x),
+			Math.atan2(innerEnd.y - centerInner.y, innerEnd.x - centerInner.x),
+			true
+		);
+		path.lineTo(outerEnd.x, outerEnd.y);
+		path.arc(
+			centerOuter.x,
+			centerOuter.y,
+			outerRadius,
+			Math.atan2(outerEnd.y - centerOuter.y, outerEnd.x - centerOuter.x),
+			Math.atan2(outerStart.y - centerOuter.y, outerStart.x - centerOuter.x),
+			false
+		);
+		path.closePath();
+		return path;
 	}
 
 	updatePlayerCoordinates(player: Player): void {
