@@ -268,6 +268,26 @@ export class TrackGeometry {
 		return path;
 	}
 
+	createSingleZone(zone: number, rearmost: Player, foremost: Player): Path2D {
+		// for the straights
+		if (zone === 1 || zone === 3) {
+			return this.createStraightZone(
+				rearmost.innerPoint,
+				rearmost.outerPoint,
+				foremost.innerPoint,
+				foremost.outerPoint
+			);
+		} else {
+			return this.createTurnZone(
+				rearmost.innerPoint,
+				rearmost.outerPoint,
+				foremost.innerPoint,
+				foremost.outerPoint,
+				zone as TurnKey
+			);
+		}
+	}
+
 	createDualZone(packZones: number[], rearmost: Player, foremost: Player): Path2D {
 		const path = new Path2D();
 
@@ -317,6 +337,59 @@ export class TrackGeometry {
 			path.addPath(turnZone);
 			path.addPath(straightZone);
 		}
+
+		return path;
+	}
+
+	createTriZone(packZones: number[], rearmost: Player, foremost: Player): Path2D {
+		const path = new Path2D();
+		const firstZone = packZones[0];
+		const middleZone = packZones[1];
+		const lastZone = packZones[2];
+
+		// Create partial zone from rearmost player to end of first zone
+		const firstZonePath =
+			firstZone % 2 === 1
+				? this.createStraightZone(
+						rearmost.innerPoint,
+						rearmost.outerPoint,
+						this.zones[firstZone as StraightKey].innerEnd,
+						this.zones[firstZone as StraightKey].outerEnd
+					)
+				: this.createTurnZone(
+						rearmost.innerPoint,
+						rearmost.outerPoint,
+						this.zones[firstZone as TurnKey].innerEnd,
+						this.zones[firstZone as TurnKey].outerEnd,
+						firstZone as TurnKey
+					);
+
+		// Create full middle zone
+		const middleZonePath =
+			middleZone % 2 === 1
+				? this.createStraightPath(middleZone as StraightKey)
+				: this.createTurnPath(middleZone as TurnKey);
+
+		// Create partial zone from start of last zone to foremost player
+		const lastZonePath =
+			lastZone % 2 === 1
+				? this.createStraightZone(
+						this.zones[lastZone as StraightKey].innerStart,
+						this.zones[lastZone as StraightKey].outerStart,
+						foremost.innerPoint,
+						foremost.outerPoint
+					)
+				: this.createTurnZone(
+						this.zones[lastZone as TurnKey].innerStart,
+						this.zones[lastZone as TurnKey].outerStart,
+						foremost.innerPoint,
+						foremost.outerPoint,
+						lastZone as TurnKey
+					);
+
+		path.addPath(firstZonePath);
+		path.addPath(middleZonePath);
+		path.addPath(lastZonePath);
 
 		return path;
 	}
@@ -441,52 +514,16 @@ export class TrackGeometry {
 	}
 
 	createPackZonePath(rearmost: Player, foremost: Player, packZones: number[]): Path2D {
-		console.log(packZones);
-
 		const singleZone = packZones.length === 1;
 		const dualZone = packZones.length === 2;
 
 		if (singleZone) {
-			const zone = packZones[0];
-
-			// for the straights
-			if (zone === 1 || zone === 3) {
-				return this.createStraightZone(
-					rearmost.innerPoint,
-					rearmost.outerPoint,
-					foremost.innerPoint,
-					foremost.outerPoint
-				);
-			}
-
-			if (zone === 2) {
-				return this.createTurnZone(
-					rearmost.innerPoint,
-					rearmost.outerPoint,
-					foremost.innerPoint,
-					foremost.outerPoint,
-					2
-				);
-			}
-
-			if (zone === 4 || zone === 0) {
-				return this.createTurnZone(
-					rearmost.innerPoint,
-					rearmost.outerPoint,
-					foremost.innerPoint,
-					foremost.outerPoint,
-					4
-				);
-			}
-		}
-
-		if (dualZone) {
+			return this.createSingleZone(packZones[0], rearmost, foremost);
+		} else if (dualZone) {
 			return this.createDualZone(packZones, rearmost, foremost);
+		} else {
+			return this.createTriZone(packZones, rearmost, foremost);
 		}
-
-		const path = new Path2D();
-
-		return path;
 	}
 
 	updatePlayerCoordinates(player: Player): void {
