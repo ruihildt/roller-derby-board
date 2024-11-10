@@ -200,84 +200,67 @@ export class TrackGeometry {
 		return path;
 	}
 
-	createStraightZone(points: {
-		innerStart: Point;
-		outerStart: Point;
-		innerEnd: Point;
-		outerEnd: Point;
-	}): Path2D {
+	createStraightZone(
+		innerStart: Point,
+		outerStart: Point,
+		innerEnd: Point,
+		outerEnd: Point
+	): Path2D {
 		const path = new Path2D();
 
-		path.moveTo(points.innerStart.x, points.innerStart.y);
-		path.lineTo(points.innerEnd.x, points.innerEnd.y);
-		path.lineTo(points.outerEnd.x, points.outerEnd.y);
-		path.lineTo(points.outerStart.x, points.outerStart.y);
+		path.moveTo(innerStart.x, innerStart.y);
+		path.lineTo(innerEnd.x, innerEnd.y);
+		path.lineTo(outerEnd.x, outerEnd.y);
+		path.lineTo(outerStart.x, outerStart.y);
 		path.closePath();
 
 		return path;
 	}
 
-	createTurnZone(points: {
-		innerStart: Point;
-		outerStart: Point;
-		innerEnd: Point;
-		outerEnd: Point;
-		centerInner: Point;
-		centerOuter: Point;
-	}): Path2D {
+	createTurnZone(
+		innerStart: Point,
+		outerStart: Point,
+		innerEnd: Point,
+		outerEnd: Point,
+		zoneKey: TurnKey
+	): Path2D {
 		const path = new Path2D();
+		const centerInner = this.zones[zoneKey].centerInner;
+		const centerOuter = this.zones[zoneKey].centerOuter;
 
 		// Calculate angles for inner arc
-		const innerStartAngle = Math.atan2(
-			points.innerStart.y - points.centerInner.y,
-			points.innerStart.x - points.centerInner.x
-		);
-		const innerEndAngle = Math.atan2(
-			points.innerEnd.y - points.centerInner.y,
-			points.innerEnd.x - points.centerInner.x
-		);
+		const innerStartAngle = Math.atan2(innerStart.y - centerInner.y, innerStart.x - centerInner.x);
+		const innerEndAngle = Math.atan2(innerEnd.y - centerInner.y, innerEnd.x - centerInner.x);
 
 		// Calculate angles for outer arc
-		const outerStartAngle = Math.atan2(
-			points.outerStart.y - points.centerOuter.y,
-			points.outerStart.x - points.centerOuter.x
-		);
-		const outerEndAngle = Math.atan2(
-			points.outerEnd.y - points.centerOuter.y,
-			points.outerEnd.x - points.centerOuter.x
-		);
+		const outerStartAngle = Math.atan2(outerStart.y - centerOuter.y, outerStart.x - centerOuter.x);
+		const outerEndAngle = Math.atan2(outerEnd.y - centerOuter.y, outerEnd.x - centerOuter.x);
 
 		// Start from outerStart, draw line to innerStart
-		path.moveTo(points.outerStart.x, points.outerStart.y);
-		path.lineTo(points.innerStart.x, points.innerStart.y);
+		path.moveTo(outerStart.x, outerStart.y);
+		path.lineTo(innerStart.x, innerStart.y);
 
 		// Draw inner arc
 		path.arc(
-			points.centerInner.x,
-			points.centerInner.y,
-			Math.hypot(
-				points.innerStart.x - points.centerInner.x,
-				points.innerStart.y - points.centerInner.y
-			),
+			centerInner.x,
+			centerInner.y,
+			Math.hypot(innerStart.x - centerInner.x, innerStart.y - centerInner.y),
 			innerStartAngle,
 			innerEndAngle,
-			true // Ensure the arc direction is correct
+			true
 		);
 
 		// Draw line to outerEnd
-		path.lineTo(points.outerEnd.x, points.outerEnd.y);
+		path.lineTo(outerEnd.x, outerEnd.y);
 
 		// Draw outer arc
 		path.arc(
-			points.centerOuter.x,
-			points.centerOuter.y,
-			Math.hypot(
-				points.outerStart.x - points.centerOuter.x,
-				points.outerStart.y - points.centerOuter.y
-			),
+			centerOuter.x,
+			centerOuter.y,
+			Math.hypot(outerStart.x - centerOuter.x, outerStart.y - centerOuter.y),
 			outerEndAngle,
 			outerStartAngle,
-			false // Ensure the arc direction is correct
+			false
 		);
 
 		path.closePath();
@@ -424,34 +407,32 @@ export class TrackGeometry {
 
 			// for the straights
 			if (zone === 1 || zone === 3) {
-				return this.createStraightZone({
-					innerStart: rearmost.innerPoint,
-					outerStart: rearmost.outerPoint,
-					innerEnd: foremost.innerPoint,
-					outerEnd: foremost.outerPoint
-				});
+				return this.createStraightZone(
+					rearmost.innerPoint,
+					rearmost.outerPoint,
+					foremost.innerPoint,
+					foremost.outerPoint
+				);
 			}
 
 			if (zone === 2) {
-				return this.createTurnZone({
-					innerStart: rearmost.innerPoint,
-					outerStart: rearmost.outerPoint,
-					innerEnd: foremost.innerPoint,
-					outerEnd: foremost.outerPoint,
-					centerInner: { x: this.points.B.x, y: this.points.B.y },
-					centerOuter: { x: this.points.H.x, y: this.points.H.y }
-				});
+				return this.createTurnZone(
+					rearmost.innerPoint,
+					rearmost.outerPoint,
+					foremost.innerPoint,
+					foremost.outerPoint,
+					2
+				);
 			}
 
 			if (zone === 4 || zone === 0) {
-				return this.createTurnZone({
-					innerStart: rearmost.innerPoint,
-					outerStart: rearmost.outerPoint,
-					innerEnd: foremost.innerPoint,
-					outerEnd: foremost.outerPoint,
-					centerInner: { x: this.points.A.x, y: this.points.A.y },
-					centerOuter: { x: this.points.G.x, y: this.points.G.y }
-				});
+				return this.createTurnZone(
+					rearmost.innerPoint,
+					rearmost.outerPoint,
+					foremost.innerPoint,
+					foremost.outerPoint,
+					4
+				);
 			}
 		}
 
