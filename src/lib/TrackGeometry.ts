@@ -268,11 +268,55 @@ export class TrackGeometry {
 		return path;
 	}
 
-	createStraightTurnZone(packZones: number[], rearmost: Player, foremost: Player): Path2D {
+	createDualZone(packZones: number[], rearmost: Player, foremost: Player): Path2D {
 		const path = new Path2D();
-		// Create a straight segment from the rearmost innerPoint/outerPoint to the packZone 1 innerEnd/outerEnd
-		// Create a turn segment from the packZone 1 innerEnd + outerEnd to the foremost innerPoint/outerPoint
-		// Add the two created zone to the path
+
+		// When first zone is a straight (1 or 3)
+		if (packZones[0] % 2 === 1) {
+			const straight = packZones[0] as StraightKey;
+			const turn = packZones[1] as TurnKey;
+
+			const straightZone = this.createStraightZone(
+				rearmost.innerPoint,
+				rearmost.outerPoint,
+				this.zones[straight].innerEnd,
+				this.zones[straight].outerEnd
+			);
+
+			const turnZone = this.createTurnZone(
+				this.zones[turn].innerStart,
+				this.zones[turn].outerStart,
+				foremost.innerPoint,
+				foremost.outerPoint,
+				turn
+			);
+
+			path.addPath(straightZone);
+			path.addPath(turnZone);
+		}
+		// When first zone is a turn (2 or 4)
+		else {
+			const turn = packZones[0] as TurnKey;
+			const straight = packZones[1] as StraightKey;
+
+			const turnZone = this.createTurnZone(
+				rearmost.innerPoint,
+				rearmost.outerPoint,
+				this.zones[turn].innerEnd,
+				this.zones[turn].outerEnd,
+				turn
+			);
+
+			const straightZone = this.createStraightZone(
+				this.zones[straight].innerStart,
+				this.zones[straight].outerStart,
+				foremost.innerPoint,
+				foremost.outerPoint
+			);
+
+			path.addPath(turnZone);
+			path.addPath(straightZone);
+		}
 
 		return path;
 	}
@@ -437,11 +481,7 @@ export class TrackGeometry {
 		}
 
 		if (dualZone) {
-			const zone1 = packZones[0];
-			const zone2 = packZones[1];
-
-			// it can either be straight > curve or curve > straight
-			// if straight > curve
+			return this.createDualZone(packZones, rearmost, foremost);
 		}
 
 		const path = new Path2D();
