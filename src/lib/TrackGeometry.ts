@@ -159,45 +159,24 @@ export class TrackGeometry {
 	}
 
 	createStraightPath(straight: StraightKey): Path2D {
-		const path = new Path2D();
 		const zone = this.zones[straight];
-
-		path.moveTo(zone.outerStart.x, zone.outerStart.y);
-		path.lineTo(zone.innerStart.x, zone.innerStart.y);
-		path.lineTo(zone.innerEnd.x, zone.innerEnd.y);
-		path.lineTo(zone.outerEnd.x, zone.outerEnd.y);
-		path.closePath();
-
-		return path;
+		return this.createStraightSegment(
+			zone.innerStart,
+			zone.outerStart,
+			zone.innerEnd,
+			zone.outerEnd
+		);
 	}
 
 	createTurnPath(turnKey: TurnKey): Path2D {
-		const path = new Path2D();
 		const turn = this.zones[turnKey];
-		const isFirstTurn = turnKey === 2;
-
-		path.moveTo(turn.outerStart.x, turn.outerStart.y);
-		path.lineTo(turn.innerStart.x, turn.innerStart.y);
-		path.arc(
-			turn.centerInner.x,
-			turn.centerInner.y,
-			Math.abs(turn.innerStart.y - turn.centerInner.y),
-			isFirstTurn ? -Math.PI / 2 : Math.PI / 2,
-			isFirstTurn ? Math.PI / 2 : -Math.PI / 2,
-			true
+		return this.createTurnSegment(
+			turn.innerStart,
+			turn.outerStart,
+			turn.innerEnd,
+			turn.outerEnd,
+			turnKey
 		);
-		path.lineTo(turn.innerEnd.x, turn.innerEnd.y);
-		path.arc(
-			turn.centerOuter.x,
-			turn.centerOuter.y,
-			Math.abs(turn.outerStart.y - turn.centerOuter.y),
-			isFirstTurn ? Math.PI / 2 : -Math.PI / 2,
-			isFirstTurn ? -Math.PI / 2 : Math.PI / 2,
-			false
-		);
-		path.closePath();
-
-		return path;
 	}
 
 	createMidTrackPath(): Path2D {

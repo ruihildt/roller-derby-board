@@ -133,11 +133,11 @@ export class PackManager extends EventTarget {
 			zones.sort();
 		}
 
-		console.log(
-			'Pack blockers zones:',
-			packBlockers.map((p) => p.zone)
-		);
-		console.log('Zones:', zones);
+		// console.log(
+		// 	'Pack blockers zones:',
+		// 	packBlockers.map((p) => p.zone)
+		// );
+		// console.log('Zones:', zones);
 
 		this.zones = zones;
 
