@@ -137,6 +137,23 @@ export class TrackGeometry {
 		return path;
 	}
 
+	createStraightZone(points: {
+		innerStart: Point;
+		outerStart: Point;
+		innerEnd: Point;
+		outerEnd: Point;
+	}): Path2D {
+		const path = new Path2D();
+
+		path.moveTo(points.innerStart.x, points.innerStart.y);
+		path.lineTo(points.innerEnd.x, points.innerEnd.y);
+		path.lineTo(points.outerEnd.x, points.outerEnd.y);
+		path.lineTo(points.outerStart.x, points.outerStart.y);
+		path.closePath();
+
+		return path;
+	}
+
 	createTurnZone(points: {
 		innerStart: Point;
 		outerStart: Point;
@@ -198,46 +215,6 @@ export class TrackGeometry {
 			outerEndAngle,
 			outerStartAngle,
 			false // Ensure the arc direction is correct
-		);
-
-		path.closePath();
-
-		return path;
-	}
-
-	createPackTurn2Path(
-		rearmostStartPoint: Point,
-		rearmostEndPoint: Point,
-		foremostEndPoint: Point,
-		foremostStartPoint: Point
-	): Path2D {
-		const path = new Path2D();
-		const p = this.points;
-
-		// Start at rearmost inner point
-		path.moveTo(rearmostStartPoint.x, rearmostStartPoint.y);
-
-		// Inner track arc - using same radius as inner track
-		path.arc(
-			p.A.x,
-			p.A.y,
-			Math.abs(p.C.y - p.A.y),
-			Math.atan2(rearmostStartPoint.y - p.A.y, rearmostStartPoint.x - p.A.x),
-			Math.atan2(foremostStartPoint.y - p.A.y, foremostStartPoint.x - p.A.x),
-			true
-		);
-
-		// Line to foremost outer point
-		path.lineTo(foremostEndPoint.x, foremostEndPoint.y);
-
-		// Outer track arc - using same radius as outer track
-		path.arc(
-			p.G.x,
-			p.G.y,
-			Math.abs(p.I.y - p.G.y),
-			Math.atan2(foremostEndPoint.y - p.G.y, foremostEndPoint.x - p.G.x),
-			Math.atan2(rearmostEndPoint.y - p.G.y, rearmostEndPoint.x - p.G.x),
-			false
 		);
 
 		path.closePath();
@@ -389,17 +366,55 @@ export class TrackGeometry {
 		//      Draw the pack zone as a quadrilateral using rearmost innerpoint/outerpoint and foremost innerpoint/outerpoint
 		//    If the pack is in a turn
 		//      Draw the pack zone as
+		const singleZone = zones.length === 1;
+		const dualZone = zones.length === 2;
 
-		return this.createTurnZone({
-			innerStart: rearmost.innerPoint,
-			outerStart: rearmost.outerPoint,
-			innerEnd: foremost.innerPoint,
-			outerEnd: foremost.outerPoint,
-			centerInner: { x: this.points.B.x, y: this.points.B.y },
-			centerOuter: { x: this.points.H.x, y: this.points.H.y }
-		});
+		if (singleZone) {
+			const zone = zones[0];
+
+			// for the straights
+			if (zone === 1 || zone === 3) {
+				return this.createStraightZone({
+					innerStart: rearmost.innerPoint,
+					outerStart: rearmost.outerPoint,
+					innerEnd: foremost.innerPoint,
+					outerEnd: foremost.outerPoint
+				});
+			}
+
+			if (zone === 2) {
+				return this.createTurnZone({
+					innerStart: rearmost.innerPoint,
+					outerStart: rearmost.outerPoint,
+					innerEnd: foremost.innerPoint,
+					outerEnd: foremost.outerPoint,
+					centerInner: { x: this.points.B.x, y: this.points.B.y },
+					centerOuter: { x: this.points.H.x, y: this.points.H.y }
+				});
+			}
+
+			if (zone === 4 || zone === 0) {
+				return this.createTurnZone({
+					innerStart: rearmost.innerPoint,
+					outerStart: rearmost.outerPoint,
+					innerEnd: foremost.innerPoint,
+					outerEnd: foremost.outerPoint,
+					centerInner: { x: this.points.A.x, y: this.points.A.y },
+					centerOuter: { x: this.points.G.x, y: this.points.G.y }
+				});
+			}
+		}
+
+		if (dualZone) {
+			const zone1 = zones[0];
+			const zone2 = zones[1];
+
+			// it can either be straight > curve or curve > straight
+			// if straight > curve
+		}
 
 		const path = new Path2D();
+
 		return path;
 	}
 
