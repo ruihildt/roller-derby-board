@@ -26,6 +26,14 @@ type Zones = {
 	4: Turn;
 };
 
+// Track Constants
+const ENGAGEMENT_ZONE_METERS = 6.1;
+const HALF_PI = Math.PI / 2;
+
+// Angles
+const CLOCKWISE = true;
+const COUNTER_CLOCKWISE = false;
+
 export class TrackGeometry {
 	canvas: HTMLCanvasElement;
 	ctx: CanvasRenderingContext2D;
@@ -107,18 +115,18 @@ export class TrackGeometry {
 			zones[2].centerInner.x,
 			zones[2].centerInner.y,
 			Math.abs(zones[2].innerStart.y - zones[2].centerInner.y),
-			-Math.PI / 2,
-			Math.PI / 2,
-			true
+			-HALF_PI,
+			HALF_PI,
+			CLOCKWISE
 		);
 		path.lineTo(zones[3].innerEnd.x, zones[3].innerEnd.y);
 		path.arc(
 			zones[4].centerInner.x,
 			zones[4].centerInner.y,
 			Math.abs(zones[4].innerEnd.y - zones[4].centerInner.y),
-			Math.PI / 2,
-			-Math.PI / 2,
-			true
+			HALF_PI,
+			-HALF_PI,
+			CLOCKWISE
 		);
 
 		return path;
@@ -134,18 +142,18 @@ export class TrackGeometry {
 			zones[2].centerOuter.x,
 			zones[2].centerOuter.y,
 			Math.abs(zones[2].outerStart.y - zones[2].centerOuter.y),
-			-Math.PI / 2,
-			Math.PI / 2,
-			true
+			-HALF_PI,
+			HALF_PI,
+			CLOCKWISE
 		);
 		path.lineTo(zones[3].outerEnd.x, zones[3].outerEnd.y);
 		path.arc(
 			zones[4].centerOuter.x,
 			zones[4].centerOuter.y,
 			Math.abs(zones[4].outerStart.y - zones[4].centerOuter.y),
-			Math.PI / 2,
-			-Math.PI / 2,
-			true
+			HALF_PI,
+			-HALF_PI,
+			CLOCKWISE
 		);
 
 		return path;
@@ -192,9 +200,9 @@ export class TrackGeometry {
 
 		path.moveTo(p.C.x, midYStartTop);
 		path.lineTo(p.E.x, midYEndTop);
-		path.arc(p.H.x, (p.B.y + p.H.y) / 2, midRadiusBottom, -Math.PI / 2, Math.PI / 2, true);
+		path.arc(p.H.x, (p.B.y + p.H.y) / 2, midRadiusBottom, -HALF_PI, HALF_PI, CLOCKWISE);
 		path.lineTo(p.D.x, midYStartBottom);
-		path.arc(p.G.x, (p.G.y + p.A.y) / 2, midRadiusTop, Math.PI / 2, -Math.PI / 2, true);
+		path.arc(p.G.x, (p.G.y + p.A.y) / 2, midRadiusTop, HALF_PI, -HALF_PI, CLOCKWISE);
 
 		return path;
 	}
@@ -339,7 +347,6 @@ export class TrackGeometry {
 	}
 
 	private calculateEngagementZonePoints(rearmost: Player, foremost: Player) {
-		const ENGAGEMENT_ZONE_METERS = 6.1;
 		return {
 			forward: this.getPointAheadOnMidtrack(foremost, ENGAGEMENT_ZONE_METERS),
 			backward: this.getPointBehindOnMidtrack(rearmost, ENGAGEMENT_ZONE_METERS)
@@ -478,7 +485,7 @@ export class TrackGeometry {
 				);
 
 				const angleChange = remainingDistance / radius;
-				const startAngle = isZone1 ? -Math.PI / 2 : Math.PI / 2;
+				const startAngle = isZone1 ? -HALF_PI : HALF_PI;
 				const newAngle = startAngle - angleChange;
 
 				return {
@@ -605,7 +612,7 @@ export class TrackGeometry {
 			innerRadius,
 			Math.atan2(innerStart.y - centerInner.y, innerStart.x - centerInner.x),
 			Math.atan2(innerEnd.y - centerInner.y, innerEnd.x - centerInner.x),
-			true
+			CLOCKWISE
 		);
 		path.lineTo(outerEnd.x, outerEnd.y);
 		path.arc(
@@ -614,7 +621,7 @@ export class TrackGeometry {
 			outerRadius,
 			Math.atan2(outerEnd.y - centerOuter.y, outerEnd.x - centerOuter.x),
 			Math.atan2(outerStart.y - centerOuter.y, outerStart.x - centerOuter.x),
-			false
+			COUNTER_CLOCKWISE
 		);
 		path.closePath();
 		return path;

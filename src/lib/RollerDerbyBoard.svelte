@@ -18,7 +18,7 @@
 		highResCanvas.height = height * 2;
 
 		if (game) {
-			game.resize(canvas, highResCanvas);
+			game.resize();
 		}
 	}
 

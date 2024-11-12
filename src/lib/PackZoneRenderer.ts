@@ -28,11 +28,7 @@ export class PackZoneRenderer {
 		const foremost = packPlayers.find((p) => p.isForemost);
 
 		if (rearmost && foremost) {
-			const path = this.trackGeometry.createPackZonePath(
-				rearmost,
-				foremost,
-				this.packManager.zones
-			);
+			const path = this.trackGeometry.createPackZonePath(rearmost, foremost);
 
 			this.ctx.fillStyle = 'rgba(255, 192, 203, 0.8)'; // Pink with transparency
 			this.ctx.fill(path, 'evenodd');
@@ -46,11 +42,7 @@ export class PackZoneRenderer {
 			this.ctx.fillRect(rearmostPoint.x - 5, rearmostPoint.y - 5, 10, 10);
 
 			// Draw engagement zone (20ft behind and ahead of the pack)
-			const engagementZonePath = this.trackGeometry.createEngagementZonePath(
-				rearmost,
-				foremost,
-				this.packManager.zones
-			);
+			const engagementZonePath = this.trackGeometry.createEngagementZonePath(rearmost, foremost);
 			this.ctx.fillStyle = 'rgba(144, 238, 144, 0.4)'; // Light green with transparency
 			this.ctx.fill(engagementZonePath, 'evenodd');
 		}

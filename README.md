@@ -12,14 +12,16 @@ What we have so far:
 - working animation and audio recording
 - out of bounds detection
 - pack definition
+- engagement zone
 
 What's missing to cover the basics:
 
-- visualization of play zones
+- fix resizing issues
+- player status based on zones
 - 10 feet lines
 - physics and collision detection
 - improve the design
-- record without audio
+- record without audio / save as gif
 
 Ideas:
 
