@@ -39,10 +39,7 @@ export class PackZoneRenderer {
 
 			// Draw point with getPointAheadOnMidtrack
 
-			const pointToDraw = this.trackGeometry.getPointAheadOnMidtrack(
-				{ x: foremost.x, y: foremost.y },
-				6.1
-			);
+			const pointToDraw = this.trackGeometry.getPointAheadOnMidtrack(foremost, 6.1);
 			this.ctx.fillStyle = 'rgba(255, 0, 0, 1)'; // Red
 			this.ctx.fillRect(pointToDraw.x - 5, pointToDraw.y - 5, 10, 10);
 

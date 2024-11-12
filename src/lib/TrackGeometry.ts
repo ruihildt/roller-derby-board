@@ -347,7 +347,7 @@ export class TrackGeometry {
 
 	createEngagementZonePath(rearmost: Player, foremost: Player): Path2D {
 		// Get the point 6.1 meters ahead on the midtrack
-		const engagementZonePoint = this.getPointAheadOnMidtrack({ x: foremost.x, y: foremost.y }, 6.1);
+		const engagementZonePoint = this.getPointAheadOnMidtrack(foremost, 6.1);
 
 		// Create a path from foremost player to engagement zone point
 		const packZones = this.getZonesBetweenPoints(
@@ -368,7 +368,7 @@ export class TrackGeometry {
 		);
 	}
 
-	getPointAheadOnMidtrack(startPoint: Point, distanceInMeters: number): Point {
+	getPointAheadOnMidtrack(startPoint: Player, distanceInMeters: number): Point {
 		const distanceInPixels = distanceInMeters * this.PIXELS_PER_METER;
 		const zone = this.determineZone(startPoint.x, startPoint.y);
 
@@ -398,7 +398,7 @@ export class TrackGeometry {
 
 				const angleChange = remainingDistance / radius;
 				const startAngle = isZone1 ? -Math.PI / 2 : Math.PI / 2;
-				const newAngle = isZone1 ? startAngle - angleChange : startAngle - angleChange; // Changed to minus for both cases
+				const newAngle = startAngle - angleChange;
 
 				return {
 					x: centerPoint.x + radius * Math.cos(newAngle),
@@ -421,8 +421,22 @@ export class TrackGeometry {
 
 		// Handle turns (zones 2 and 4)
 		const centerPoint = zone === 2 ? this.zones[2].centerOuter : this.zones[4].centerOuter;
-		const radius = Math.hypot(startPoint.x - centerPoint.x, startPoint.y - centerPoint.y);
-		const currentAngle = Math.atan2(startPoint.y - centerPoint.y, startPoint.x - centerPoint.x);
+
+		// Calculate midpoint between inner and outer points as the true starting point
+		const startPointOnMidtrack = {
+			x: (startPoint.innerPoint.x + startPoint.outerPoint.x) / 2,
+			y: (startPoint.innerPoint.y + startPoint.outerPoint.y) / 2
+		};
+
+		const radius = Math.hypot(
+			startPointOnMidtrack.x - centerPoint.x,
+			startPointOnMidtrack.y - centerPoint.y
+		);
+
+		const currentAngle = Math.atan2(
+			startPointOnMidtrack.y - centerPoint.y,
+			startPointOnMidtrack.x - centerPoint.x
+		);
 
 		// Calculate angular distance to turn end
 		const nextZone = zone === 2 ? 3 : 1;
@@ -436,7 +450,7 @@ export class TrackGeometry {
 		// If distance to end is greater than requested distance, stay in turn
 		if (distanceToTurnEnd >= distanceInPixels) {
 			const angleChange = distanceInPixels / radius;
-			const newAngle = zone === 2 ? currentAngle - angleChange : currentAngle - angleChange; // Changed to minus for both cases
+			const newAngle = currentAngle - angleChange;
 
 			return {
 				x: centerPoint.x + radius * Math.cos(newAngle),
