@@ -345,28 +345,43 @@ export class TrackGeometry {
 		return path;
 	}
 
-	createEngagementZonePath(rearmost: Player, foremost: Player): Path2D {
-		// Get the point 6.1 meters ahead on the midtrack
-		const engagementZonePoint = this.getPointAheadOnMidtrack(foremost, 6.1);
+	createEngagementZonePath(rearmost: Player, foremost: Player, packZones: number[]): Path2D {
+		const path = new Path2D();
 
-		// Create a dummy player at the engagement zone point to get proper inner/outer points
-		const dummyPlayer = {
-			x: engagementZonePoint.x,
-			y: engagementZonePoint.y,
+		// Get points 6.1 meters ahead and behind
+		const forwardPoint = this.getPointAheadOnMidtrack(foremost, 6.1);
+		const backwardPoint = this.getPointBehindOnMidtrack(rearmost, 6.1);
+
+		// Create dummy players at both engagement zone points
+		const forwardDummy = {
+			x: forwardPoint.x,
+			y: forwardPoint.y,
 			innerPoint: { x: 0, y: 0 },
 			outerPoint: { x: 0, y: 0 }
 		} as Player;
 
-		// Calculate proper inner/outer points
-		this.updatePlayerCoordinates(dummyPlayer);
+		const backwardDummy = {
+			x: backwardPoint.x,
+			y: backwardPoint.y,
+			innerPoint: { x: 0, y: 0 },
+			outerPoint: { x: 0, y: 0 }
+		} as Player;
 
-		// Create a path from foremost player to engagement zone point
-		const packZones = this.getZonesBetweenPoints(
-			{ x: foremost.x, y: foremost.y },
-			engagementZonePoint
-		);
+		// Calculate proper inner/outer points for both dummies
+		this.updatePlayerCoordinates(forwardDummy);
+		this.updatePlayerCoordinates(backwardDummy);
 
-		return this.createPackZonePath(foremost, dummyPlayer, packZones);
+		// Create a single continuous path from backward point to forward point
+		const engagementZones = [
+			...new Set([
+				this.determineZone(backwardPoint.x, backwardPoint.y),
+				...packZones,
+				this.determineZone(forwardPoint.x, forwardPoint.y)
+			])
+		];
+		path.addPath(this.createPackZonePath(backwardDummy, forwardDummy, engagementZones));
+
+		return path;
 	}
 
 	getPointBehindOnMidtrack(startPoint: Player, distanceInMeters: number): Point {
@@ -572,27 +587,6 @@ export class TrackGeometry {
 				: straightZone.innerStart.x - remainingDistance;
 
 		return { x: newX, y: midY };
-	}
-
-	private getZonesBetweenPoints(start: Point, end: Point): number[] {
-		const zones: number[] = [];
-		const startZone = this.determineZone(start.x, start.y);
-		const endZone = this.determineZone(end.x, end.y);
-
-		if (startZone === endZone) {
-			zones.push(startZone);
-			return zones;
-		}
-
-		let currentZone = startZone;
-		zones.push(currentZone);
-
-		while (currentZone !== endZone) {
-			currentZone = currentZone === 4 ? 1 : currentZone + 1;
-			zones.push(currentZone);
-		}
-
-		return zones;
 	}
 
 	private determineZone(x: number, y: number): number {
