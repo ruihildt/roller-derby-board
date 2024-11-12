@@ -349,23 +349,24 @@ export class TrackGeometry {
 		// Get the point 6.1 meters ahead on the midtrack
 		const engagementZonePoint = this.getPointAheadOnMidtrack(foremost, 6.1);
 
+		// Create a dummy player at the engagement zone point to get proper inner/outer points
+		const dummyPlayer = {
+			x: engagementZonePoint.x,
+			y: engagementZonePoint.y,
+			innerPoint: { x: 0, y: 0 },
+			outerPoint: { x: 0, y: 0 }
+		} as Player;
+
+		// Calculate proper inner/outer points
+		this.updatePlayerCoordinates(dummyPlayer);
+
 		// Create a path from foremost player to engagement zone point
 		const packZones = this.getZonesBetweenPoints(
 			{ x: foremost.x, y: foremost.y },
 			engagementZonePoint
 		);
 
-		// Use existing pack zone creation logic for the engagement zone
-		return this.createPackZonePath(
-			foremost,
-			{
-				x: engagementZonePoint.x,
-				y: engagementZonePoint.y,
-				innerPoint: engagementZonePoint,
-				outerPoint: engagementZonePoint
-			} as Player,
-			packZones
-		);
+		return this.createPackZonePath(foremost, dummyPlayer, packZones);
 	}
 
 	getPointAheadOnMidtrack(startPoint: Player, distanceInMeters: number): Point {
