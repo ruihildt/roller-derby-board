@@ -39,9 +39,11 @@ export class PackZoneRenderer {
 
 			// Draw point with getPointAheadOnMidtrack
 
-			const pointToDraw = this.trackGeometry.getPointAheadOnMidtrack(foremost, 6.1);
+			const foremostPoint = this.trackGeometry.getPointAheadOnMidtrack(foremost, 6.1);
+			const rearmostPoint = this.trackGeometry.getPointBehindOnMidtrack(rearmost, 6.1);
 			this.ctx.fillStyle = 'rgba(255, 0, 0, 1)'; // Red
-			this.ctx.fillRect(pointToDraw.x - 5, pointToDraw.y - 5, 10, 10);
+			this.ctx.fillRect(foremostPoint.x - 5, foremostPoint.y - 5, 10, 10);
+			this.ctx.fillRect(rearmostPoint.x - 5, rearmostPoint.y - 5, 10, 10);
 
 			// Draw engagement zone (20ft behind and ahead of the pack)
 			const engagementZonePath = this.trackGeometry.createEngagementZonePath(rearmost, foremost);

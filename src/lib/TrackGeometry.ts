@@ -369,6 +369,109 @@ export class TrackGeometry {
 		return this.createPackZonePath(foremost, dummyPlayer, packZones);
 	}
 
+	getPointBehindOnMidtrack(startPoint: Player, distanceInMeters: number): Point {
+		const distanceInPixels = distanceInMeters * this.PIXELS_PER_METER;
+		const zone = this.determineZone(startPoint.x, startPoint.y);
+
+		if (zone === 1 || zone === 3) {
+			const isZone1 = zone === 1;
+			const { innerStart, outerStart, innerEnd, outerEnd } = this.zones[zone];
+			const straightStart = isZone1 ? innerStart.x : innerStart.x;
+			const distanceToStart = Math.abs(startPoint.x - straightStart);
+
+			if (distanceInPixels > distanceToStart) {
+				const remainingDistance = distanceInPixels - distanceToStart;
+				const centerPoint = isZone1
+					? {
+							x: this.zones[4].centerOuter.x,
+							y: (this.zones[4].centerInner.y + this.zones[4].centerOuter.y) / 2
+						}
+					: {
+							x: this.zones[2].centerOuter.x,
+							y: (this.zones[2].centerInner.y + this.zones[2].centerOuter.y) / 2
+						};
+
+				const turnEnd = isZone1 ? this.zones[4].innerEnd : this.zones[2].innerEnd;
+				const turnEndOuter = isZone1 ? this.zones[4].outerEnd : this.zones[2].outerEnd;
+
+				const radius = Math.hypot(
+					turnEnd.x - centerPoint.x,
+					(turnEnd.y + turnEndOuter.y) / 2 - centerPoint.y
+				);
+
+				const angleChange = remainingDistance / radius;
+				const startAngle = Math.atan2(
+					(turnEnd.y + turnEndOuter.y) / 2 - centerPoint.y,
+					turnEnd.x - centerPoint.x
+				);
+				const newAngle = startAngle + angleChange;
+
+				return {
+					x: centerPoint.x + radius * Math.cos(newAngle),
+					y: centerPoint.y + radius * Math.sin(newAngle)
+				};
+			}
+
+			const midY = isZone1
+				? (innerStart.y + outerStart.y) / 2 +
+					((innerEnd.y + outerEnd.y) / 2 - (innerStart.y + outerStart.y) / 2) *
+						((startPoint.x - innerStart.x) / (innerEnd.x - innerStart.x))
+				: (innerStart.y + outerStart.y) / 2 +
+					((innerEnd.y + outerEnd.y) / 2 - (innerStart.y + outerStart.y) / 2) *
+						((startPoint.x - innerStart.x) / (innerEnd.x - innerStart.x));
+
+			const newX = isZone1 ? startPoint.x + distanceInPixels : startPoint.x - distanceInPixels;
+
+			return { x: newX, y: midY };
+		}
+
+		// Handle turns (zones 2 and 4)
+		const centerPoint = zone === 2 ? this.zones[2].centerOuter : this.zones[4].centerOuter;
+
+		const startPointOnMidtrack = {
+			x: (startPoint.innerPoint.x + startPoint.outerPoint.x) / 2,
+			y: (startPoint.innerPoint.y + startPoint.outerPoint.y) / 2
+		};
+
+		const radius = Math.hypot(
+			startPointOnMidtrack.x - centerPoint.x,
+			startPointOnMidtrack.y - centerPoint.y
+		);
+
+		const currentAngle = Math.atan2(
+			startPointOnMidtrack.y - centerPoint.y,
+			startPointOnMidtrack.x - centerPoint.x
+		);
+
+		const prevZone = zone === 2 ? 1 : 3;
+		const turnStart = this.zones[prevZone].innerEnd;
+		const turnStartAngle = Math.atan2(turnStart.y - centerPoint.y, turnStart.x - centerPoint.x);
+
+		const angleDiff = zone === 2 ? currentAngle - turnStartAngle : turnStartAngle - currentAngle;
+		const distanceToTurnStart = Math.abs(angleDiff * radius);
+
+		if (distanceToTurnStart < distanceInPixels) {
+			// Project on the previous straight
+			const remainingDistance = distanceInPixels - distanceToTurnStart;
+			const straightZone = this.zones[prevZone];
+			const midY = (straightZone.innerEnd.y + straightZone.outerEnd.y) / 2;
+			const newX =
+				zone === 2
+					? straightZone.innerEnd.x + remainingDistance
+					: straightZone.innerEnd.x - remainingDistance;
+
+			return { x: newX, y: midY };
+		}
+
+		const angleChange = distanceInPixels / radius;
+		const newAngle = currentAngle + angleChange;
+
+		return {
+			x: centerPoint.x + radius * Math.cos(newAngle),
+			y: centerPoint.y + radius * Math.sin(newAngle)
+		};
+	}
+
 	getPointAheadOnMidtrack(startPoint: Player, distanceInMeters: number): Point {
 		const distanceInPixels = distanceInMeters * this.PIXELS_PER_METER;
 		const zone = this.determineZone(startPoint.x, startPoint.y);
