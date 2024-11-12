@@ -263,125 +263,87 @@ export class TrackGeometry {
 		return true;
 	}
 
-	isPlayerInStraight1(player: Player): boolean {
-		return this.ctx.isPointInPath(this.straight1Area, player.x, player.y);
-	}
-
-	isPlayerInStraight2(player: Player): boolean {
-		return this.ctx.isPointInPath(this.straight2Area, player.x, player.y);
-	}
-
-	isPlayerInTurn1(player: Player): boolean {
-		return this.ctx.isPointInPath(this.turn1Area, player.x, player.y);
-	}
-	isPlayerInTurn2(player: Player): boolean {
-		return this.ctx.isPointInPath(this.turn2Area, player.x, player.y);
-	}
-
 	updatePlayerZone(player: Player): void {
-		const isInZone1 = this.isPlayerInStraight1(player);
-		const isInZone2 = this.isPlayerInTurn1(player);
-		const isInZone3 = this.isPlayerInStraight2(player);
-		const isInZone4 = this.isPlayerInTurn2(player);
-
-		if (isInZone1) {
-			player.zone = 1;
-		} else if (isInZone2) {
-			player.zone = 2;
-		} else if (isInZone3) {
-			player.zone = 3;
-		} else if (isInZone4) {
-			player.zone = 4;
-		} else {
-			player.zone = 0; // Outside track
-		}
-		// console.log(player.role + ' is in ' + player.zone);
+		player.zone = this.determineZone(player.x, player.y);
 	}
 
-	createPackZonePath(rearmost: Player, foremost: Player, packZones: number[]): Path2D {
+	createPackZonePath(rearmost: Player, foremost: Player): Path2D {
+		const zoneSequence = this.determineZoneSequence(
+			{ x: rearmost.x, y: rearmost.y },
+			{ x: foremost.x, y: foremost.y }
+		);
+		return this.createZonePath(rearmost, foremost, zoneSequence);
+	}
+
+	createEngagementZonePath(rearmost: Player, foremost: Player): Path2D {
+		const points = this.calculateEngagementZonePoints(rearmost, foremost);
+		const zoneSequence = this.determineZoneSequence(points.backward, points.forward);
+		return this.createZonePath(
+			this.createDummyPlayer(points.backward),
+			this.createDummyPlayer(points.forward),
+			zoneSequence
+		);
+	}
+
+	private createZonePath(start: Player, end: Player, zones: number[]): Path2D {
 		const path = new Path2D();
 
-		// Handle each zone sequentially
-		packZones.forEach((zone, index) => {
+		zones.forEach((zone, index) => {
 			const isFirstZone = index === 0;
-			const isLastZone = index === packZones.length - 1;
-
-			// Cast zone to the appropriate type based on whether it's odd or even
+			const isLastZone = index === zones.length - 1;
 			const zoneKey = zone % 2 === 1 ? (zone as StraightKey) : (zone as TurnKey);
 
-			// Determine start and end points for this zone segment
 			const startPoints = isFirstZone
-				? { inner: rearmost.innerPoint, outer: rearmost.outerPoint }
+				? { inner: start.innerPoint, outer: start.outerPoint }
 				: { inner: this.zones[zoneKey].innerStart, outer: this.zones[zoneKey].outerStart };
 
-			// Inside createPackZonePath method, modify the endPoints determination:
 			const endPoints = isLastZone
-				? { inner: foremost.innerPoint, outer: foremost.outerPoint }
+				? { inner: end.innerPoint, outer: end.outerPoint }
 				: { inner: this.zones[zoneKey].innerEnd, outer: this.zones[zoneKey].outerEnd };
 
-			// Create zone segment based on zone type
-			if (zone % 2 === 1) {
-				// Straight zone
-				const straightZone = this.createStraightSegment(
-					startPoints.inner,
-					startPoints.outer,
-					endPoints.inner,
-					endPoints.outer
-				);
-				path.addPath(straightZone);
-			} else {
-				// Turn zone
-				const turnZone = this.createTurnSegment(
-					startPoints.inner,
-					startPoints.outer,
-					endPoints.inner,
-					endPoints.outer,
-					zone as TurnKey
-				);
-				path.addPath(turnZone);
-			}
+			const zonePath =
+				zone % 2 === 1
+					? this.createStraightSegment(
+							startPoints.inner,
+							startPoints.outer,
+							endPoints.inner,
+							endPoints.outer
+						)
+					: this.createTurnSegment(
+							startPoints.inner,
+							startPoints.outer,
+							endPoints.inner,
+							endPoints.outer,
+							zone as TurnKey
+						);
+
+			path.addPath(zonePath);
 		});
 
 		return path;
 	}
 
-	createEngagementZonePath(rearmost: Player, foremost: Player, packZones: number[]): Path2D {
-		const path = new Path2D();
+	private determineZoneSequence(startPoint: Point, endPoint: Point): number[] {
+		const startZone = this.determineZone(startPoint.x, startPoint.y);
+		const endZone = this.determineZone(endPoint.x, endPoint.y);
+		const zones = new Set<number>();
+		let currentZone = startZone;
 
-		// Get points 6.1 meters ahead and behind
-		const forwardPoint = this.getPointAheadOnMidtrack(foremost, 6.1);
-		const backwardPoint = this.getPointBehindOnMidtrack(rearmost, 6.1);
+		while (currentZone !== endZone) {
+			zones.add(currentZone);
+			currentZone = (currentZone % 4) + 1;
+		}
+		zones.add(endZone);
 
-		// Create dummy players at both engagement zone points
-		const forwardDummy = {
-			x: forwardPoint.x,
-			y: forwardPoint.y,
-			innerPoint: { x: 0, y: 0 },
-			outerPoint: { x: 0, y: 0 }
-		} as Player;
+		return Array.from(zones);
+	}
 
-		const backwardDummy = {
-			x: backwardPoint.x,
-			y: backwardPoint.y,
-			innerPoint: { x: 0, y: 0 },
-			outerPoint: { x: 0, y: 0 }
-		} as Player;
-
-		// Calculate proper inner/outer points for both dummies
-		this.updatePlayerCoordinates(forwardDummy);
-		this.updatePlayerCoordinates(backwardDummy);
-
-		// Create a single continuous path from backward point to forward point
-		const engagementZones = [
-			...new Set([
-				this.determineZone(backwardPoint.x, backwardPoint.y),
-				...packZones,
-				this.determineZone(forwardPoint.x, forwardPoint.y)
-			])
-		];
-		path.addPath(this.createPackZonePath(backwardDummy, forwardDummy, engagementZones));
-
-		return path;
+	private calculateEngagementZonePoints(rearmost: Player, foremost: Player) {
+		const ENGAGEMENT_ZONE_METERS = 6.1;
+		return {
+			forward: this.getPointAheadOnMidtrack(foremost, ENGAGEMENT_ZONE_METERS),
+			backward: this.getPointBehindOnMidtrack(rearmost, ENGAGEMENT_ZONE_METERS)
+		};
 	}
 
 	getPointBehindOnMidtrack(startPoint: Player, distanceInMeters: number): Point {
@@ -587,6 +549,17 @@ export class TrackGeometry {
 				: straightZone.innerStart.x - remainingDistance;
 
 		return { x: newX, y: midY };
+	}
+
+	private createDummyPlayer(point: Point): Player {
+		const dummy = {
+			x: point.x,
+			y: point.y,
+			innerPoint: { x: 0, y: 0 },
+			outerPoint: { x: 0, y: 0 }
+		} as Player;
+		this.updatePlayerCoordinates(dummy);
+		return dummy;
 	}
 
 	private determineZone(x: number, y: number): number {
