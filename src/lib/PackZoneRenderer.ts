@@ -37,6 +37,20 @@ export class PackZoneRenderer {
 			this.ctx.fillStyle = 'rgba(255, 192, 203, 0.8)'; // Pink with transparency
 			this.ctx.fill(path, 'evenodd');
 
+			// Draw point with getPointAheadOnMidtrack
+
+			const pointToDraw = this.trackGeometry.getPointAheadOnMidtrack(
+				{ x: foremost.x, y: foremost.y },
+				6.1
+			);
+			this.ctx.fillStyle = 'rgba(255, 0, 0, 1)'; // Red
+			this.ctx.fillRect(pointToDraw.x - 5, pointToDraw.y - 5, 10, 10);
+
+			// // Draw engagement zone (20ft behind and ahead of the pack)
+			// const engagementZonePath = this.trackGeometry.createEngagementZonePath(rearmost, foremost);
+			// this.ctx.fillStyle = 'rgba(144, 238, 144, 0.3)'; // Light green with transparency
+			// this.ctx.fill(engagementZonePath, 'evenodd');
+
 			// console.log('Pack zone updated');
 		}
 	}

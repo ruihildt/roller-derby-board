@@ -1,5 +1,5 @@
 import type { Point } from './types';
-import type { Player } from './Player';
+import { Player } from './Player';
 
 type StraightKey = 1 | 3;
 type TurnKey = 2 | 4;
@@ -343,6 +343,146 @@ export class TrackGeometry {
 		});
 
 		return path;
+	}
+
+	createEngagementZonePath(rearmost: Player, foremost: Player): Path2D {
+		// Get the point 6.1 meters ahead on the midtrack
+		const engagementZonePoint = this.getPointAheadOnMidtrack({ x: foremost.x, y: foremost.y }, 6.1);
+
+		// Create a path from foremost player to engagement zone point
+		const packZones = this.getZonesBetweenPoints(
+			{ x: foremost.x, y: foremost.y },
+			engagementZonePoint
+		);
+
+		// Use existing pack zone creation logic for the engagement zone
+		return this.createPackZonePath(
+			foremost,
+			{
+				x: engagementZonePoint.x,
+				y: engagementZonePoint.y,
+				innerPoint: engagementZonePoint,
+				outerPoint: engagementZonePoint
+			} as Player,
+			packZones
+		);
+	}
+
+	getPointAheadOnMidtrack(startPoint: Point, distanceInMeters: number): Point {
+		const distanceInPixels = distanceInMeters * this.PIXELS_PER_METER;
+		const zone = this.determineZone(startPoint.x, startPoint.y);
+
+		if (zone === 1 || zone === 3) {
+			const isZone1 = zone === 1;
+			const { innerStart, outerStart, innerEnd, outerEnd } = this.zones[zone];
+			const straightEnd = isZone1 ? innerEnd.x : innerEnd.x;
+			const distanceToEnd = Math.abs(straightEnd - startPoint.x);
+
+			if (distanceInPixels > distanceToEnd) {
+				const remainingDistance = distanceInPixels - distanceToEnd;
+				const centerPoint = isZone1
+					? {
+							x: this.zones[2].centerOuter.x,
+							y: (this.zones[2].centerInner.y + this.zones[2].centerOuter.y) / 2
+						}
+					: {
+							x: this.zones[4].centerOuter.x,
+							y: (this.zones[4].centerInner.y + this.zones[4].centerOuter.y) / 2
+						};
+
+				const radius = Math.hypot(
+					straightEnd - centerPoint.x,
+					((isZone1 ? innerEnd.y : innerEnd.y) + (isZone1 ? outerEnd.y : outerEnd.y)) / 2 -
+						centerPoint.y
+				);
+
+				const angleChange = remainingDistance / radius;
+				const startAngle = isZone1 ? -Math.PI / 2 : Math.PI / 2;
+				const newAngle = isZone1 ? startAngle - angleChange : startAngle - angleChange; // Changed to minus for both cases
+
+				return {
+					x: centerPoint.x + radius * Math.cos(newAngle),
+					y: centerPoint.y + radius * Math.sin(newAngle)
+				};
+			}
+
+			const midY = isZone1
+				? (innerStart.y + outerStart.y) / 2 +
+					((innerEnd.y + outerEnd.y) / 2 - (innerStart.y + outerStart.y) / 2) *
+						((startPoint.x - innerStart.x) / (innerEnd.x - innerStart.x))
+				: (innerStart.y + outerStart.y) / 2 +
+					((innerEnd.y + outerEnd.y) / 2 - (innerStart.y + outerStart.y) / 2) *
+						((startPoint.x - innerStart.x) / (innerEnd.x - innerStart.x));
+
+			const newX = isZone1 ? startPoint.x - distanceInPixels : startPoint.x + distanceInPixels;
+
+			return { x: newX, y: midY };
+		}
+
+		// Handle turns (zones 2 and 4)
+		const centerPoint = zone === 2 ? this.zones[2].centerOuter : this.zones[4].centerOuter;
+		const radius = Math.hypot(startPoint.x - centerPoint.x, startPoint.y - centerPoint.y);
+		const currentAngle = Math.atan2(startPoint.y - centerPoint.y, startPoint.x - centerPoint.x);
+
+		// Calculate angular distance to turn end
+		const nextZone = zone === 2 ? 3 : 1;
+		const turnEnd = this.zones[nextZone].innerStart;
+		const turnEndAngle = Math.atan2(turnEnd.y - centerPoint.y, turnEnd.x - centerPoint.x);
+
+		// Calculate distance to turn end along arc
+		const angleDiff = zone === 2 ? turnEndAngle - currentAngle : currentAngle - turnEndAngle;
+		const distanceToTurnEnd = Math.abs(angleDiff * radius);
+
+		// If distance to end is greater than requested distance, stay in turn
+		if (distanceToTurnEnd >= distanceInPixels) {
+			const angleChange = distanceInPixels / radius;
+			const newAngle = zone === 2 ? currentAngle - angleChange : currentAngle - angleChange; // Changed to minus for both cases
+
+			return {
+				x: centerPoint.x + radius * Math.cos(newAngle),
+				y: centerPoint.y + radius * Math.sin(newAngle)
+			};
+		}
+
+		// Project remaining distance into next straight
+		const remainingDistance = distanceInPixels - distanceToTurnEnd;
+		const straightZone = this.zones[nextZone];
+		const midY = (straightZone.innerStart.y + straightZone.outerStart.y) / 2;
+		const newX =
+			zone === 2
+				? straightZone.innerStart.x + remainingDistance
+				: straightZone.innerStart.x - remainingDistance;
+
+		return { x: newX, y: midY };
+	}
+
+	private getZonesBetweenPoints(start: Point, end: Point): number[] {
+		const zones: number[] = [];
+		const startZone = this.determineZone(start.x, start.y);
+		const endZone = this.determineZone(end.x, end.y);
+
+		if (startZone === endZone) {
+			zones.push(startZone);
+			return zones;
+		}
+
+		let currentZone = startZone;
+		zones.push(currentZone);
+
+		while (currentZone !== endZone) {
+			currentZone = currentZone === 4 ? 1 : currentZone + 1;
+			zones.push(currentZone);
+		}
+
+		return zones;
+	}
+
+	private determineZone(x: number, y: number): number {
+		if (this.ctx.isPointInPath(this.straight1Area, x, y)) return 1;
+		if (this.ctx.isPointInPath(this.turn1Area, x, y)) return 2;
+		if (this.ctx.isPointInPath(this.straight2Area, x, y)) return 3;
+		if (this.ctx.isPointInPath(this.turn2Area, x, y)) return 4;
+		return 0;
 	}
 
 	private createStraightSegment(
