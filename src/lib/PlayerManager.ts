@@ -207,6 +207,56 @@ export class PlayerManager {
 		throw new Error('Could not find a valid position for the jammer after maximum attempts');
 	}
 
+	checkCollision(player1: Player, player2: Player): boolean {
+		const dx = player2.x - player1.x;
+		const dy = player2.y - player1.y;
+		const distance = Math.sqrt(dx * dx + dy * dy);
+		const collisionThreshold = player1.radius + player2.radius;
+		return distance < collisionThreshold;
+	}
+
+	handlePush(pusher: Player, target: Player): void {
+		const dx = target.x - pusher.x;
+		const dy = target.y - pusher.y;
+		const distance = Math.sqrt(dx * dx + dy * dy);
+
+		const dirX = dx / distance;
+		const dirY = dy / distance;
+
+		const pushForce = 1;
+
+		target.x = pusher.x + dirX * (pusher.radius + target.radius + pushForce);
+		target.y = pusher.y + dirY * (pusher.radius + target.radius + pushForce);
+
+		target.inBounds = this.trackGeometry.isPlayerInBounds(target);
+		this.trackGeometry.updatePlayerZone(target);
+		this.trackGeometry.updatePlayerCoordinates(target);
+	}
+
+	handleMouseMove(event: MouseEvent): void {
+		const player = this.selectedPlayer;
+		if (player && player.isDragging) {
+			const rect = this.canvas.getBoundingClientRect();
+			const x = event.clientX - rect.left;
+			const y = event.clientY - rect.top;
+
+			player.x = x - player.dragOffsetX;
+			player.y = y - player.dragOffsetY;
+
+			// Check collisions with other players
+			this.players.forEach((otherPlayer) => {
+				if (otherPlayer !== player && this.checkCollision(player, otherPlayer)) {
+					this.handlePush(player, otherPlayer);
+				}
+			});
+
+			player.inBounds = this.trackGeometry.isPlayerInBounds(player);
+			this.trackGeometry.updatePlayerZone(player);
+			this.trackGeometry.updatePlayerCoordinates(player);
+			this.packManager.updatePlayers(this.players);
+		}
+	}
+
 	handleMouseDown(event: MouseEvent): void {
 		const rect = this.canvas.getBoundingClientRect();
 		const x = event.clientX - rect.left;
@@ -220,21 +270,6 @@ export class PlayerManager {
 				player.dragOffsetY = y - player.y;
 				break;
 			}
-		}
-	}
-
-	handleMouseMove(event: MouseEvent): void {
-		if (this.selectedPlayer && this.selectedPlayer.isDragging) {
-			const rect = this.canvas.getBoundingClientRect();
-			const x = event.clientX - rect.left;
-			const y = event.clientY - rect.top;
-
-			this.selectedPlayer.x = x - this.selectedPlayer.dragOffsetX;
-			this.selectedPlayer.y = y - this.selectedPlayer.dragOffsetY;
-			this.selectedPlayer.inBounds = this.trackGeometry.isPlayerInBounds(this.selectedPlayer);
-			this.trackGeometry.updatePlayerZone(this.selectedPlayer);
-			this.trackGeometry.updatePlayerCoordinates(this.selectedPlayer);
-			this.packManager.updatePlayers(this.players);
 		}
 	}
 
