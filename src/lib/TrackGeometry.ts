@@ -231,13 +231,24 @@ export class TrackGeometry {
 
 	create10FeetLines(): Path2D {
 		const path = new Path2D();
+
+		path.addPath(this.drawStraight1TenFeetLines());
+		path.addPath(this.drawStraight2TenFeetLines());
+		path.addPath(this.drawTurn1TenFeetLines());
+		path.addPath(this.drawTurn2TenFeetLines());
+
+		return path;
+	}
+
+	drawStraight1TenFeetLines(): Path2D {
+		const path = new Path2D();
 		const p = this.points;
 
 		// Calculate distances in pixels
 		const tenFeet = 3.05 * this.PIXELS_PER_METER;
 		const twentyFeet = 6.1 * this.PIXELS_PER_METER;
 		const thirtyFeet = 9.15 * this.PIXELS_PER_METER;
-		const lineLength = 1.6 * this.PIXELS_PER_METER;
+		const lineLength = 0.8 * this.PIXELS_PER_METER;
 
 		// Create a dummy player to use updatePlayerCoordinates
 		const dummyPlayer = {
@@ -262,15 +273,70 @@ export class TrackGeometry {
 			);
 
 			// Draw line centered on midpoint
-			path.moveTo(
-				midX - (lineLength / 2) * Math.cos(angle),
-				midY - (lineLength / 2) * Math.sin(angle)
-			);
-			path.lineTo(
-				midX + (lineLength / 2) * Math.cos(angle),
-				midY + (lineLength / 2) * Math.sin(angle)
-			);
+			path.moveTo(midX - lineLength * Math.cos(angle), midY - lineLength * Math.sin(angle));
+			path.lineTo(midX + lineLength * Math.cos(angle), midY + lineLength * Math.sin(angle));
 		});
+
+		return path;
+	}
+
+	drawStraight2TenFeetLines(): Path2D {
+		const path = new Path2D();
+
+		return path;
+	}
+
+	drawTurn1TenFeetLines(): Path2D {
+		const path = new Path2D();
+		const p = this.points;
+
+		// Convert measurements to pixels
+		const segmentLength = 2.15 * this.PIXELS_PER_METER; // 7 feet ½ inch = 2.15 meters
+		const lineLength = 0.8 * this.PIXELS_PER_METER;
+
+		// Calculate and draw E1 through E5 points and their circles
+		const radiusEF = Math.hypot(p.E.x - p.B.x, p.E.y - p.B.y);
+		let currentAngle = Math.atan2(p.E.y - p.B.y, p.E.x - p.B.x);
+
+		const points = [];
+		for (let i = 1; i <= 5; i++) {
+			const point = {
+				x: p.B.x + radiusEF * Math.cos(currentAngle - segmentLength / radiusEF),
+				y: p.B.y + radiusEF * Math.sin(currentAngle - segmentLength / radiusEF)
+			};
+			points.push(point);
+
+			// Create dummy player at current point to find midtrack intersection
+			const dummyPlayer = {
+				x: point.x,
+				y: point.y,
+				innerPoint: { x: 0, y: 0 },
+				outerPoint: { x: 0, y: 0 }
+			} as Player;
+			this.updatePlayerCoordinates(dummyPlayer);
+
+			// Calculate midtrack intersection point
+			const midX = (dummyPlayer.innerPoint.x + dummyPlayer.outerPoint.x) / 2;
+			const midY = (dummyPlayer.innerPoint.y + dummyPlayer.outerPoint.y) / 2;
+
+			// Draw segment of lineLength from midtrack point
+			const angle = Math.atan2(
+				dummyPlayer.outerPoint.y - dummyPlayer.innerPoint.y,
+				dummyPlayer.outerPoint.x - dummyPlayer.innerPoint.x
+			);
+			path.moveTo(midX - lineLength * Math.cos(angle), midY - lineLength * Math.sin(angle));
+			path.lineTo(midX + lineLength * Math.cos(angle), midY + lineLength * Math.sin(angle));
+
+			currentAngle = Math.atan2(point.y - p.B.y, point.x - p.B.x);
+		}
+		// TODO according to the track guide, the final segment will measure slightly more than 2.15 meters
+		// Since there is nor precise indication, I have not implemented its
+		// Source: https://static.wftda.com/resources/wftda-regulation-track-layout-guide.pdf
+		return path;
+	}
+
+	drawTurn2TenFeetLines(): Path2D {
+		const path = new Path2D();
 
 		return path;
 	}
