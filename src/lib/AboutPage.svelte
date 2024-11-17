@@ -11,16 +11,24 @@
 					showAbout = false;
 				}}>×</button
 			>
-			<h1>About Roller Derby Strategy Board</h1>
+			<h1>🛼 Roller Derby Strategy Board</h1>
 			<p>
 				An interactive web application for real-time recording of roller derby strategies through
 				your browser.
 			</p>
 
 			<p>
+				You can find more details about the project and the source code <a
+					href="https://github.com/ruihildt/roller-derby-strategy"
+					target="_blank">on GitHub</a
+				>
+				for more details about this project.
+			</p>
+
+			<p>
 				For feedback or suggestions, please <a
 					href="https://github.com/ruihildt/roller-derby-strategy/issues"
-					target="_blank">open an issue on GitHub</a
+					target="_blank">open an issue</a
 				>
 				or <a href="mailto:ruihildt@protonmail.com">email me</a>.
 			</p>
@@ -75,6 +83,10 @@
 		max-height: 80%;
 		overflow-y: auto;
 		position: relative;
+		font-family:
+			system-ui,
+			-apple-system,
+			sans-serif;
 	}
 
 	.close-button {
