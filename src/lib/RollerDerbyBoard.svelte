@@ -3,6 +3,7 @@
 	import { Game } from '$lib/Game';
 	import { calculateCanvasSize } from '$lib/utils';
 	import RecordingControls from '$lib/RecordingControls.svelte';
+	import AboutPage from '$lib/AboutPage.svelte';
 
 	let container: HTMLDivElement;
 	let canvas: HTMLCanvasElement;
@@ -39,6 +40,7 @@
 <div bind:this={container} class="container">
 	<canvas bind:this={canvas}></canvas>
 	<canvas bind:this={highResCanvas} style="display: none;"></canvas>
+	<AboutPage />
 	<RecordingControls {highResCanvas} />
 </div>
 
