@@ -21,6 +21,7 @@ export class Renderer {
 	turn2Area: Path2D;
 	trackSurface: Path2D;
 	midTrackPath: Path2D;
+	tenFeetLines: Path2D;
 	constructor(
 		canvas: HTMLCanvasElement,
 		ctx: CanvasRenderingContext2D,
@@ -49,6 +50,7 @@ export class Renderer {
 		this.turn2Area = this.trackGeometry.turn2Area;
 		this.trackSurface = this.trackGeometry.trackSurface;
 		this.midTrackPath = this.trackGeometry.midTrackPath;
+		this.tenFeetLines = this.trackGeometry.tenFeetLines;
 	}
 
 	draw(): void {
@@ -93,6 +95,11 @@ export class Renderer {
 		// Draw pivot and jammer lines
 		this.drawPivotLine(ctx);
 		this.drawJammerLine(ctx);
+
+		// Draw the 10-foot lines
+		ctx.strokeStyle = 'black';
+		ctx.lineWidth = 3;
+		ctx.stroke(this.tenFeetLines);
 	}
 
 	drawPivotLine(ctx: CanvasRenderingContext2D): void {

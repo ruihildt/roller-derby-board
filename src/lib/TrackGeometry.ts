@@ -51,6 +51,7 @@ export class TrackGeometry {
 	midTrackPath: Path2D;
 	pivotLinePath: Path2D;
 	jammerLinePath: Path2D;
+	tenFeetLines: Path2D;
 
 	constructor(
 		canvas: HTMLCanvasElement,
@@ -103,6 +104,7 @@ export class TrackGeometry {
 		this.midTrackPath = this.createMidTrackPath();
 		this.pivotLinePath = this.createPivotLinePath();
 		this.jammerLinePath = this.createJammerLinePath();
+		this.tenFeetLines = this.create10FeetLines();
 	}
 
 	createInnerTrackPath(): Path2D {
@@ -223,6 +225,52 @@ export class TrackGeometry {
 
 		path.moveTo(p.K.x, p.K.y);
 		path.lineTo(p.E.x, p.E.y);
+
+		return path;
+	}
+
+	create10FeetLines(): Path2D {
+		const path = new Path2D();
+		const p = this.points;
+
+		// Calculate distances in pixels
+		const tenFeet = 3.05 * this.PIXELS_PER_METER;
+		const twentyFeet = 6.1 * this.PIXELS_PER_METER;
+		const thirtyFeet = 9.15 * this.PIXELS_PER_METER;
+		const lineLength = 1.6 * this.PIXELS_PER_METER;
+
+		// Create a dummy player to use updatePlayerCoordinates
+		const dummyPlayer = {
+			x: p.D.x,
+			y: (p.D.y + p.J.y) / 2,
+			innerPoint: { x: 0, y: 0 },
+			outerPoint: { x: 0, y: 0 }
+		} as Player;
+
+		[0, tenFeet, twentyFeet, thirtyFeet].forEach((distance) => {
+			dummyPlayer.x = p.D.x - distance;
+			this.updatePlayerCoordinates(dummyPlayer);
+
+			// Calculate the midpoint between inner and outer points
+			const midX = (dummyPlayer.innerPoint.x + dummyPlayer.outerPoint.x) / 2;
+			const midY = (dummyPlayer.innerPoint.y + dummyPlayer.outerPoint.y) / 2;
+
+			// Calculate the angle of the perpendicular line
+			const angle = Math.atan2(
+				dummyPlayer.outerPoint.y - dummyPlayer.innerPoint.y,
+				dummyPlayer.outerPoint.x - dummyPlayer.innerPoint.x
+			);
+
+			// Draw line centered on midpoint
+			path.moveTo(
+				midX - (lineLength / 2) * Math.cos(angle),
+				midY - (lineLength / 2) * Math.sin(angle)
+			);
+			path.lineTo(
+				midX + (lineLength / 2) * Math.cos(angle),
+				midY + (lineLength / 2) * Math.sin(angle)
+			);
+		});
 
 		return path;
 	}
