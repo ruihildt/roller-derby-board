@@ -98,7 +98,7 @@ export class Renderer {
 
 		// Draw the 10-foot lines
 		ctx.strokeStyle = 'black';
-		ctx.lineWidth = 1;
+		ctx.lineWidth = this.LINE_WIDTH / 2;
 		ctx.stroke(this.tenFeetLines);
 	}
 

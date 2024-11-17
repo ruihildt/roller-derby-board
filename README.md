@@ -13,11 +13,11 @@ What we have so far:
 - out of bounds detection
 - pack definition
 - engagement zone
+- 10 feet lines
 
 What's missing to cover the basics:
 
 - player status based on zones
-- 10 feet lines
 - physics and collision detection
 - improve the design
 - record without audio / save as gif

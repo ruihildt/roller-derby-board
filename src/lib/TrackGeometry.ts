@@ -39,12 +39,14 @@ export class TrackGeometry {
 	ctx: CanvasRenderingContext2D;
 	points: Record<string, Point>;
 	zones: Zones;
+	jammerLinePoints: Record<string, Point>;
 	PIXELS_PER_METER: number;
 
 	straight1Area: Path2D;
 	straight2Area: Path2D;
 	turn1Area: Path2D;
 	turn2Area: Path2D;
+	startZone: Path2D;
 	innerTrackPath: Path2D;
 	outerTrackPath: Path2D;
 	trackSurface: Path2D;
@@ -93,11 +95,13 @@ export class TrackGeometry {
 				centerOuter: { x: points.G.x, y: points.G.y }
 			}
 		};
+		this.jammerLinePoints = this.createJammerLinePoints();
 
 		this.straight1Area = this.createStraightPath(1);
 		this.straight2Area = this.createStraightPath(3);
 		this.turn1Area = this.createTurnPath(2);
 		this.turn2Area = this.createTurnPath(4);
+		this.startZone = this.createStartZonePath();
 		this.innerTrackPath = this.createInnerTrackPath();
 		this.outerTrackPath = this.createOuterTrackPath();
 		this.trackSurface = this.createTrackSurfacePath();
@@ -196,7 +200,6 @@ export class TrackGeometry {
 		const midYStartTop = (p.C.y + p.I.y) / 2;
 		const midYEndTop = (p.E.y + p.K.y) / 2;
 		const midYStartBottom = (p.D.y + p.J.y) / 2;
-		// const midYEndBottom = (p.F.y + p.L.y) / 2;
 		const midRadiusTop = (Math.abs(p.C.y - p.A.y) + Math.abs(p.I.y - p.G.y)) / 2;
 		const midRadiusBottom = (Math.abs(p.D.y - p.A.y) + Math.abs(p.J.y - p.G.y)) / 2;
 
@@ -209,17 +212,87 @@ export class TrackGeometry {
 		return path;
 	}
 
-	createPivotLinePath(): Path2D {
+	createStartZonePath(): Path2D {
 		const path = new Path2D();
 		const p = this.points;
+		const { innerPoint: jammerInner, outerPoint: jammerOuter } = this.jammerLinePoints;
 
-		path.moveTo(p.I.x, p.I.y);
-		path.lineTo(p.C.x, p.C.y);
+		// Create path from jammer line to pivot line
+		path.moveTo(jammerInner.x, jammerInner.y);
+		path.lineTo(jammerOuter.x, jammerOuter.y);
+		path.lineTo(p.K.x, p.K.y);
+		path.lineTo(p.E.x, p.E.y);
+		path.closePath();
 
 		return path;
 	}
 
+	createJammerStartZone(): Path2D {
+		// Get jammer line points
+		const { innerPoint: jammerInner, outerPoint: jammerOuter } = this.jammerLinePoints;
+
+		// Calculate points 3 meters behind jammer line
+		const backDistance = 3 * this.PIXELS_PER_METER;
+		const angle =
+			Math.atan2(jammerOuter.y - jammerInner.y, jammerOuter.x - jammerInner.x) + Math.PI / 2;
+
+		const backInner = {
+			x: jammerInner.x + backDistance * Math.cos(angle),
+			y: jammerInner.y + backDistance * Math.sin(angle)
+		};
+
+		const backOuter = {
+			x: jammerOuter.x + backDistance * Math.cos(angle),
+			y: jammerOuter.y + backDistance * Math.sin(angle)
+		};
+
+		// Create jammer start zone path
+		const jammerStartZone = new Path2D();
+		jammerStartZone.moveTo(jammerInner.x, jammerInner.y);
+		jammerStartZone.lineTo(jammerOuter.x, jammerOuter.y);
+		jammerStartZone.lineTo(backOuter.x, backOuter.y);
+		jammerStartZone.lineTo(backInner.x, backInner.y);
+		jammerStartZone.closePath();
+
+		return jammerStartZone;
+	}
+
 	createJammerLinePath(): Path2D {
+		const path = new Path2D();
+		const { innerPoint, outerPoint } = this.jammerLinePoints;
+
+		// Draw the full jammer line from inner to outer track
+		path.moveTo(innerPoint.x, innerPoint.y);
+		path.lineTo(outerPoint.x, outerPoint.y);
+
+		return path;
+	}
+
+	createJammerLinePoints(): { innerPoint: Point; outerPoint: Point } {
+		const p = this.points;
+
+		// Calculate thirty feet in pixels
+		const thirtyFeet = 9.15 * this.PIXELS_PER_METER;
+
+		// Create a dummy player at the pivot line
+		const dummyPlayer = {
+			x: p.K.x,
+			y: (p.K.y + p.E.y) / 2,
+			innerPoint: { x: 0, y: 0 },
+			outerPoint: { x: 0, y: 0 }
+		} as Player;
+
+		// Move dummy player thirty feet forward
+		dummyPlayer.x = p.K.x + thirtyFeet;
+		this.updatePlayerCoordinates(dummyPlayer);
+
+		return {
+			innerPoint: { x: dummyPlayer.innerPoint.x, y: dummyPlayer.innerPoint.y },
+			outerPoint: { x: dummyPlayer.outerPoint.x, y: dummyPlayer.outerPoint.y }
+		};
+	}
+
+	createPivotLinePath(): Path2D {
 		const path = new Path2D();
 		const p = this.points;
 
@@ -282,6 +355,40 @@ export class TrackGeometry {
 
 	drawStraight2TenFeetLines(): Path2D {
 		const path = new Path2D();
+		const p = this.points;
+
+		// Calculate distances in pixels
+		const tenFeet = 3.05 * this.PIXELS_PER_METER;
+		const twentyFeet = 6.1 * this.PIXELS_PER_METER;
+		const thirtyFeet = 9.15 * this.PIXELS_PER_METER;
+		const lineLength = 0.8 * this.PIXELS_PER_METER;
+
+		// Create a dummy player to use updatePlayerCoordinates
+		const dummyPlayer = {
+			x: p.E.x,
+			y: (p.E.y + p.K.y) / 2,
+			innerPoint: { x: 0, y: 0 },
+			outerPoint: { x: 0, y: 0 }
+		} as Player;
+
+		[0, tenFeet, twentyFeet, thirtyFeet].forEach((distance) => {
+			dummyPlayer.x = p.E.x + distance;
+			this.updatePlayerCoordinates(dummyPlayer);
+
+			// Calculate the midpoint between inner and outer points
+			const midX = (dummyPlayer.innerPoint.x + dummyPlayer.outerPoint.x) / 2;
+			const midY = (dummyPlayer.innerPoint.y + dummyPlayer.outerPoint.y) / 2;
+
+			// Calculate the angle of the perpendicular line
+			const angle = Math.atan2(
+				dummyPlayer.outerPoint.y - dummyPlayer.innerPoint.y,
+				dummyPlayer.outerPoint.x - dummyPlayer.innerPoint.x
+			);
+
+			// Draw line centered on midpoint
+			path.moveTo(midX - lineLength * Math.cos(angle), midY - lineLength * Math.sin(angle));
+			path.lineTo(midX + lineLength * Math.cos(angle), midY + lineLength * Math.sin(angle));
+		});
 
 		return path;
 	}

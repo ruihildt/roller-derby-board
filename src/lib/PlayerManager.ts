@@ -18,6 +18,7 @@ export class PlayerManager {
 	straight2Area: Path2D;
 	turn1Area: Path2D;
 	turn2Area: Path2D;
+	startZone: Path2D;
 	packManager: PackManager;
 
 	constructor(
@@ -40,6 +41,7 @@ export class PlayerManager {
 		this.straight2Area = renderer.straight2Area;
 		this.turn1Area = renderer.turn1Area;
 		this.turn2Area = renderer.turn2Area;
+		this.startZone = this.trackGeometry.startZone;
 
 		this.playerRadius = Math.max(0, Math.floor(this.canvas.width / 70));
 		this.packManager = new PackManager(PIXELS_PER_METER, points);
@@ -109,9 +111,9 @@ export class PlayerManager {
 		}
 
 		// Add jammers
-		const jammerPosA = this.getJammerLinePosition();
-		const jammerPosB = this.getJammerLinePosition();
+		const jammerPosA = this.getRandomJammerPosition();
 		this.players.push(new Player(jammerPosA.x, jammerPosA.y, 'A', 'jammer', this.playerRadius));
+		const jammerPosB = this.getRandomJammerPosition();
 		this.players.push(new Player(jammerPosB.x, jammerPosB.y, 'B', 'jammer', this.playerRadius));
 
 		this.players.forEach((player) => {
@@ -142,7 +144,7 @@ export class PlayerManager {
 			// Check if all points are inside the straight1Area and in bounds
 			const allPointsValid = pointsToCheck.every(
 				(point) =>
-					ctx.isPointInPath(this.straight1Area, point.x, point.y) &&
+					ctx.isPointInPath(this.startZone, point.x, point.y) &&
 					this.trackGeometry.isPlayerInBounds(
 						new Player(point.x, point.y, 'A', 'blocker', this.playerRadius)
 					)
@@ -163,46 +165,39 @@ export class PlayerManager {
 		throw new Error('Could not find a valid position for the blocker after maximum attempts');
 	}
 
-	getJammerLinePosition(): Point {
-		const JAMMER_LINE_OFFSET = -2 * this.PIXELS_PER_METER;
-		const { I, C } = this.points;
+	getRandomJammerPosition(): Point {
+		const ctx = this.ctx;
 		let attempts = 0;
-		const maxAttempts = 1000; // Adjust this value as needed
+		const maxAttempts = 1000;
+
+		const jammerStartZone = this.trackGeometry.createJammerStartZone();
 
 		while (attempts < maxAttempts) {
-			const t = Math.random();
-			const dx = C.x - I.x;
-			const dy = C.y - I.y;
-			const length = Math.sqrt(dx * dx + dy * dy);
-			const normalizedDx = dx / length;
-			const normalizedDy = dy / length;
-			const offsetX = -normalizedDy * JAMMER_LINE_OFFSET;
-			const offsetY = normalizedDx * JAMMER_LINE_OFFSET;
-			const x = I.x + t * (C.x - I.x) + offsetX;
-			const y = I.y + t * (C.y - I.y) + offsetY;
+			const x = Math.random() * this.canvas.width;
+			const y = Math.random() * this.canvas.height;
 
-			// Check the center and four points on the circumference
 			const pointsToCheck = [
-				{ x, y }, // Center
-				{ x: x + this.playerRadius, y }, // Right
-				{ x: x - this.playerRadius, y }, // Left
-				{ x, y: y + this.playerRadius }, // Bottom
-				{ x, y: y - this.playerRadius } // Top
+				{ x, y },
+				{ x: x + this.playerRadius, y },
+				{ x: x - this.playerRadius, y },
+				{ x, y: y + this.playerRadius },
+				{ x, y: y - this.playerRadius }
 			];
 
-			// Check if all points are in bounds
-			const allPointsInBounds = pointsToCheck.every((point) =>
-				this.trackGeometry.isPlayerInBounds(
-					new Player(point.x, point.y, 'A', 'jammer', this.playerRadius)
-				)
+			const allPointsValid = pointsToCheck.every(
+				(point) =>
+					ctx.isPointInPath(jammerStartZone, point.x, point.y) &&
+					this.trackGeometry.isPlayerInBounds(
+						new Player(point.x, point.y, 'A', 'jammer', this.playerRadius)
+					)
 			);
 
-			// Check for collisions with existing players
+			// Check for collisions with existing players who are jammers
 			const noCollisions = this.players.every(
 				(player) => Math.hypot(player.x - x, player.y - y) > this.playerRadius * 2
 			);
 
-			if (allPointsInBounds && noCollisions) {
+			if (allPointsValid && noCollisions) {
 				return { x, y };
 			}
 
