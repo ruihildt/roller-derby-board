@@ -59,8 +59,6 @@ export class Renderer {
 		this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
 		this.drawTrack(this.ctx);
-		this.drawMidTrackLine(this.ctx);
-		this.drawPoints(this.ctx);
 	}
 
 	drawHighRes(): void {

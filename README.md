@@ -14,10 +14,10 @@ What we have so far:
 - pack definition
 - engagement zone
 - 10 feet lines
+- player coloured based on status
 
 What's missing to cover the basics:
 
-- player status based on zones
 - physics and collision detection
 - improve the design
 - record without audio / save as gif

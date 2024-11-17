@@ -15,6 +15,7 @@ export class Player {
 	isInPack: boolean;
 	isRearmost: boolean;
 	isForemost: boolean;
+	isInEngagementZone: boolean;
 	isDragging: boolean;
 	dragOffsetX: number;
 	dragOffsetY: number;
@@ -27,7 +28,7 @@ export class Player {
 
 		this.team = team;
 		this.role = role;
-		this.color = team === 'A' ? 'teal' : 'orange';
+		this.color = team === 'A' ? 'rebeccapurple' : 'yellow';
 		this.radius = radius;
 		this.speed = 0;
 		this.zone = 0;
@@ -36,6 +37,7 @@ export class Player {
 		this.isInPack = false;
 		this.isRearmost = false;
 		this.isForemost = false;
+		this.isInEngagementZone = false;
 		this.isDragging = false;
 		this.dragOffsetX = 0;
 		this.dragOffsetY = 0;

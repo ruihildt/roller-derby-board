@@ -1,4 +1,5 @@
 import { Player } from './Player';
+import { TrackGeometry } from './TrackGeometry';
 import type { Point } from './types';
 import { distance } from './utils';
 
@@ -7,13 +8,15 @@ export class PackManager extends EventTarget {
 	PACK_DISTANCE: number;
 	points: Record<string, Point>;
 	zones: number[];
+	trackGeometry: TrackGeometry;
 
-	constructor(pixelsPerMeter: number, points: Record<string, Point>) {
+	constructor(pixelsPerMeter: number, points: Record<string, Point>, trackGeometry: TrackGeometry) {
 		super();
 		this.players = [];
 		this.PACK_DISTANCE = 3.05 * pixelsPerMeter;
 		this.points = points;
 		this.zones = [];
+		this.trackGeometry = trackGeometry;
 	}
 
 	updatePlayers(players: Player[]) {
@@ -51,7 +54,7 @@ export class PackManager extends EventTarget {
 			const packGroup = largestGroups[0];
 			this.updatePlayerPackStatus(packGroup);
 			this.updateRearAndForemostPlayers(packGroup);
-			// console.log('Valid pack found:', packGroup);
+			this.updatePlayerEngagementZoneStatus(packGroup);
 		} else {
 			// Multiple largest groups of equal size, no pack
 			this.players.forEach((p) => (p.isInPack = false));
@@ -89,6 +92,32 @@ export class PackManager extends EventTarget {
 		this.players.forEach((player) => {
 			player.isInPack = packGroup.includes(player);
 		});
+	}
+
+	updatePlayerEngagementZoneStatus(packGroup: Player[]) {
+		const rearmost = packGroup.find((p) => p.isRearmost);
+		const foremost = packGroup.find((p) => p.isForemost);
+
+		// First, set all players to not in engagement zone
+		this.players.forEach((p) => (p.isInEngagementZone = false));
+
+		// If no rearmost or foremost player, return early
+		if (!rearmost || !foremost) {
+			return;
+		}
+
+		const engagementZonePath = this.trackGeometry.createEngagementZonePath(rearmost, foremost);
+
+		// Only check in-bounds players for engagement zone
+		this.players
+			.filter((player) => player.inBounds)
+			.forEach((player) => {
+				player.isInEngagementZone = this.trackGeometry.ctx.isPointInPath(
+					engagementZonePath,
+					player.x,
+					player.y
+				);
+			});
 	}
 
 	updateRearAndForemostPlayers(packGroup: Player[]): void {
@@ -132,12 +161,6 @@ export class PackManager extends EventTarget {
 			// No zone 4 involved, sort sequentially
 			zones.sort();
 		}
-
-		// console.log(
-		// 	'Pack blockers zones:',
-		// 	packBlockers.map((p) => p.zone)
-		// );
-		// console.log('Zones:', zones);
 
 		this.zones = zones;
 

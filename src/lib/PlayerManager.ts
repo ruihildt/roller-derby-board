@@ -44,7 +44,7 @@ export class PlayerManager {
 		this.startZone = this.trackGeometry.startZone;
 
 		this.playerRadius = Math.max(0, Math.floor(this.canvas.width / 70));
-		this.packManager = new PackManager(PIXELS_PER_METER, points);
+		this.packManager = new PackManager(PIXELS_PER_METER, points, this.trackGeometry);
 
 		if (isInitialLoad) {
 			this.initializePlayers();
@@ -93,7 +93,7 @@ export class PlayerManager {
 		}
 
 		// Update packManager
-		this.packManager = new PackManager(PIXELS_PER_METER, points);
+		this.packManager = new PackManager(PIXELS_PER_METER, points, this.trackGeometry);
 		this.packManager.updatePlayers(this.players);
 	}
 
