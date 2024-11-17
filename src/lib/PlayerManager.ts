@@ -228,6 +228,17 @@ export class PlayerManager {
 		target.x = pusher.x + dirX * (pusher.radius + target.radius + pushForce);
 		target.y = pusher.y + dirY * (pusher.radius + target.radius + pushForce);
 
+		// Check for chain reactions with other players
+		this.players.forEach((otherPlayer) => {
+			if (
+				otherPlayer !== target &&
+				otherPlayer !== pusher &&
+				this.checkCollision(target, otherPlayer)
+			) {
+				this.handlePush(target, otherPlayer);
+			}
+		});
+
 		target.inBounds = this.trackGeometry.isPlayerInBounds(target);
 		this.trackGeometry.updatePlayerZone(target);
 		this.trackGeometry.updatePlayerCoordinates(target);
