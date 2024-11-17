@@ -43,13 +43,12 @@ export class PlayerManager {
 		this.turn2Area = renderer.turn2Area;
 		this.startZone = this.trackGeometry.startZone;
 
-		this.playerRadius = Math.max(0, Math.floor(this.canvas.width / 70));
+		this.playerRadius = Math.max(0, Math.floor(this.canvas.width / 68));
 		this.packManager = new PackManager(PIXELS_PER_METER, points, this.trackGeometry);
 
 		if (isInitialLoad) {
 			this.initializePlayers();
 			this.packManager.updatePlayers(this.players);
-			console.log('Initial pack evaluation complete');
 		}
 	}
 
