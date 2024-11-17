@@ -61,6 +61,8 @@ export class Game {
 		this.packZoneRenderer = new PackZoneRenderer(
 			this.canvas,
 			this.ctx,
+			this.highResCanvas,
+			this.highResCtx,
 			this.renderer.trackGeometry,
 			this.playerManager.packManager
 		);
@@ -123,6 +125,8 @@ export class Game {
 		this.packZoneRenderer = new PackZoneRenderer(
 			this.canvas,
 			this.ctx,
+			this.highResCanvas,
+			this.highResCtx,
 			this.renderer.trackGeometry,
 			this.playerManager.packManager
 		);
@@ -155,12 +159,13 @@ export class Game {
 
 	draw(): void {
 		this.renderer.draw();
-		this.packZoneRenderer.draw();
+		this.packZoneRenderer.drawEngagementZone(this.ctx);
 		this.playerRenderer.drawPlayers(this.playerManager.players);
 	}
 
 	drawHighRes(): void {
 		this.renderer.drawHighRes();
+		this.packZoneRenderer.drawEngagementZoneHighRes();
 		this.playerRenderer.drawPlayersHighRes(this.playerManager.players);
 	}
 
