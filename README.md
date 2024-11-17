@@ -1,65 +1,76 @@
-# Roller Derby Board
+# Roller Derby Strategy Board
 
-Roller Derby Board is a web app that lets you record a video of a roller derby strategy with audio, directly in your browser.
+This is an interactive web application that enables real-time recording of roller derby strategies through your browser. Create dynamic track visualizations with player movements, pack formations while capturing video with optional audio commentary.
 
-## Features
+The main goal is to make it as easy as possible sharing roller derby plays, making it an effective tool for coaches, players, and teams to communicate tactics.
 
-This is a work in progress. I started implenting the basics.
+## Core features
 
-What we have so far:
+✨ Track Visualization
 
-- a track
-- working animation and audio recording
-- out of bounds detection
-- pack definition
-- engagement zone
-- 10 feet lines
-- player coloured based on status
-- collision detection
-- improve the design
+- Regulation-size roller derby track
+- Dynamic pack and engagement zone indicators
+- Status-based player coloring system
+- Smooth player animations
 
-What's missing to cover the basics:
+🎥 Recording Capabilities
 
-- record without audio / save as gif
+- High-quality video capture
+- Optional audio commentary
+- Direct browser recording
+- Downloadable webm format
 
-Ideas:
+### Potential ideas
 
-- Add common start strategies
-- Show recorded video before offering to download it
-- Assign players to keyboard shortcut and control them with the direction keys
-- Save an animation not only as a video, but also as a set of instructions the user can reload at a later point in time
+🚀 Strategic features
+
+- Pre-configured set plays (starts, power jams, etc.)
+- Keyboard shortcuts for player control
+- Save & reload animation sequences
+
+🎮 Interactive Elements
+
+- Touch device support
+- Custom shape drawing tools (arrows, circles)
+- Embedded video titles
+- Preview before download
+- Webcam overlay integration
+
+🎨 Branding
+
+- Custom logo customization
+- Custom video title
 
 I will implement new features based on your feedback and usecases, please open an issue (or send an email to ruihildt@protonmail.com ) if you have any.
 
 ## Prior art & inspiration
 
-I would be nothing without the work of others. Quite litteraly, since I have been using LLM to help me code this. And I would like to thank the following projects for inspiration.
-
 ### New Ultimate Roller Derby Simulator
 
 NURDS is great and I initially tried to record the track with it, but it turns out SVG animation doesn't work well for that usecase.
 
-I am tempted to call this project YARDS (Yet Another Roller Derby Simulator) in homage to NURDS.
+I have been tempted to call this project YARDS (Yet Another Roller Derby Simulator) in homage to NURDS.
 
 [Source code](https://github.com/fa-bien/nurds) | [Demo](https://nurds.space/)
 
 ### Roller Derby Track Visualization
 
-Haven't looked at it in detail, the 3D visualization is pretty cool.
+Innovative 3D approach to track visualization.
 
 [Source code](https://github.com/webdingens/track-viz) | [Demo](https://trackviz.netlify.app/)
 
 ## Technical details
 
-### Technologies
+### Technical stack
 
-This is using HTML Canvas to draw the board, and the MediaRecorder API for the audio recording. The video is saved as webm and is actually scaled up from what is shown in the browser.
+- HTML Canvas
+- MediaRecorder API for audio capture
 
 ### About the LLM usage
 
-I'm not entirely sure how many lines of code I have actually wrote in this project (very few), and it's really weird. It's the first time I prompt engineer my way to a project.
+I have written very few lines of code in this project, on purpose. It was a trial to see how far I could come by prompt engineering with LLMs.
 
-While I'm an ok frontend developer, without LLM help, I would have probably never been able to get this far. I suck at geometry and I can't even double check if everything is correct `¯\_(ツ)\_/¯`.
+While I'm an ok frontend developer, without LLM help, I would have probably never been able to get this far. I suck at geometry and had no previous experience in HTML canvas, animating game state or browser recording. I can't evern double check if everything is correct `¯\_(ツ)\_/¯`.
 
 If you have any suggestions on how to improve the code, I would love to hear them.
 
@@ -86,8 +97,6 @@ You can preview the production build with `npm run preview`.
 
 ## License
 
-It's really debatable, since what the license of content produced by LLM is hotly debated and there are multiple ongoing lawsuits.
+The license of this project is debatable, since what the license of content produced by LLM is still unclear, as there are multiple ongoing lawsuits.
 
 Assuming that the code here is mine, I hereby license it under the [AGPL license](https://www.gnu.org/licenses/agpl-3.0.en.html).
-
-I am not a lawyer, but alternatively, do what you want, I'm not going to sue anyone for it.
