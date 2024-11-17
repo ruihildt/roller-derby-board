@@ -6,20 +6,17 @@ export class PackZoneRenderer {
 	ctx: CanvasRenderingContext2D;
 	trackGeometry: TrackGeometry;
 	packManager: PackManager;
-	PIXELS_PER_METER: number;
 
 	constructor(
 		canvas: HTMLCanvasElement,
 		ctx: CanvasRenderingContext2D,
 		trackGeometry: TrackGeometry,
-		packManager: PackManager,
-		PIXELS_PER_METER: number
+		packManager: PackManager
 	) {
 		this.canvas = canvas;
 		this.ctx = ctx;
 		this.trackGeometry = trackGeometry;
 		this.packManager = packManager;
-		this.PIXELS_PER_METER = PIXELS_PER_METER;
 	}
 
 	draw(): void {
@@ -28,13 +25,12 @@ export class PackZoneRenderer {
 		const foremost = packPlayers.find((p) => p.isForemost);
 
 		if (rearmost && foremost) {
-			const path = this.trackGeometry.createPackZonePath(rearmost, foremost);
+			const packZonePath = this.trackGeometry.createPackZonePath(rearmost, foremost);
 
 			this.ctx.fillStyle = 'rgba(255, 192, 203, 0.8)'; // Pink with transparency
-			this.ctx.fill(path, 'evenodd');
+			this.ctx.fill(packZonePath, 'evenodd');
 
 			// Draw point with getPointAheadOnMidtrack
-
 			const foremostPoint = this.trackGeometry.getPointAheadOnMidtrack(foremost, 6.1);
 			const rearmostPoint = this.trackGeometry.getPointBehindOnMidtrack(rearmost, 6.1);
 			this.ctx.fillStyle = 'rgba(255, 0, 0, 1)'; // Red

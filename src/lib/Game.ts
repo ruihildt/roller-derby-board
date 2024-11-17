@@ -62,8 +62,7 @@ export class Game {
 			this.canvas,
 			this.ctx,
 			this.renderer.trackGeometry,
-			this.playerManager.packManager,
-			this.PIXELS_PER_METER
+			this.playerManager.packManager
 		);
 
 		this.canvas.addEventListener(
@@ -119,6 +118,14 @@ export class Game {
 
 		// Draw the players in their new positions
 		this.playerRenderer.drawPlayers(this.playerManager.players);
+
+		// Update pack zone renderer with new dimensions
+		this.packZoneRenderer = new PackZoneRenderer(
+			this.canvas,
+			this.ctx,
+			this.renderer.trackGeometry,
+			this.playerManager.packManager
+		);
 	}
 
 	initializePoints(): Record<string, Point> {
