@@ -9,23 +9,29 @@
 	let recordedChunks: Blob[] = [];
 	let recordingStartTime: number;
 
-	async function startRecording() {
+	let withAudio = false;
+
+	async function startRecording(withAudio: boolean = true) {
 		if (highResCanvas) {
 			recordedChunks = [];
 
-			try {
-				audioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-			} catch (err) {
-				console.error('Error accessing the microphone', err);
-				return;
-			}
-
 			const canvasStream = highResCanvas.captureStream(60); // 60 FPS
+			let combinedStream;
 
-			const combinedStream = new MediaStream([
-				...canvasStream.getVideoTracks(),
-				...audioStream.getAudioTracks()
-			]);
+			if (withAudio) {
+				try {
+					audioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+					combinedStream = new MediaStream([
+						...canvasStream.getVideoTracks(),
+						...audioStream.getAudioTracks()
+					]);
+				} catch (err) {
+					console.error('Error accessing the microphone', err);
+					return;
+				}
+			} else {
+				combinedStream = canvasStream;
+			}
 
 			mediaRecorder = new MediaRecorder(combinedStream, { mimeType: 'video/webm' });
 
@@ -76,7 +82,7 @@
 			stopRecording();
 		} else {
 			try {
-				await startRecording();
+				await startRecording(withAudio);
 			} catch (error) {
 				console.error('Failed to start recording:', error);
 			}
@@ -84,34 +90,99 @@
 	}
 </script>
 
-<button class="record-button" on:click={toggleRecording}>
-	{isRecording ? 'Stop Recording' : 'Start Recording'}
-</button>
+<div class="controls-container">
+	<button
+		class="mic-button"
+		title={withAudio ? 'Audio recording ON' : 'Audio recording OFF'}
+		on:click={() => (withAudio = !withAudio)}
+	>
+		<span class="mic-emoji">🎙️</span>
+		{#if !withAudio}
+			<span class="x-overlay">❌</span>
+		{/if}
+	</button>
+	<button class="record-button" on:click={toggleRecording}>
+		<span class="recording-dot" class:recording={isRecording}></span>
+		{isRecording ? 'Stop' : 'Start'}
+	</button>
+</div>
 
 <style>
-	.record-button {
+	:global(body) {
+		overflow-x: hidden;
+		margin: 0;
+		padding: 0;
+	}
+
+	.controls-container {
 		position: absolute;
 		bottom: 20px;
 		right: 20px;
-		padding: 10px 20px;
+		display: flex;
+		align-items: center;
+		gap: 10px;
+	}
+
+	.mic-button,
+	.record-button {
+		background: white;
+		border: 1px solid #ccc;
 		border-radius: 4px;
-		background: #ff3e00;
-		color: white;
-		border: none;
 		cursor: pointer;
 		font-family:
 			system-ui,
 			-apple-system,
 			sans-serif;
 		font-weight: 500;
-		transition: background-color 0.2s ease;
+		display: flex;
+		align-items: center;
+		height: 40px;
 	}
 
-	.record-button:hover {
-		background: #ff2d00;
+	.mic-button {
+		position: relative;
+		padding: 13px;
 	}
 
-	.record-button:active {
-		transform: scale(0.98);
+	.mic-emoji {
+		font-size: 1.2em;
+	}
+
+	.x-overlay {
+		position: absolute;
+		left: 50%;
+		top: 50%;
+		transform: translate(-50%, -50%);
+	}
+
+	.record-button {
+		min-width: 100px;
+		text-align: center;
+		justify-content: center;
+		gap: 8px;
+		padding: 10px 20px;
+	}
+
+	.recording-dot {
+		width: 10px;
+		height: 10px;
+		background-color: red;
+		border-radius: 50%;
+	}
+
+	.recording-dot.recording {
+		animation: pulse 1.5s ease-in-out infinite;
+	}
+
+	@keyframes pulse {
+		0% {
+			opacity: 1;
+		}
+		50% {
+			opacity: 0.3;
+		}
+		100% {
+			opacity: 1;
+		}
 	}
 </style>
