@@ -330,14 +330,57 @@ export class TrackGeometry {
 			currentAngle = Math.atan2(point.y - p.B.y, point.x - p.B.x);
 		}
 		// TODO according to the track guide, the final segment will measure slightly more than 2.15 meters
-		// Since there is nor precise indication, I have not implemented its
+		// Since there is nor precise indication, I have not implemented it
 		// Source: https://static.wftda.com/resources/wftda-regulation-track-layout-guide.pdf
 		return path;
 	}
 
 	drawTurn2TenFeetLines(): Path2D {
 		const path = new Path2D();
+		const p = this.points;
 
+		// Convert measurements to pixels
+		const segmentLength = 2.15 * this.PIXELS_PER_METER; // 7 feet ½ inch = 2.15 meters
+		const lineLength = 0.8 * this.PIXELS_PER_METER;
+
+		// Calculate and draw E1 through E5 points and their circles
+		const radiusDC = Math.hypot(p.D.x - p.A.x, p.D.y - p.A.y);
+		let currentAngle = Math.atan2(p.D.y - p.A.y, p.D.x - p.A.x);
+
+		const points = [];
+		for (let i = 1; i <= 5; i++) {
+			const point = {
+				x: p.A.x + radiusDC * Math.cos(currentAngle - segmentLength / radiusDC),
+				y: p.A.y + radiusDC * Math.sin(currentAngle - segmentLength / radiusDC)
+			};
+			points.push(point);
+
+			// Create dummy player at current point to find midtrack intersection
+			const dummyPlayer = {
+				x: point.x,
+				y: point.y,
+				innerPoint: { x: 0, y: 0 },
+				outerPoint: { x: 0, y: 0 }
+			} as Player;
+			this.updatePlayerCoordinates(dummyPlayer);
+
+			// Calculate midtrack intersection point
+			const midX = (dummyPlayer.innerPoint.x + dummyPlayer.outerPoint.x) / 2;
+			const midY = (dummyPlayer.innerPoint.y + dummyPlayer.outerPoint.y) / 2;
+
+			// Draw segment of lineLength from midtrack point
+			const angle = Math.atan2(
+				dummyPlayer.outerPoint.y - dummyPlayer.innerPoint.y,
+				dummyPlayer.outerPoint.x - dummyPlayer.innerPoint.x
+			);
+			path.moveTo(midX - lineLength * Math.cos(angle), midY - lineLength * Math.sin(angle));
+			path.lineTo(midX + lineLength * Math.cos(angle), midY + lineLength * Math.sin(angle));
+
+			currentAngle = Math.atan2(point.y - p.A.y, point.x - p.A.x);
+		}
+		// TODO according to the track guide, the final segment will measure slightly more than 2.15 meters
+		// Since there is nor precise indication, I have not implemented it
+		// Source: https://static.wftda.com/resources/wftda-regulation-track-layout-guide.pdf
 		return path;
 	}
 
