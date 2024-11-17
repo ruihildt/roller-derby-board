@@ -83,8 +83,14 @@ export class PlayerManager {
 			player.radius = this.playerRadius;
 		});
 
-		// Update track geometry and pack manager
+		// Update track geometry
 		this.trackGeometry = new TrackGeometry(canvas, ctx, points, PIXELS_PER_METER);
+		// Update player coordinates after resize
+		for (const player of this.players) {
+			this.trackGeometry.updatePlayerCoordinates(player);
+		}
+
+		// Update packManager
 		this.packManager = new PackManager(PIXELS_PER_METER, points);
 		this.packManager.updatePlayers(this.players);
 	}

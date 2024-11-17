@@ -16,7 +16,6 @@ What we have so far:
 
 What's missing to cover the basics:
 
-- fix resizing issues
 - player status based on zones
 - 10 feet lines
 - physics and collision detection
