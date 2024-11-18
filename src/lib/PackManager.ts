@@ -25,25 +25,17 @@ export class PackManager extends EventTarget {
 	}
 
 	determinePack() {
-		// Reset all players first
+		// Reset all players pack related properties
 		this.players.forEach((player) => {
 			player.isRearmost = false;
 			player.isForemost = false;
+			player.isInPack = false;
+			player.isInEngagementZone = false;
 		});
 
-		// console.log('Determining pack...');
 		const inBoundsBlockers = this.players.filter((p) => p.inBounds && p.role === 'blocker');
-		// console.log('In-bounds blockers:', inBoundsBlockers.length);
 		const groups = this.groupBlockers(inBoundsBlockers);
 		const validGroups = groups.filter(this.isValidGroup);
-
-		if (validGroups.length === 0) {
-			// No valid groups, no pack
-			this.players.forEach((p) => {
-				p.isInPack = false;
-			});
-			return;
-		}
 
 		// Find the size of the largest group(s)
 		const maxSize = Math.max(...validGroups.map((g) => g.length));
