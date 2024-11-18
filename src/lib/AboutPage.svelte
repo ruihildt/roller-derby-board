@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { buildDate, version } from './appVersion';
 	let showAbout: boolean;
 </script>
 
@@ -11,19 +12,28 @@
 					showAbout = false;
 				}}>×</button
 			>
-			<h1>🛼 Roller Derby Strategy Board</h1>
+			<div class="title-container">
+				<h1>🛼 Roller Derby Strategy Board</h1>
+				<span class="version-badge">{version} | {buildDate}</span>
+			</div>
 			<p>
 				An interactive web application for real-time recording of roller derby strategies through
 				your browser.
 			</p>
 
 			<p>
-				You can find more details about the project and the source code <a
+				More information about the project and code can be found on <a
 					href="https://github.com/ruihildt/roller-derby-strategy"
-					target="_blank">on GitHub</a
+					target="_blank">Github</a
+				>. The whole project is licensed under (<a
+					href="https://www.gnu.org/licenses/agpl-3.0.en.html"
+					target="_blank"
 				>
-				for more details about this project.
+					AGPLv3</a
+				>).
 			</p>
+
+			<hr class="separator" />
 
 			<p>
 				For feedback or suggestions, please <a
@@ -97,5 +107,35 @@
 		background: none;
 		font-size: 24px;
 		cursor: pointer;
+	}
+
+	.version-badge {
+		bottom: 10px;
+		right: 10px;
+		background: #e9ecef;
+		color: #495057;
+		padding: 4px 8px;
+		border-radius: 12px;
+		font-size: 0.9rem;
+		font-weight: 500;
+	}
+
+	h1 {
+		font-size: 1.5rem;
+		margin: 0;
+	}
+
+	.title-container {
+		display: flex;
+		align-items: center;
+		gap: 1rem;
+		margin-bottom: 1rem;
+	}
+
+	.separator {
+		border: 0;
+		height: 1px;
+		background-color: #e9ecef;
+		margin: 1.5rem 0;
 	}
 </style>
