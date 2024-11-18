@@ -61,7 +61,8 @@ export class PlayerRenderer {
 		ctx.stroke();
 
 		ctx.fillStyle = player.team === 'A' ? 'white' : 'black';
-		ctx.font = 'bold 10px Arial';
+		ctx.font =
+			'bold 15px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
 		ctx.textAlign = 'center';
 		ctx.textBaseline = 'middle';
 		ctx.fillText(player.role[0].toUpperCase(), player.x, player.y);

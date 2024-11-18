@@ -59,6 +59,7 @@ export class Renderer {
 		this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
 		this.drawTrack(this.ctx);
+		this.drawBranding(this.ctx);
 	}
 
 	drawHighRes(): void {
@@ -77,6 +78,7 @@ export class Renderer {
 		ctx.fillRect(0, 0, this.highResCanvas.width, this.highResCanvas.height);
 
 		this.drawTrack(ctx);
+		this.drawBranding(ctx);
 	}
 
 	drawTrack(ctx: CanvasRenderingContext2D): void {
@@ -118,7 +120,7 @@ export class Renderer {
 
 	drawPoints(ctx: CanvasRenderingContext2D): void {
 		ctx.fillStyle = 'blue';
-		ctx.font = '12px Arial';
+		ctx.font = '12px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
 		ctx.textAlign = 'left';
 		ctx.textBaseline = 'middle';
 
@@ -135,5 +137,17 @@ export class Renderer {
 				ctx.fillText(label, point.x + 6, point.y);
 			}
 		}
+	}
+
+	private drawBranding(ctx: CanvasRenderingContext2D): void {
+		ctx.save();
+		ctx.fillStyle = '#333';
+		ctx.font = '16px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+		ctx.textAlign = 'center';
+		ctx.textBaseline = 'middle';
+		const textX = (this.points.F.x + this.points.D.x) / 2;
+		const textY = this.points.D.y + 22;
+		ctx.fillText('created with www.rollerderby.click', textX, textY);
+		ctx.restore();
 	}
 }
