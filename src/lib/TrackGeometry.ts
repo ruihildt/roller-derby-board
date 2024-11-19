@@ -581,12 +581,21 @@ export class TrackGeometry {
 	private determineZoneSequence(startPoint: Point, endPoint: Point): number[] {
 		const startZone = this.determineZone(startPoint.x, startPoint.y);
 		const endZone = this.determineZone(endPoint.x, endPoint.y);
+
+		// Early return if invalid zones
+		if (startZone === 0 || endZone === 0) {
+			return [];
+		}
+
 		const zones = new Set<number>();
 		let currentZone = startZone;
+		let iterations = 0;
+		const MAX_ITERATIONS = 4;
 
-		while (currentZone !== endZone) {
+		while (currentZone !== endZone && iterations < MAX_ITERATIONS) {
 			zones.add(currentZone);
 			currentZone = (currentZone % 4) + 1;
+			iterations++;
 		}
 		zones.add(endZone);
 
