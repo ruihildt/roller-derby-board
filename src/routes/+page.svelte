@@ -2,16 +2,19 @@
 	import BoardCanvas from '$lib/components/BoardCanvas.svelte';
 </script>
 
-<div class="container">
+<main>
 	<BoardCanvas />
-</div>
+</main>
 
 <style>
-	.container {
+	main {
+		aspect-ratio: 3/2;
 		max-width: 1000px;
-		max-height: 660px;
-		margin: 0 auto;
-		width: 100vw;
-		height: 66vw;
+		width: 100%;
+		max-height: 100vh;
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%);
 	}
 </style>

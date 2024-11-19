@@ -12,16 +12,12 @@
 
 	function handleResize() {
 		if (!container) return;
-
 		const { width, height } = calculateCanvasSize(container.clientWidth, container.clientHeight);
 		canvas.width = width;
 		canvas.height = height;
 		highResCanvas.width = width * 2;
 		highResCanvas.height = height * 2;
-
-		if (game) {
-			game.resize();
-		}
+		game?.resize();
 	}
 
 	onMount(() => {
@@ -33,7 +29,6 @@
 		});
 
 		window.addEventListener('resize', handleResize);
-
 		return () => {
 			window.removeEventListener('resize', handleResize);
 			game?.cleanup();
@@ -41,7 +36,7 @@
 	});
 </script>
 
-<div bind:this={container} class="container">
+<div bind:this={container}>
 	<canvas bind:this={canvas}></canvas>
 	<canvas bind:this={highResCanvas} style="display: none;"></canvas>
 	<AboutPage />
@@ -49,7 +44,7 @@
 </div>
 
 <style>
-	.container {
+	div {
 		width: 100%;
 		height: 100%;
 		position: relative;
