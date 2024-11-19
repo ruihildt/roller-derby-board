@@ -1,4 +1,4 @@
-import type { Point } from './types';
+import type { Point } from '../types';
 import { Player } from './Player';
 
 type StraightKey = 1 | 3;

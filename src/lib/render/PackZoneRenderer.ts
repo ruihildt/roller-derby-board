@@ -1,5 +1,5 @@
-import type { PackManager } from './PackManager';
-import type { TrackGeometry } from './TrackGeometry';
+import type { PackManager } from '../classes/PackManager';
+import type { TrackGeometry } from '../classes/TrackGeometry';
 
 export class PackZoneRenderer {
 	canvas: HTMLCanvasElement;

@@ -1,9 +1,9 @@
 <script>
-	import RollerDerbySimulator from '$lib/RollerDerbyBoard.svelte';
+	import BoardCanvas from '$lib/components/BoardCanvas.svelte';
 </script>
 
 <div class="container">
-	<RollerDerbySimulator />
+	<BoardCanvas />
 </div>
 
 <style>

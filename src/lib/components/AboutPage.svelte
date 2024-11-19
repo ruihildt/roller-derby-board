@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { buildDate, version } from './appVersion';
+	import { buildDate, version } from '../utils/appVersion';
 	let showAbout: boolean;
 </script>
 

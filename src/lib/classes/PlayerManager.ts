@@ -1,6 +1,6 @@
-import { Player } from '$lib/Player';
-import { PackManager } from '$lib/PackManager';
-import { Renderer } from '$lib/Renderer';
+import { Player } from '$lib/classes/Player';
+import { PackManager } from '$lib/classes/PackManager';
+import { Renderer } from '$lib/render/Renderer';
 import type { Point } from '$lib/types';
 import { TrackGeometry } from './TrackGeometry';
 

@@ -1,6 +1,6 @@
-import type { PackManager } from './PackManager';
-import type { Player } from './Player';
-import { TrackGeometry } from './TrackGeometry';
+import type { PackManager } from '../classes/PackManager';
+import type { Player } from '../classes/Player';
+import { TrackGeometry } from '../classes/TrackGeometry';
 
 export class PlayerRenderer {
 	canvas: HTMLCanvasElement;

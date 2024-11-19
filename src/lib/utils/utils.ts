@@ -1,4 +1,4 @@
-import type { Point } from './types';
+import type { Point } from '../types';
 
 export function isAngleBetween(angle: number, start: number, end: number): boolean {
 	const normalizeDifference = (a: number) => (a + 2 * Math.PI) % (2 * Math.PI);

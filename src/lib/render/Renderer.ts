@@ -1,5 +1,5 @@
 import type { Point } from '$lib/types';
-import { TrackGeometry } from './TrackGeometry';
+import { TrackGeometry } from '../classes/TrackGeometry';
 
 export class Renderer {
 	canvas: HTMLCanvasElement;

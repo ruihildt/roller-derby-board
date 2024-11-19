@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { Game } from '$lib/Game';
-	import { calculateCanvasSize } from '$lib/utils';
-	import RecordingControls from '$lib/RecordingControls.svelte';
-	import AboutPage from '$lib/AboutPage.svelte';
+	import { Game } from '$lib/classes/Game';
+	import { calculateCanvasSize } from '$lib/utils/utils';
+	import RecordingControls from '$lib/components/RecordingControls.svelte';
+	import AboutPage from '$lib/components/AboutPage.svelte';
 
 	let container: HTMLDivElement;
 	let canvas: HTMLCanvasElement;

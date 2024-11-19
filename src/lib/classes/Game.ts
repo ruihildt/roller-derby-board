@@ -1,8 +1,8 @@
 import type { Point } from '$lib/types';
-import { Renderer } from '$lib/Renderer';
-import { PlayerManager } from '$lib/PlayerManager';
-import { PlayerRenderer } from './PlayerRenderer';
-import { PackZoneRenderer } from './PackZoneRenderer';
+import { Renderer } from '$lib/render/Renderer';
+import { PlayerManager } from '$lib/classes/PlayerManager';
+import { PlayerRenderer } from '../render/PlayerRenderer';
+import { PackZoneRenderer } from '../render/PackZoneRenderer';
 
 export class Game {
 	canvas: HTMLCanvasElement;

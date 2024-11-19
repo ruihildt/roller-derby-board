@@ -1,7 +1,7 @@
 import { Player } from './Player';
 import { TrackGeometry } from './TrackGeometry';
-import type { Point } from './types';
-import { distance } from './utils';
+import type { Point } from '../types';
+import { distance } from '../utils/utils';
 
 export class PackManager extends EventTarget {
 	players: Player[];
