@@ -11,8 +11,9 @@
 	let game: Game;
 
 	function handleResize() {
-		const { width, height } = calculateCanvasSize(container.clientWidth, container.clientHeight);
+		if (!container) return;
 
+		const { width, height } = calculateCanvasSize(container.clientWidth, container.clientHeight);
 		canvas.width = width;
 		canvas.height = height;
 		highResCanvas.width = width * 2;
@@ -24,15 +25,18 @@
 	}
 
 	onMount(() => {
-		handleResize();
-		game = new Game(canvas, highResCanvas, false);
-		game.gameLoop();
+		// Force a layout reflow to get accurate container dimensions
+		requestAnimationFrame(() => {
+			handleResize();
+			game = new Game(canvas, highResCanvas, false);
+			game.gameLoop();
+		});
 
 		window.addEventListener('resize', handleResize);
 
 		return () => {
 			window.removeEventListener('resize', handleResize);
-			game.cleanup();
+			game?.cleanup();
 		};
 	});
 </script>
