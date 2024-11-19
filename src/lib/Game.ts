@@ -82,8 +82,8 @@ export class Game {
 	}
 
 	resize(): void {
-		this.LINE_WIDTH = Math.max(1, Math.floor(this.canvas.width / 330));
-		this.PIXELS_PER_METER = Math.floor(this.canvas.width / 33);
+		this.LINE_WIDTH = Math.max(1, Math.floor(this.canvas.width / 250));
+		this.PIXELS_PER_METER = Math.floor(this.canvas.width / 29);
 
 		const newPoints = this.initializePoints();
 		this.points = newPoints;
