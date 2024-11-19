@@ -5,10 +5,15 @@
 	import RecordingControls from '$lib/components/RecordingControls.svelte';
 	import AboutPage from '$lib/components/AboutPage.svelte';
 
+	let { recordingComplete } = $props<{
+		recordingComplete: (blob: Blob) => void;
+	}>();
+
 	let container: HTMLDivElement;
 	let canvas: HTMLCanvasElement;
-	let highResCanvas: HTMLCanvasElement;
 	let game: Game;
+
+	let highResCanvas = $state<HTMLCanvasElement>()!;
 
 	function handleResize() {
 		if (!container) return;
@@ -21,7 +26,6 @@
 	}
 
 	onMount(() => {
-		// Force a layout reflow to get accurate container dimensions
 		requestAnimationFrame(() => {
 			handleResize();
 			game = new Game(canvas, highResCanvas, false);
@@ -34,13 +38,17 @@
 			game?.cleanup();
 		};
 	});
+
+	function handleRecordingComplete(blob: Blob) {
+		recordingComplete(blob);
+	}
 </script>
 
 <div bind:this={container}>
 	<canvas bind:this={canvas}></canvas>
 	<canvas bind:this={highResCanvas} style="display: none;"></canvas>
 	<AboutPage />
-	<RecordingControls {highResCanvas} />
+	<RecordingControls {highResCanvas} recordingComplete={handleRecordingComplete} />
 </div>
 
 <style>

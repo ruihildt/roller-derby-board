@@ -1,9 +1,27 @@
-<script>
+<script lang="ts">
 	import BoardCanvas from '$lib/components/BoardCanvas.svelte';
+	import PreviewModal from '$lib/components/PreviewModal.svelte';
+
+	let showPreview = $state(false);
+	let recordedBlob: Blob | null = $state(null);
+
+	function handleRecordingComplete(blob: Blob) {
+		recordedBlob = blob;
+		showPreview = true;
+	}
+
+	function handlePreviewClose() {
+		showPreview = false;
+		recordedBlob = null;
+	}
 </script>
 
 <main>
-	<BoardCanvas />
+	<BoardCanvas recordingComplete={handleRecordingComplete} />
+
+	{#if showPreview && recordedBlob}
+		<PreviewModal videoBlob={recordedBlob} close={handlePreviewClose} />
+	{/if}
 </main>
 
 <style>

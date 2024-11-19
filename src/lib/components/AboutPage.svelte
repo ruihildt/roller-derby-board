@@ -49,6 +49,9 @@
 <button class="about-button" on:click={() => (showAbout = true)}> ℹ️ About </button>
 
 <style>
+	button:hover {
+		background: #f1ecec;
+	}
 	.about-button {
 		position: absolute;
 		bottom: 20px;

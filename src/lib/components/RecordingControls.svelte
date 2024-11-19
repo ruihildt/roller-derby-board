@@ -1,20 +1,21 @@
 <script lang="ts">
 	import fixWebmDuration from 'fix-webm-duration';
 
-	export let highResCanvas: HTMLCanvasElement;
-	export let isRecording = false;
-	export let audioStream: MediaStream | null = null;
+	let { highResCanvas, recordingComplete } = $props<{
+		highResCanvas: HTMLCanvasElement;
+		recordingComplete: (blob: Blob) => void;
+	}>();
 
-	let mediaRecorder: MediaRecorder | null = null;
-	let recordedChunks: Blob[] = [];
-	let recordingStartTime: number;
-
-	let withAudio = false;
+	let isRecording = $state(false);
+	let audioStream = $state<MediaStream | null>(null);
+	let mediaRecorder: MediaRecorder | null = $state(null);
+	let recordedChunks = $state<Blob[]>([]);
+	let recordingStartTime = $state<number>(0);
+	let withAudio = $state(false);
 
 	async function startRecording(withAudio: boolean = true) {
 		if (highResCanvas) {
 			recordedChunks = [];
-
 			const canvasStream = highResCanvas.captureStream(60); // 60 FPS
 			let combinedStream;
 
@@ -37,7 +38,7 @@
 
 			mediaRecorder.ondataavailable = (event) => {
 				if (event.data.size > 0) {
-					recordedChunks.push(event.data);
+					recordedChunks = [...recordedChunks, event.data];
 				}
 			};
 
@@ -46,14 +47,7 @@
 				const duration = Date.now() - recordingStartTime;
 				const fixedBlob = await fixWebmDuration(blob, duration);
 
-				const url = URL.createObjectURL(fixedBlob);
-				const a = document.createElement('a');
-				document.body.appendChild(a);
-				a.style.display = 'none';
-				a.href = url;
-				a.download = 'roller-derby-simulation.webm';
-				a.click();
-				window.URL.revokeObjectURL(url);
+				recordingComplete(fixedBlob);
 
 				if (audioStream) {
 					audioStream.getTracks().forEach((track) => track.stop());
@@ -94,26 +88,20 @@
 	<button
 		class="mic-button"
 		title={withAudio ? 'Audio recording ON' : 'Audio recording OFF'}
-		on:click={() => (withAudio = !withAudio)}
+		onclick={() => (withAudio = !withAudio)}
 	>
 		<span class="mic-emoji">🎙️</span>
 		{#if !withAudio}
 			<span class="x-overlay">❌</span>
 		{/if}
 	</button>
-	<button class="record-button" on:click={toggleRecording}>
+	<button class="record-button" onclick={toggleRecording}>
 		<span class="recording-dot" class:recording={isRecording}></span>
 		{isRecording ? 'Stop' : 'Start'}
 	</button>
 </div>
 
 <style>
-	:global(body) {
-		overflow-x: hidden;
-		margin: 0;
-		padding: 0;
-	}
-
 	.controls-container {
 		position: absolute;
 		bottom: 20px;
@@ -121,6 +109,10 @@
 		display: flex;
 		align-items: center;
 		gap: 10px;
+	}
+
+	button:hover {
+		background: #f1ecec;
 	}
 
 	.mic-button,
