@@ -1,6 +1,6 @@
 <script lang="ts">
 	import BoardCanvas from '$lib/components/BoardCanvas.svelte';
-	import PreviewModal from '$lib/components/PreviewModal.svelte';
+	import VideoPreview from '$lib/components/VideoPreview.svelte';
 
 	let showPreview = $state(false);
 	let recordedBlob: Blob | null = $state(null);
@@ -20,7 +20,7 @@
 	<BoardCanvas recordingComplete={handleRecordingComplete} />
 
 	{#if showPreview && recordedBlob}
-		<PreviewModal videoBlob={recordedBlob} close={handlePreviewClose} />
+		<VideoPreview videoBlob={recordedBlob} close={handlePreviewClose} />
 	{/if}
 </main>
 
