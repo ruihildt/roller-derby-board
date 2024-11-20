@@ -42,29 +42,48 @@ export class PlayerRenderer {
 	}
 
 	drawPlayer(player: Player, ctx: CanvasRenderingContext2D): void {
-		// Draw existing player circle and details
+		// Base circle
 		ctx.beginPath();
 		ctx.arc(player.x, player.y, player.radius, 0, Math.PI * 2);
-
 		ctx.fillStyle = player.color;
-
 		ctx.fill();
 
+		// Draw pivot stripe
+		if (player.role === PlayerRole.pivot) {
+			ctx.beginPath();
+			ctx.rect(player.x - player.radius, player.y - 4, player.radius * 2, 7);
+			ctx.fillStyle = player.team === 'A' ? 'deepskyblue' : 'black';
+			ctx.fill();
+		}
+
+		// Draw jammer star
+		if (player.role === PlayerRole.jammer) {
+			const starSize = player.radius * 0.8;
+			ctx.beginPath();
+			for (let i = 0; i < 5; i++) {
+				const angle = (i * 4 * Math.PI) / 5 - Math.PI / 2;
+				const x = player.x + Math.cos(angle) * starSize;
+				const y = player.y + Math.sin(angle) * starSize;
+				if (i === 0) ctx.moveTo(x, y);
+				else ctx.lineTo(x, y);
+			}
+			ctx.closePath();
+			ctx.fillStyle = player.team === 'A' ? 'deepskyblue' : 'black';
+			ctx.fill();
+		}
+
+		// Border drawn last
+		ctx.beginPath();
+		ctx.arc(player.x, player.y, player.radius, 0, Math.PI * 2);
 		ctx.strokeStyle = player.isInPack
 			? 'green'
-			: player.isInEngagementZone && (PlayerRole.blocker || PlayerRole.pivot)
+			: player.isInEngagementZone && player.role !== PlayerRole.jammer
 				? 'orange'
 				: player.inBounds
 					? 'black'
 					: 'red';
+
 		ctx.lineWidth = 4;
 		ctx.stroke();
-
-		ctx.fillStyle = player.team === 'A' ? 'white' : 'black';
-		ctx.font =
-			'bold 15px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-		ctx.textAlign = 'center';
-		ctx.textBaseline = 'middle';
-		ctx.fillText(player.role[0].toUpperCase(), player.x, player.y);
 	}
 }

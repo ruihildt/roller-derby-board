@@ -33,9 +33,7 @@ export class PackManager extends EventTarget {
 			player.isInEngagementZone = false;
 		});
 
-		const inBoundsBlockers = this.players.filter(
-			(p) => p.inBounds && (p.role === PlayerRole.blocker || PlayerRole.pivot)
-		);
+		const inBoundsBlockers = this.players.filter((p) => p.inBounds && p.role !== PlayerRole.jammer);
 		const groups = this.groupBlockers(inBoundsBlockers);
 		const validGroups = groups.filter(this.isValidGroup);
 
