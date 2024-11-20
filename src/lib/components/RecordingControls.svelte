@@ -43,7 +43,7 @@
 			};
 
 			mediaRecorder.onstop = async () => {
-				const blob = new Blob(recordedChunks, { type: 'video/webm' });
+				const blob = new Blob(recordedChunks, { type: 'video/webm; codecs=vp8,opus' });
 				const duration = Date.now() - recordingStartTime;
 				const fixedBlob = await fixWebmDuration(blob, duration);
 
@@ -53,6 +53,30 @@
 					audioStream.getTracks().forEach((track) => track.stop());
 				}
 			};
+
+			// IF playback of audio doesn't start reliably, we can try this
+			//
+			// mediaRecorder.onstop = async () => {
+			// 	const blob = new Blob(recordedChunks, { type: 'video/webm; codecs=vp8,opus' });
+			// 	const duration = Date.now() - recordingStartTime;
+			// 	const fixedBlob = await fixWebmDuration(blob, duration);
+
+			// 	// Force metadata loading before passing the blob
+			// 	const videoElement = document.createElement('video');
+			// 	videoElement.preload = 'metadata';
+
+			// 	const blobUrl = URL.createObjectURL(fixedBlob);
+			// 	videoElement.src = blobUrl;
+
+			// 	videoElement.onloadedmetadata = () => {
+			// 		URL.revokeObjectURL(blobUrl);
+			// 		recordingComplete(fixedBlob);
+			// 	};
+
+			// 	if (audioStream) {
+			// 		audioStream.getTracks().forEach((track) => track.stop());
+			// 	}
+			// };
 
 			recordingStartTime = Date.now();
 			mediaRecorder.start();

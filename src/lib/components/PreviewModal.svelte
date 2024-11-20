@@ -25,9 +25,8 @@
 
 <div class="modal">
 	<div class="modal-content">
-		<video controls src={videoUrl}>
-			<track kind="captions" src="" label="English" srclang="en" />
-		</video>
+		<!-- svelte-ignore a11y_media_has_caption -->
+		<video controls src={videoUrl} preload="auto" playsinline></video>
 		<div class="actions">
 			<button onclick={handleDownload}>💾 Download</button>
 			<button onclick={handleDiscard} class="discard">🗑️ Discard</button>
