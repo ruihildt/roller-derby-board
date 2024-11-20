@@ -1,4 +1,14 @@
 export class Skater {
+	private static _playerRadius: number = 0;
+
+	static setCanvasWidth(width: number) {
+		this._playerRadius = Math.max(0, Math.floor(width / 70));
+	}
+
+	static get playerRadius(): number {
+		return this._playerRadius;
+	}
+
 	x: number;
 	y: number;
 	innerPoint: { x: number; y: number };
@@ -10,12 +20,12 @@ export class Skater {
 	dragOffsetX: number;
 	dragOffsetY: number;
 
-	constructor(x: number, y: number, radius: number) {
+	constructor(x: number, y: number) {
 		this.x = x;
 		this.y = y;
 		this.innerPoint = { x, y };
 		this.outerPoint = { x, y };
-		this.radius = radius;
+		this.radius = Skater.playerRadius;
 		this.speed = 0;
 		this.direction = 0;
 		this.isDragging = false;

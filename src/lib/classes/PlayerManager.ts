@@ -3,6 +3,7 @@ import { PackManager } from '$lib/classes/PackManager';
 import { Renderer } from '$lib/render/Renderer';
 import type { Point } from '$lib/types';
 import { TrackGeometry } from './TrackGeometry';
+import { Skater } from './Skater';
 
 export class PlayerManager {
 	canvas: HTMLCanvasElement;
@@ -13,7 +14,6 @@ export class PlayerManager {
 	selectedPlayer: Player | null;
 	trackGeometry: TrackGeometry;
 	renderer: Renderer;
-	playerRadius: number;
 	straight1Area: Path2D;
 	straight2Area: Path2D;
 	turn1Area: Path2D;
@@ -33,6 +33,7 @@ export class PlayerManager {
 		this.ctx = ctx;
 		this.points = points;
 		this.PIXELS_PER_METER = PIXELS_PER_METER;
+		Skater.setCanvasWidth(canvas.width);
 		this.players = [];
 		this.selectedPlayer = null;
 		this.trackGeometry = new TrackGeometry(canvas, ctx, points, PIXELS_PER_METER);
@@ -43,7 +44,6 @@ export class PlayerManager {
 		this.turn2Area = renderer.turn2Area;
 		this.startZone = this.trackGeometry.startZone;
 
-		this.playerRadius = Math.max(0, Math.floor(this.canvas.width / 68));
 		this.packManager = new PackManager(PIXELS_PER_METER, points, this.trackGeometry);
 
 		if (isInitialLoad) {
@@ -69,7 +69,7 @@ export class PlayerManager {
 		this.ctx = ctx;
 		this.points = points;
 		this.PIXELS_PER_METER = PIXELS_PER_METER;
-		this.playerRadius = Math.max(0, Math.floor(canvas.width / 70));
+		Skater.setCanvasWidth(canvas.width);
 
 		// Update track areas
 		this.straight1Area = renderer.straight1Area;
@@ -81,7 +81,6 @@ export class PlayerManager {
 		this.players.forEach((player) => {
 			player.x = player.x * scale;
 			player.y = player.y * scale;
-			player.radius = this.playerRadius;
 		});
 
 		// Update track geometry
@@ -101,25 +100,21 @@ export class PlayerManager {
 		for (let i = 0; i < 4; i++) {
 			const role = i < 3 ? PlayerRole.blocker : PlayerRole.pivot;
 			const pos = this.getRandomBlockerPosition(role);
-			this.players.push(new Player(pos.x, pos.y, 'A', role, this.playerRadius));
+			this.players.push(new Player(pos.x, pos.y, 'A', role));
 		}
 
 		// Create 4 blockers for Team B
 		for (let i = 0; i < 4; i++) {
 			const role = i < 3 ? PlayerRole.blocker : PlayerRole.pivot;
 			const pos = this.getRandomBlockerPosition(role);
-			this.players.push(new Player(pos.x, pos.y, 'B', role, this.playerRadius));
+			this.players.push(new Player(pos.x, pos.y, 'B', role));
 		}
 
 		// Add jammers
 		const jammerPosA = this.getRandomJammerPosition();
-		this.players.push(
-			new Player(jammerPosA.x, jammerPosA.y, 'A', PlayerRole.jammer, this.playerRadius)
-		);
+		this.players.push(new Player(jammerPosA.x, jammerPosA.y, 'A', PlayerRole.jammer));
 		const jammerPosB = this.getRandomJammerPosition();
-		this.players.push(
-			new Player(jammerPosB.x, jammerPosB.y, 'B', PlayerRole.jammer, this.playerRadius)
-		);
+		this.players.push(new Player(jammerPosB.x, jammerPosB.y, 'B', PlayerRole.jammer));
 
 		this.players.forEach((player) => {
 			player.inBounds = this.trackGeometry.isPlayerInBounds(player);
@@ -140,24 +135,22 @@ export class PlayerManager {
 			// Check the center and four points on the circumference
 			const pointsToCheck = [
 				{ x, y }, // Center
-				{ x: x + this.playerRadius, y }, // Right
-				{ x: x - this.playerRadius, y }, // Left
-				{ x, y: y + this.playerRadius }, // Bottom
-				{ x, y: y - this.playerRadius } // Top
+				{ x: x + Skater.playerRadius, y }, // Right
+				{ x: x - Skater.playerRadius, y }, // Left
+				{ x, y: y + Skater.playerRadius }, // Bottom
+				{ x, y: y - Skater.playerRadius } // Top
 			];
 
 			// Check if all points are inside the straight1Area and in bounds
 			const allPointsValid = pointsToCheck.every(
 				(point) =>
 					ctx.isPointInPath(this.startZone, point.x, point.y) &&
-					this.trackGeometry.isPlayerInBounds(
-						new Player(point.x, point.y, 'A', role, this.playerRadius)
-					)
+					this.trackGeometry.isPlayerInBounds(new Player(point.x, point.y, 'A', role))
 			);
 
 			// Check for collisions with existing players
 			const noCollisions = this.players.every(
-				(player) => Math.hypot(player.x - x, player.y - y) > this.playerRadius * 2
+				(player) => Math.hypot(player.x - x, player.y - y) > Skater.playerRadius * 2
 			);
 
 			if (allPointsValid && noCollisions) {
@@ -183,23 +176,21 @@ export class PlayerManager {
 
 			const pointsToCheck = [
 				{ x, y },
-				{ x: x + this.playerRadius, y },
-				{ x: x - this.playerRadius, y },
-				{ x, y: y + this.playerRadius },
-				{ x, y: y - this.playerRadius }
+				{ x: x + Skater.playerRadius, y },
+				{ x: x - Skater.playerRadius, y },
+				{ x, y: y + Skater.playerRadius },
+				{ x, y: y - Skater.playerRadius }
 			];
 
 			const allPointsValid = pointsToCheck.every(
 				(point) =>
 					ctx.isPointInPath(jammerStartZone, point.x, point.y) &&
-					this.trackGeometry.isPlayerInBounds(
-						new Player(point.x, point.y, 'A', PlayerRole.jammer, this.playerRadius)
-					)
+					this.trackGeometry.isPlayerInBounds(new Player(point.x, point.y, 'A', PlayerRole.jammer))
 			);
 
 			// Check for collisions with existing players who are jammers
 			const noCollisions = this.players.every(
-				(player) => Math.hypot(player.x - x, player.y - y) > this.playerRadius * 2
+				(player) => Math.hypot(player.x - x, player.y - y) > Skater.playerRadius * 2
 			);
 
 			if (allPointsValid && noCollisions) {

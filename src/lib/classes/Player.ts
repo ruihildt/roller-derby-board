@@ -17,8 +17,8 @@ export class Player extends Skater {
 	isForemost: boolean;
 	isInEngagementZone: boolean;
 
-	constructor(x: number, y: number, team: string, role: PlayerRole, radius: number) {
-		super(x, y, radius);
+	constructor(x: number, y: number, team: string, role: PlayerRole) {
+		super(x, y);
 		this.team = team;
 		this.role = role;
 		this.color = team === 'A' ? 'rebeccapurple' : 'yellow';
