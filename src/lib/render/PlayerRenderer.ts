@@ -1,5 +1,5 @@
 import type { PackManager } from '../classes/PackManager';
-import type { Player } from '../classes/Player';
+import { PlayerRole, type Player } from '../classes/Player';
 import { TrackGeometry } from '../classes/TrackGeometry';
 
 export class PlayerRenderer {
@@ -52,7 +52,7 @@ export class PlayerRenderer {
 
 		ctx.strokeStyle = player.isInPack
 			? 'green'
-			: player.isInEngagementZone && player.role === 'blocker'
+			: player.isInEngagementZone && (PlayerRole.blocker || PlayerRole.pivot)
 				? 'orange'
 				: player.inBounds
 					? 'black'

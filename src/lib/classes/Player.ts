@@ -1,3 +1,9 @@
+export enum PlayerRole {
+	jammer = 'jammer',
+	blocker = 'blocker',
+	pivot = 'pivot'
+}
+
 export class Player {
 	x: number;
 	y: number;
@@ -5,7 +11,7 @@ export class Player {
 	innerPoint: { x: number; y: number };
 	outerPoint: { x: number; y: number };
 	team: string;
-	role: string;
+	role: PlayerRole;
 	color: string;
 	radius: number;
 	speed: number;
@@ -20,7 +26,7 @@ export class Player {
 	dragOffsetX: number;
 	dragOffsetY: number;
 
-	constructor(x: number, y: number, team: string, role: string, radius: number) {
+	constructor(x: number, y: number, team: string, role: PlayerRole, radius: number) {
 		this.x = x;
 		this.y = y;
 		this.innerPoint = { x, y };

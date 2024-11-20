@@ -1,4 +1,4 @@
-import { Player } from '$lib/classes/Player';
+import { Player, PlayerRole } from '$lib/classes/Player';
 import { PackManager } from '$lib/classes/PackManager';
 import { Renderer } from '$lib/render/Renderer';
 import type { Point } from '$lib/types';
@@ -99,21 +99,27 @@ export class PlayerManager {
 	initializePlayers(): void {
 		// Create 4 blockers for Team A
 		for (let i = 0; i < 4; i++) {
-			const pos = this.getRandomBlockerPosition();
-			this.players.push(new Player(pos.x, pos.y, 'A', 'blocker', this.playerRadius));
+			const role = i < 3 ? PlayerRole.blocker : PlayerRole.pivot;
+			const pos = this.getRandomBlockerPosition(role);
+			this.players.push(new Player(pos.x, pos.y, 'A', role, this.playerRadius));
 		}
 
 		// Create 4 blockers for Team B
 		for (let i = 0; i < 4; i++) {
-			const pos = this.getRandomBlockerPosition();
-			this.players.push(new Player(pos.x, pos.y, 'B', 'blocker', this.playerRadius));
+			const role = i < 3 ? PlayerRole.blocker : PlayerRole.pivot;
+			const pos = this.getRandomBlockerPosition(role);
+			this.players.push(new Player(pos.x, pos.y, 'B', role, this.playerRadius));
 		}
 
 		// Add jammers
 		const jammerPosA = this.getRandomJammerPosition();
-		this.players.push(new Player(jammerPosA.x, jammerPosA.y, 'A', 'jammer', this.playerRadius));
+		this.players.push(
+			new Player(jammerPosA.x, jammerPosA.y, 'A', PlayerRole.jammer, this.playerRadius)
+		);
 		const jammerPosB = this.getRandomJammerPosition();
-		this.players.push(new Player(jammerPosB.x, jammerPosB.y, 'B', 'jammer', this.playerRadius));
+		this.players.push(
+			new Player(jammerPosB.x, jammerPosB.y, 'B', PlayerRole.jammer, this.playerRadius)
+		);
 
 		this.players.forEach((player) => {
 			player.inBounds = this.trackGeometry.isPlayerInBounds(player);
@@ -122,7 +128,7 @@ export class PlayerManager {
 		});
 	}
 
-	getRandomBlockerPosition(): Point {
+	getRandomBlockerPosition(role: PlayerRole): Point {
 		const ctx = this.ctx;
 		let attempts = 0;
 		const maxAttempts = 1000; // Adjust this value as needed
@@ -145,7 +151,7 @@ export class PlayerManager {
 				(point) =>
 					ctx.isPointInPath(this.startZone, point.x, point.y) &&
 					this.trackGeometry.isPlayerInBounds(
-						new Player(point.x, point.y, 'A', 'blocker', this.playerRadius)
+						new Player(point.x, point.y, 'A', role, this.playerRadius)
 					)
 			);
 
@@ -187,7 +193,7 @@ export class PlayerManager {
 				(point) =>
 					ctx.isPointInPath(jammerStartZone, point.x, point.y) &&
 					this.trackGeometry.isPlayerInBounds(
-						new Player(point.x, point.y, 'A', 'jammer', this.playerRadius)
+						new Player(point.x, point.y, 'A', PlayerRole.jammer, this.playerRadius)
 					)
 			);
 
