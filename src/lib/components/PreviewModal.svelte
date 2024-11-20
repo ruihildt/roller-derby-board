@@ -18,18 +18,27 @@
 		close();
 	}
 
+	function handleBackdropClick(event: MouseEvent) {
+		// Close the modal only if the backdrop is clicked
+		if (event.target === event.currentTarget) {
+			close();
+		}
+	}
+
 	function handleDiscard() {
 		close();
 	}
 </script>
 
-<div class="modal">
+<!-- svelte-ignore a11y_no_static_element_interactions -->
+<!-- svelte-ignore a11y_click_events_have_key_events -->
+<div class="modal" onclick={handleBackdropClick}>
 	<div class="modal-content">
 		<!-- svelte-ignore a11y_media_has_caption -->
 		<video controls src={videoUrl} preload="auto" playsinline></video>
 		<div class="actions">
-			<button onclick={handleDownload}>💾 Download</button>
 			<button onclick={handleDiscard} class="discard">🗑️ Discard</button>
+			<button onclick={handleDownload}>💾 Download</button>
 		</div>
 	</div>
 </div>
@@ -49,9 +58,23 @@
 	}
 
 	.modal-content {
-		background: white;
-		max-width: 90%;
-		max-height: 90%;
+		background: #f0f0f0;
+		width: 100%;
+		height: 100%;
+		display: grid;
+		grid-template-rows: 1fr 50px;
+	}
+
+	video {
+		width: 100%;
+		height: 100%;
+		object-fit: contain;
+	}
+
+	.actions {
+		display: flex;
+		justify-content: flex-end;
+		padding: 3px 5px;
 	}
 
 	button {
@@ -78,16 +101,5 @@
 	.discard:hover {
 		background: #d64545;
 		color: white;
-	}
-
-	video {
-		max-width: 100%;
-		max-height: 70vh;
-	}
-
-	.actions {
-		display: flex;
-		justify-content: space-between;
-		padding: 3px 5px;
 	}
 </style>
