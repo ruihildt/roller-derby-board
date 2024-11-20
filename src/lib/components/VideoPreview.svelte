@@ -10,7 +10,14 @@
 		const url = URL.createObjectURL(videoBlob);
 		const a = document.createElement('a');
 		a.href = url;
-		a.download = `derby-strategy-${new Date().toISOString()}.webm`;
+
+		const now = new Date();
+		const year = now.getFullYear().toString().slice(-2);
+		const month = String(now.getMonth() + 1).padStart(2, '0');
+		const day = String(now.getDate()).padStart(2, '0');
+
+		a.download = `rollerderby.click-${year}-${month}-${day}.webm`;
+
 		document.body.appendChild(a);
 		a.click();
 		document.body.removeChild(a);
