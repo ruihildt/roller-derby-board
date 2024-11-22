@@ -128,32 +128,50 @@ export class PlayerManager {
 	}
 
 	initializeSkatingOfficials(): void {
+		const positions = {
+			OPR1: { x: 285.1, y: 24.7 },
+			OPR2: { x: 481.1, y: 23.7 },
+			OPR3: { x: 561.9, y: 17.7 },
+			FPR: { x: 404.9, y: 256.3 },
+			BPR: { x: 575.9, y: 256.3 },
+			JRTeamA: { x: 592.9, y: 198.7 },
+			JRTeamB: { x: 569.9, y: 212.7 }
+		};
+
 		// Add jam refs
-		this.skatingOfficials.push(
-			new SkatingOfficial(this.points.A.x, this.points.A.y, SkatingOfficialRole.jamRef)
+		const jamRefTeamA = new SkatingOfficial(
+			positions.JRTeamA.x,
+			positions.JRTeamA.y,
+			SkatingOfficialRole.jamRef
 		);
-		this.skatingOfficials.push(
-			new SkatingOfficial(this.points.B.x, this.points.B.y, SkatingOfficialRole.jamRef)
+
+		const jamRefTeamB = new SkatingOfficial(
+			positions.JRTeamB.x,
+			positions.JRTeamB.y,
+			SkatingOfficialRole.jamRef
 		);
+
+		this.skatingOfficials.push(jamRefTeamA);
+		this.skatingOfficials.push(jamRefTeamB);
 
 		// Add pack refs
 		this.skatingOfficials.push(
-			new SkatingOfficial(this.points.C.x, this.points.C.y, SkatingOfficialRole.backPackRef)
+			new SkatingOfficial(positions.FPR.x, positions.FPR.y, SkatingOfficialRole.backPackRef)
 		);
 		this.skatingOfficials.push(
-			new SkatingOfficial(this.points.D.x, this.points.D.y, SkatingOfficialRole.frontPackRef)
+			new SkatingOfficial(positions.BPR.x, positions.BPR.y, SkatingOfficialRole.frontPackRef)
 		);
 
 		// Add outside pack refs
-		for (let i = 0; i < 3; i++) {
-			this.skatingOfficials.push(
-				new SkatingOfficial(
-					this.points.E.x + i * 30,
-					this.points.E.y,
-					SkatingOfficialRole.outsidePackRef
-				)
-			);
-		}
+		this.skatingOfficials.push(
+			new SkatingOfficial(positions.OPR1.x, positions.OPR1.y, SkatingOfficialRole.outsidePackRef)
+		);
+		this.skatingOfficials.push(
+			new SkatingOfficial(positions.OPR2.x, positions.OPR2.y, SkatingOfficialRole.outsidePackRef)
+		);
+		this.skatingOfficials.push(
+			new SkatingOfficial(positions.OPR3.x, positions.OPR3.y, SkatingOfficialRole.outsidePackRef)
+		);
 	}
 
 	getRandomBlockerPosition(role: PlayerRole): Point {
@@ -300,6 +318,11 @@ export class PlayerManager {
 				this.trackGeometry.updatePlayerZone(entity);
 				this.trackGeometry.updatePlayerCoordinates(entity);
 				this.packManager.updatePlayers(this.players);
+			}
+
+			// Log position changes for skating officials
+			if (entity instanceof SkatingOfficial) {
+				console.log(`${entity.role} moved from to (${entity.x}, ${entity.y})`);
 			}
 		}
 	}
