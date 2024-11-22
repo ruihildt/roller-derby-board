@@ -1,5 +1,6 @@
 import type { Point } from '../types';
 import { Player } from './Player';
+import type { TeamPlayer } from './TeamPlayer';
 
 type StraightKey = 1 | 3;
 type TurnKey = 2 | 4;
@@ -491,7 +492,7 @@ export class TrackGeometry {
 		return path;
 	}
 
-	isPlayerInBounds(player: Player): boolean {
+	isPlayerInBounds(player: TeamPlayer): boolean {
 		// Check the center and four points on the circumference of the player's circle
 		const pointsToCheck = [
 			{ x: player.x, y: player.y }, // Center
@@ -518,11 +519,11 @@ export class TrackGeometry {
 		return true;
 	}
 
-	updatePlayerZone(player: Player): void {
+	updatePlayerZone(player: TeamPlayer): void {
 		player.zone = this.determineZone(player.x, player.y);
 	}
 
-	createPackZonePath(rearmost: Player, foremost: Player): Path2D {
+	createPackZonePath(rearmost: TeamPlayer, foremost: TeamPlayer): Path2D {
 		const zoneSequence = this.determineZoneSequence(
 			{ x: rearmost.x, y: rearmost.y },
 			{ x: foremost.x, y: foremost.y }
@@ -530,7 +531,7 @@ export class TrackGeometry {
 		return this.createZonePath(rearmost, foremost, zoneSequence);
 	}
 
-	createEngagementZonePath(rearmost: Player, foremost: Player): Path2D {
+	createEngagementZonePath(rearmost: TeamPlayer, foremost: TeamPlayer): Path2D {
 		const points = this.calculateEngagementZonePoints(rearmost, foremost);
 		const zoneSequence = this.determineZoneSequence(points.backward, points.forward);
 		return this.createZonePath(
@@ -540,7 +541,7 @@ export class TrackGeometry {
 		);
 	}
 
-	private createZonePath(start: Player, end: Player, zones: number[]): Path2D {
+	private createZonePath(start: TeamPlayer, end: TeamPlayer, zones: number[]): Path2D {
 		const path = new Path2D();
 
 		zones.forEach((zone, index) => {
@@ -602,14 +603,14 @@ export class TrackGeometry {
 		return Array.from(zones);
 	}
 
-	private calculateEngagementZonePoints(rearmost: Player, foremost: Player) {
+	private calculateEngagementZonePoints(rearmost: TeamPlayer, foremost: TeamPlayer) {
 		return {
 			forward: this.getPointAheadOnMidtrack(foremost, ENGAGEMENT_ZONE_METERS),
 			backward: this.getPointBehindOnMidtrack(rearmost, ENGAGEMENT_ZONE_METERS)
 		};
 	}
 
-	getPointBehindOnMidtrack(startPoint: Player, distanceInMeters: number): Point {
+	getPointBehindOnMidtrack(startPoint: TeamPlayer, distanceInMeters: number): Point {
 		const distanceInPixels = distanceInMeters * this.PIXELS_PER_METER;
 		const zone = this.determineZone(startPoint.x, startPoint.y);
 
@@ -712,7 +713,7 @@ export class TrackGeometry {
 		};
 	}
 
-	getPointAheadOnMidtrack(startPoint: Player, distanceInMeters: number): Point {
+	getPointAheadOnMidtrack(startPoint: TeamPlayer, distanceInMeters: number): Point {
 		const distanceInPixels = distanceInMeters * this.PIXELS_PER_METER;
 		const zone = this.determineZone(startPoint.x, startPoint.y);
 
@@ -814,13 +815,13 @@ export class TrackGeometry {
 		return { x: newX, y: midY };
 	}
 
-	private createDummyPlayer(point: Point): Player {
+	private createDummyPlayer(point: Point): TeamPlayer {
 		const dummy = {
 			x: point.x,
 			y: point.y,
 			innerPoint: { x: 0, y: 0 },
 			outerPoint: { x: 0, y: 0 }
-		} as Player;
+		} as TeamPlayer;
 		this.updatePlayerCoordinates(dummy);
 		return dummy;
 	}

@@ -1,10 +1,10 @@
-import { Player, PlayerRole } from './Player';
+import { TeamPlayer, PlayerRole } from './TeamPlayer';
 import { TrackGeometry } from './TrackGeometry';
 import type { Point } from '../types';
 import { distance } from '../utils/utils';
 
 export class PackManager extends EventTarget {
-	players: Player[];
+	players: TeamPlayer[];
 	PACK_DISTANCE: number;
 	points: Record<string, Point>;
 	zones: number[];
@@ -19,7 +19,7 @@ export class PackManager extends EventTarget {
 		this.trackGeometry = trackGeometry;
 	}
 
-	updatePlayers(players: Player[]) {
+	updatePlayers(players: TeamPlayer[]) {
 		this.players = players;
 		this.determinePack();
 	}
@@ -54,12 +54,12 @@ export class PackManager extends EventTarget {
 		this.dispatchEvent(new Event('packChanged'));
 	}
 
-	isValidGroup(group: Player[]): boolean {
+	isValidGroup(group: TeamPlayer[]): boolean {
 		return group.some((p) => p.team === 'A') && group.some((p) => p.team === 'B');
 	}
 
-	groupBlockers(blockers: Player[]): Player[][] {
-		const groups: Player[][] = [];
+	groupBlockers(blockers: TeamPlayer[]): TeamPlayer[][] {
+		const groups: TeamPlayer[][] = [];
 		const ungrouped = [...blockers];
 
 		while (ungrouped.length > 0) {
@@ -80,13 +80,13 @@ export class PackManager extends EventTarget {
 		return groups;
 	}
 
-	updatePlayerPackStatus(packGroup: Player[]) {
+	updatePlayerPackStatus(packGroup: TeamPlayer[]) {
 		this.players.forEach((player) => {
 			player.isInPack = packGroup.includes(player);
 		});
 	}
 
-	updatePlayerEngagementZoneStatus(packGroup: Player[]) {
+	updatePlayerEngagementZoneStatus(packGroup: TeamPlayer[]) {
 		const rearmost = packGroup.find((p) => p.isRearmost);
 		const foremost = packGroup.find((p) => p.isForemost);
 
@@ -112,7 +112,7 @@ export class PackManager extends EventTarget {
 			});
 	}
 
-	updateRearAndForemostPlayers(packGroup: Player[]): void {
+	updateRearAndForemostPlayers(packGroup: TeamPlayer[]): void {
 		// Reset all players
 		this.players.forEach((player) => {
 			player.isRearmost = false;
@@ -173,7 +173,7 @@ export class PackManager extends EventTarget {
 		}
 	}
 
-	findRearmost(blockers: Player[], zone: number): Player {
+	findRearmost(blockers: TeamPlayer[], zone: number): TeamPlayer {
 		if (zone === 1) {
 			return blockers.reduce((rear, player) => (player.x > rear.x ? player : rear));
 		}
@@ -191,7 +191,7 @@ export class PackManager extends EventTarget {
 		return this.getPlayerByAngle(blockers, turnCenterX, turnCenterY, 'max');
 	}
 
-	findForemost(blockers: Player[], zone: number): Player {
+	findForemost(blockers: TeamPlayer[], zone: number): TeamPlayer {
 		if (zone === 1) {
 			return blockers.reduce((fore, player) => (player.x < fore.x ? player : fore));
 		}
@@ -210,11 +210,11 @@ export class PackManager extends EventTarget {
 	}
 
 	getPlayerByAngle(
-		blockers: Player[],
+		blockers: TeamPlayer[],
 		centerX: number,
 		centerY: number,
 		type: 'min' | 'max'
-	): Player {
+	): TeamPlayer {
 		return blockers.reduce((selected, player) => {
 			const currentAngle = Math.atan2(player.x - centerX, -(player.y - centerY));
 			const selectedAngle = Math.atan2(selected.x - centerX, -(selected.y - centerY));

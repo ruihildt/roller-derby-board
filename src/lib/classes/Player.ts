@@ -1,32 +1,46 @@
-import { Skater } from './Skater';
+export class Player {
+	private static _playerRadius: number = 0;
 
-export enum PlayerRole {
-	jammer = 'jammer',
-	blocker = 'blocker',
-	pivot = 'pivot'
-}
+	static setCanvasWidth(width: number) {
+		this._playerRadius = Math.max(0, Math.floor(width / 70));
+	}
 
-export class Player extends Skater {
-	team: string;
-	role: PlayerRole;
-	color: string;
-	zone: number;
-	inBounds: boolean;
-	isInPack: boolean;
-	isRearmost: boolean;
-	isForemost: boolean;
-	isInEngagementZone: boolean;
+	static get playerRadius(): number {
+		return this._playerRadius;
+	}
 
-	constructor(x: number, y: number, team: string, role: PlayerRole) {
-		super(x, y);
-		this.team = team;
-		this.role = role;
-		this.color = team === 'A' ? 'rebeccapurple' : 'yellow';
-		this.zone = 0;
-		this.inBounds = false;
-		this.isInPack = false;
-		this.isRearmost = false;
-		this.isForemost = false;
-		this.isInEngagementZone = false;
+	x: number;
+	y: number;
+	innerPoint: { x: number; y: number };
+	outerPoint: { x: number; y: number };
+	radius: number;
+	speed: number;
+	direction: number;
+	isDragging: boolean;
+	dragOffsetX: number;
+	dragOffsetY: number;
+
+	constructor(x: number, y: number) {
+		this.x = x;
+		this.y = y;
+		this.innerPoint = { x, y };
+		this.outerPoint = { x, y };
+		this.radius = Player.playerRadius;
+		this.speed = 0;
+		this.direction = 0;
+		this.isDragging = false;
+		this.dragOffsetX = 0;
+		this.dragOffsetY = 0;
+	}
+
+	containsPoint(x: number, y: number): boolean {
+		const dx = this.x - x;
+		const dy = this.y - y;
+		return dx * dx + dy * dy <= this.radius * this.radius;
+	}
+
+	update(): void {
+		this.x += Math.cos(this.direction) * this.speed;
+		this.y += Math.sin(this.direction) * this.speed;
 	}
 }

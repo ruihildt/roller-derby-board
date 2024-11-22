@@ -1,9 +1,9 @@
-import { Player, PlayerRole } from '$lib/classes/Player';
+import { TeamPlayer, PlayerRole } from '$lib/classes/TeamPlayer';
 import { PackManager } from '$lib/classes/PackManager';
 import { Renderer } from '$lib/render/Renderer';
 import type { Point } from '$lib/types';
 import { TrackGeometry } from './TrackGeometry';
-import { Skater } from './Skater';
+import { Player } from './Player';
 import { Official, OfficialRole } from './SkatingOfficial';
 
 export class PlayerManager {
@@ -11,7 +11,7 @@ export class PlayerManager {
 	ctx: CanvasRenderingContext2D;
 	points: Record<string, Point>;
 	PIXELS_PER_METER: number;
-	players: Player[];
+	players: TeamPlayer[];
 	officials: Official[];
 	selectedPlayer: Player | null;
 	trackGeometry: TrackGeometry;
@@ -35,7 +35,7 @@ export class PlayerManager {
 		this.ctx = ctx;
 		this.points = points;
 		this.PIXELS_PER_METER = PIXELS_PER_METER;
-		Skater.setCanvasWidth(canvas.width);
+		Player.setCanvasWidth(canvas.width);
 		this.players = [];
 		this.officials = [];
 		this.selectedPlayer = null;
@@ -73,7 +73,7 @@ export class PlayerManager {
 		this.ctx = ctx;
 		this.points = points;
 		this.PIXELS_PER_METER = PIXELS_PER_METER;
-		Skater.setCanvasWidth(canvas.width);
+		Player.setCanvasWidth(canvas.width);
 
 		// Update track areas
 		this.straight1Area = renderer.straight1Area;
@@ -104,21 +104,21 @@ export class PlayerManager {
 		for (let i = 0; i < 4; i++) {
 			const role = i < 3 ? PlayerRole.blocker : PlayerRole.pivot;
 			const pos = this.getRandomBlockerPosition(role);
-			this.players.push(new Player(pos.x, pos.y, 'A', role));
+			this.players.push(new TeamPlayer(pos.x, pos.y, 'A', role));
 		}
 
 		// Create 4 blockers for Team B
 		for (let i = 0; i < 4; i++) {
 			const role = i < 3 ? PlayerRole.blocker : PlayerRole.pivot;
 			const pos = this.getRandomBlockerPosition(role);
-			this.players.push(new Player(pos.x, pos.y, 'B', role));
+			this.players.push(new TeamPlayer(pos.x, pos.y, 'B', role));
 		}
 
 		// Add jammers
 		const jammerPosA = this.getRandomJammerPosition();
-		this.players.push(new Player(jammerPosA.x, jammerPosA.y, 'A', PlayerRole.jammer));
+		this.players.push(new TeamPlayer(jammerPosA.x, jammerPosA.y, 'A', PlayerRole.jammer));
 		const jammerPosB = this.getRandomJammerPosition();
-		this.players.push(new Player(jammerPosB.x, jammerPosB.y, 'B', PlayerRole.jammer));
+		this.players.push(new TeamPlayer(jammerPosB.x, jammerPosB.y, 'B', PlayerRole.jammer));
 
 		this.players.forEach((player) => {
 			player.inBounds = this.trackGeometry.isPlayerInBounds(player);
@@ -156,22 +156,22 @@ export class PlayerManager {
 			// Check the center and four points on the circumference
 			const pointsToCheck = [
 				{ x, y }, // Center
-				{ x: x + Skater.playerRadius, y }, // Right
-				{ x: x - Skater.playerRadius, y }, // Left
-				{ x, y: y + Skater.playerRadius }, // Bottom
-				{ x, y: y - Skater.playerRadius } // Top
+				{ x: x + Player.playerRadius, y }, // Right
+				{ x: x - Player.playerRadius, y }, // Left
+				{ x, y: y + Player.playerRadius }, // Bottom
+				{ x, y: y - Player.playerRadius } // Top
 			];
 
 			// Check if all points are inside the straight1Area and in bounds
 			const allPointsValid = pointsToCheck.every(
 				(point) =>
 					ctx.isPointInPath(this.startZone, point.x, point.y) &&
-					this.trackGeometry.isPlayerInBounds(new Player(point.x, point.y, 'A', role))
+					this.trackGeometry.isPlayerInBounds(new TeamPlayer(point.x, point.y, 'A', role))
 			);
 
 			// Check for collisions with existing players
 			const noCollisions = this.players.every(
-				(player) => Math.hypot(player.x - x, player.y - y) > Skater.playerRadius * 2
+				(player) => Math.hypot(player.x - x, player.y - y) > Player.playerRadius * 2
 			);
 
 			if (allPointsValid && noCollisions) {
@@ -197,21 +197,23 @@ export class PlayerManager {
 
 			const pointsToCheck = [
 				{ x, y },
-				{ x: x + Skater.playerRadius, y },
-				{ x: x - Skater.playerRadius, y },
-				{ x, y: y + Skater.playerRadius },
-				{ x, y: y - Skater.playerRadius }
+				{ x: x + Player.playerRadius, y },
+				{ x: x - Player.playerRadius, y },
+				{ x, y: y + Player.playerRadius },
+				{ x, y: y - Player.playerRadius }
 			];
 
 			const allPointsValid = pointsToCheck.every(
 				(point) =>
 					ctx.isPointInPath(jammerStartZone, point.x, point.y) &&
-					this.trackGeometry.isPlayerInBounds(new Player(point.x, point.y, 'A', PlayerRole.jammer))
+					this.trackGeometry.isPlayerInBounds(
+						new TeamPlayer(point.x, point.y, 'A', PlayerRole.jammer)
+					)
 			);
 
 			// Check for collisions with existing players who are jammers
 			const noCollisions = this.players.every(
-				(player) => Math.hypot(player.x - x, player.y - y) > Skater.playerRadius * 2
+				(player) => Math.hypot(player.x - x, player.y - y) > Player.playerRadius * 2
 			);
 
 			if (allPointsValid && noCollisions) {
@@ -256,32 +258,37 @@ export class PlayerManager {
 			}
 		});
 
-		target.inBounds = this.trackGeometry.isPlayerInBounds(target);
-		this.trackGeometry.updatePlayerZone(target);
-		this.trackGeometry.updatePlayerCoordinates(target);
+		if (target instanceof TeamPlayer) {
+			target.inBounds = this.trackGeometry.isPlayerInBounds(target);
+			this.trackGeometry.updatePlayerZone(target);
+			this.trackGeometry.updatePlayerCoordinates(target);
+		}
 	}
 
 	handleMouseMove(event: MouseEvent): void {
-		const player = this.selectedPlayer;
-		if (player && player.isDragging) {
+		const entity = this.selectedPlayer;
+		if (entity?.isDragging) {
 			const rect = this.canvas.getBoundingClientRect();
 			const x = event.clientX - rect.left;
 			const y = event.clientY - rect.top;
 
-			player.x = x - player.dragOffsetX;
-			player.y = y - player.dragOffsetY;
+			entity.x = x - entity.dragOffsetX;
+			entity.y = y - entity.dragOffsetY;
 
-			// Check collisions with other players
-			this.players.forEach((otherPlayer) => {
-				if (otherPlayer !== player && this.checkCollision(player, otherPlayer)) {
-					this.handlePush(player, otherPlayer);
+			// Check collisions with all entities
+			const allEntities = [...this.players, ...this.officials];
+			allEntities.forEach((otherEntity) => {
+				if (otherEntity !== entity && this.checkCollision(entity, otherEntity)) {
+					this.handlePush(entity, otherEntity);
 				}
 			});
 
-			player.inBounds = this.trackGeometry.isPlayerInBounds(player);
-			this.trackGeometry.updatePlayerZone(player);
-			this.trackGeometry.updatePlayerCoordinates(player);
-			this.packManager.updatePlayers(this.players);
+			if (entity instanceof TeamPlayer) {
+				entity.inBounds = this.trackGeometry.isPlayerInBounds(entity);
+				this.trackGeometry.updatePlayerZone(entity);
+				this.trackGeometry.updatePlayerCoordinates(entity);
+				this.packManager.updatePlayers(this.players);
+			}
 		}
 	}
 
@@ -290,12 +297,15 @@ export class PlayerManager {
 		const x = event.clientX - rect.left;
 		const y = event.clientY - rect.top;
 
-		for (const player of this.players) {
-			if (player.containsPoint(x, y)) {
-				this.selectedPlayer = player;
-				player.isDragging = true;
-				player.dragOffsetX = x - player.x;
-				player.dragOffsetY = y - player.y;
+		// Check all draggable entities in order of priority
+		const draggableEntities = [...this.players, ...this.officials];
+
+		for (const entity of draggableEntities) {
+			if (entity.containsPoint(x, y)) {
+				this.selectedPlayer = entity;
+				entity.isDragging = true;
+				entity.dragOffsetX = x - entity.x;
+				entity.dragOffsetY = y - entity.y;
 				break;
 			}
 		}

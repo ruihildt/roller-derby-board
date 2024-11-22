@@ -1,5 +1,5 @@
 import type { PackManager } from '../classes/PackManager';
-import { PlayerRole, type Player } from '../classes/Player';
+import { PlayerRole, type TeamPlayer } from '../classes/TeamPlayer';
 import { Official } from '../classes/SkatingOfficial';
 import { TrackGeometry } from '../classes/TrackGeometry';
 
@@ -27,7 +27,7 @@ export class PlayerRenderer {
 		this.packManager = packManager;
 	}
 
-	drawPlayers(players: Player[]): void {
+	drawPlayers(players: TeamPlayer[]): void {
 		for (const player of players) {
 			this.drawPlayer(player, this.ctx);
 		}
@@ -115,7 +115,7 @@ export class PlayerRenderer {
 		}
 	}
 
-	drawPlayersHighRes(players: Player[]): void {
+	drawPlayersHighRes(players: TeamPlayer[]): void {
 		if (!this.highResCanvas) return;
 
 		const ctx = this.highResCtx;
@@ -124,7 +124,7 @@ export class PlayerRenderer {
 		}
 	}
 
-	drawPlayer(player: Player, ctx: CanvasRenderingContext2D): void {
+	drawPlayer(player: TeamPlayer, ctx: CanvasRenderingContext2D): void {
 		// Base circle
 		ctx.beginPath();
 		ctx.arc(player.x, player.y, player.radius, 0, Math.PI * 2);

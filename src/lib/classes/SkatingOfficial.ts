@@ -1,4 +1,4 @@
-import { Skater } from './Skater';
+import { Player } from './Player';
 
 export enum OfficialRole {
 	jamRef = 'jamRef',
@@ -8,7 +8,7 @@ export enum OfficialRole {
 	alternate = 'alternate'
 }
 
-export class Official extends Skater {
+export class Official extends Player {
 	role: OfficialRole;
 
 	constructor(x: number, y: number, role: OfficialRole) {
