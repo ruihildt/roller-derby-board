@@ -3,6 +3,7 @@ import { Renderer } from '$lib/render/Renderer';
 import { PlayerManager } from '$lib/classes/PlayerManager';
 import { PlayerRenderer } from '../render/PlayerRenderer';
 import { PackZoneRenderer } from '../render/PackZoneRenderer';
+import { Player } from './Player';
 
 export class Game {
 	canvas: HTMLCanvasElement;
@@ -26,7 +27,7 @@ export class Game {
 		this.isRecording = isRecording;
 
 		this.LINE_WIDTH = Math.max(1, Math.floor(this.canvas.width / 250));
-		this.PIXELS_PER_METER = Math.floor(this.canvas.width / 29);
+		this.PIXELS_PER_METER = this.canvas.width / 29;
 
 		this.points = this.initializePoints();
 
@@ -82,8 +83,8 @@ export class Game {
 	}
 
 	resize(): void {
-		this.LINE_WIDTH = Math.max(1, Math.floor(this.canvas.width / 250));
-		this.PIXELS_PER_METER = Math.floor(this.canvas.width / 29);
+		this.LINE_WIDTH = Math.max(1, this.canvas.width / 250);
+		this.PIXELS_PER_METER = this.canvas.width / 29;
 
 		const newPoints = this.initializePoints();
 		this.points = newPoints;
@@ -108,6 +109,9 @@ export class Game {
 			this.renderer.trackGeometry,
 			this.playerManager.packManager
 		);
+
+		// Add this line to update player radius on resize
+		Player.setCanvasWidth(this.canvas.width);
 
 		// Update player manager and maintain existing players
 		this.playerManager.resize(

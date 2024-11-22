@@ -22,6 +22,7 @@ export class PlayerManager {
 	turn2Area: Path2D;
 	startZone: Path2D;
 	packManager: PackManager;
+	positions: Record<string, Point>;
 
 	constructor(
 		canvas: HTMLCanvasElement,
@@ -48,6 +49,15 @@ export class PlayerManager {
 		this.startZone = this.trackGeometry.startZone;
 
 		this.packManager = new PackManager(PIXELS_PER_METER, points, this.trackGeometry);
+		this.positions = {
+			OPR1: { x: this.canvas.width * 0.317, y: this.canvas.height * 0.04 },
+			OPR2: { x: this.canvas.width * 0.54, y: this.canvas.height * 0.04 },
+			OPR3: { x: this.canvas.width * 0.63, y: this.canvas.height * 0.03 },
+			FPR: { x: this.canvas.width * 0.46, y: this.canvas.height * 0.422 },
+			BPR: { x: this.canvas.width * 0.64, y: this.canvas.height * 0.422 },
+			JRTeamA: { x: this.canvas.width * 0.66, y: this.canvas.height * 0.333 },
+			JRTeamB: { x: this.canvas.width * 0.634, y: this.canvas.height * 0.356 }
+		};
 
 		if (isInitialLoad) {
 			this.initializeSkatingOfficials();
@@ -63,6 +73,13 @@ export class PlayerManager {
 		PIXELS_PER_METER: number,
 		renderer: Renderer
 	): void {
+		Player.setCanvasWidth(canvas.width);
+
+		// Update radius for all players
+		[...this.players, ...this.skatingOfficials].forEach((player) => {
+			player.radius = Player.playerRadius;
+		});
+
 		// Calculate scale factors based on track dimensions
 		const oldTrackWidth = this.points.A.x - this.points.B.x;
 		const newTrackWidth = points.A.x - points.B.x;
@@ -85,6 +102,13 @@ export class PlayerManager {
 		this.players.forEach((player) => {
 			player.x = player.x * scale;
 			player.y = player.y * scale;
+		});
+
+		// Scale official positions
+		// Scale skating officials positions
+		this.skatingOfficials.forEach((official) => {
+			official.x = official.x * scale;
+			official.y = official.y * scale;
 		});
 
 		// Update track geometry
@@ -128,15 +152,7 @@ export class PlayerManager {
 	}
 
 	initializeSkatingOfficials(): void {
-		const positions = {
-			OPR1: { x: 285.1, y: 24.7 },
-			OPR2: { x: 481.1, y: 23.7 },
-			OPR3: { x: 561.9, y: 17.7 },
-			FPR: { x: 404.9, y: 256.3 },
-			BPR: { x: 575.9, y: 256.3 },
-			JRTeamA: { x: 592.9, y: 198.7 },
-			JRTeamB: { x: 569.9, y: 212.7 }
-		};
+		const positions = this.positions;
 
 		// Add jam refs
 		const jamRefTeamA = new SkatingOfficial(
