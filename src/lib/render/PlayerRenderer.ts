@@ -1,6 +1,6 @@
 import type { PackManager } from '../classes/PackManager';
 import { PlayerRole, type TeamPlayer } from '../classes/TeamPlayer';
-import { Official } from '../classes/SkatingOfficial';
+import { SkatingOfficial } from '../classes/SkatingOfficial';
 import { TrackGeometry } from '../classes/TrackGeometry';
 
 export class PlayerRenderer {
@@ -33,32 +33,32 @@ export class PlayerRenderer {
 		}
 	}
 
-	drawOfficials(officials: Official[]): void {
+	drawSkatingOfficials(skatingOfficials: SkatingOfficial[]): void {
 		const ctx = this.ctx;
-		for (const official of officials) {
+		for (const skatingOfficial of skatingOfficials) {
 			// Base white circle
 			ctx.beginPath();
-			ctx.arc(official.x, official.y, official.radius, 0, Math.PI * 2);
+			ctx.arc(skatingOfficial.x, skatingOfficial.y, skatingOfficial.radius, 0, Math.PI * 2);
 			ctx.fillStyle = 'white';
 			ctx.fill();
 
 			// Draw 7 vertical stripes
 			const stripeCount = 7;
-			const stripeWidth = (official.radius * 2) / stripeCount;
+			const stripeWidth = (skatingOfficial.radius * 2) / stripeCount;
 
 			ctx.save();
 			ctx.beginPath();
-			ctx.arc(official.x, official.y, official.radius, 0, Math.PI * 2);
+			ctx.arc(skatingOfficial.x, skatingOfficial.y, skatingOfficial.radius, 0, Math.PI * 2);
 			ctx.clip();
 
 			for (let i = 0; i < stripeCount; i++) {
 				if (i % 2 === 0) {
 					ctx.fillStyle = 'black';
 					ctx.fillRect(
-						official.x - official.radius + i * stripeWidth,
-						official.y - official.radius,
+						skatingOfficial.x - skatingOfficial.radius + i * stripeWidth,
+						skatingOfficial.y - skatingOfficial.radius,
 						stripeWidth,
-						official.radius * 2
+						skatingOfficial.radius * 2
 					);
 				}
 			}
@@ -66,41 +66,41 @@ export class PlayerRenderer {
 
 			// Circle border
 			ctx.beginPath();
-			ctx.arc(official.x, official.y, official.radius, 0, Math.PI * 2);
+			ctx.arc(skatingOfficial.x, skatingOfficial.y, skatingOfficial.radius, 0, Math.PI * 2);
 			ctx.strokeStyle = 'black';
 			ctx.lineWidth = 2;
 			ctx.stroke();
 		}
 	}
 
-	drawOfficialsHighRes(officials: Official[]): void {
+	drawSkatingOfficialsHighRes(skatingOfficials: SkatingOfficial[]): void {
 		if (!this.highResCanvas) return;
 
 		const ctx = this.highResCtx;
-		for (const official of officials) {
+		for (const skatingOfficial of skatingOfficials) {
 			// Base white circle
 			ctx.beginPath();
-			ctx.arc(official.x, official.y, official.radius, 0, Math.PI * 2);
+			ctx.arc(skatingOfficial.x, skatingOfficial.y, skatingOfficial.radius, 0, Math.PI * 2);
 			ctx.fillStyle = 'white';
 			ctx.fill();
 
 			// Draw 7 vertical stripes
 			const stripeCount = 7;
-			const stripeWidth = (official.radius * 2) / stripeCount;
+			const stripeWidth = (skatingOfficial.radius * 2) / stripeCount;
 
 			ctx.save();
 			ctx.beginPath();
-			ctx.arc(official.x, official.y, official.radius, 0, Math.PI * 2);
+			ctx.arc(skatingOfficial.x, skatingOfficial.y, skatingOfficial.radius, 0, Math.PI * 2);
 			ctx.clip();
 
 			for (let i = 0; i < stripeCount; i++) {
 				if (i % 2 === 0) {
 					ctx.fillStyle = 'black';
 					ctx.fillRect(
-						official.x - official.radius + i * stripeWidth,
-						official.y - official.radius,
+						skatingOfficial.x - skatingOfficial.radius + i * stripeWidth,
+						skatingOfficial.y - skatingOfficial.radius,
 						stripeWidth,
-						official.radius * 2
+						skatingOfficial.radius * 2
 					);
 				}
 			}
@@ -108,7 +108,7 @@ export class PlayerRenderer {
 
 			// Circle border
 			ctx.beginPath();
-			ctx.arc(official.x, official.y, official.radius, 0, Math.PI * 2);
+			ctx.arc(skatingOfficial.x, skatingOfficial.y, skatingOfficial.radius, 0, Math.PI * 2);
 			ctx.strokeStyle = 'black';
 			ctx.lineWidth = 2;
 			ctx.stroke();

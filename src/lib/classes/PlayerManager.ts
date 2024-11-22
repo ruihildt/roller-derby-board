@@ -4,7 +4,7 @@ import { Renderer } from '$lib/render/Renderer';
 import type { Point } from '$lib/types';
 import { TrackGeometry } from './TrackGeometry';
 import { Player } from './Player';
-import { Official, OfficialRole } from './SkatingOfficial';
+import { SkatingOfficial, SkatingOfficialRole } from './SkatingOfficial';
 
 export class PlayerManager {
 	canvas: HTMLCanvasElement;
@@ -12,7 +12,7 @@ export class PlayerManager {
 	points: Record<string, Point>;
 	PIXELS_PER_METER: number;
 	players: TeamPlayer[];
-	officials: Official[];
+	skatingOfficials: SkatingOfficial[];
 	selectedPlayer: Player | null;
 	trackGeometry: TrackGeometry;
 	renderer: Renderer;
@@ -37,7 +37,7 @@ export class PlayerManager {
 		this.PIXELS_PER_METER = PIXELS_PER_METER;
 		Player.setCanvasWidth(canvas.width);
 		this.players = [];
-		this.officials = [];
+		this.skatingOfficials = [];
 		this.selectedPlayer = null;
 		this.trackGeometry = new TrackGeometry(canvas, ctx, points, PIXELS_PER_METER);
 		this.renderer = renderer;
@@ -50,7 +50,7 @@ export class PlayerManager {
 		this.packManager = new PackManager(PIXELS_PER_METER, points, this.trackGeometry);
 
 		if (isInitialLoad) {
-			this.initializeOfficials();
+			this.initializeSkatingOfficials();
 			this.initializePlayers();
 			this.packManager.updatePlayers(this.players);
 		}
@@ -127,19 +127,31 @@ export class PlayerManager {
 		});
 	}
 
-	initializeOfficials(): void {
+	initializeSkatingOfficials(): void {
 		// Add jam refs
-		this.officials.push(new Official(this.points.A.x, this.points.A.y, OfficialRole.jamRef));
-		this.officials.push(new Official(this.points.B.x, this.points.B.y, OfficialRole.jamRef));
+		this.skatingOfficials.push(
+			new SkatingOfficial(this.points.A.x, this.points.A.y, SkatingOfficialRole.jamRef)
+		);
+		this.skatingOfficials.push(
+			new SkatingOfficial(this.points.B.x, this.points.B.y, SkatingOfficialRole.jamRef)
+		);
 
 		// Add pack refs
-		this.officials.push(new Official(this.points.C.x, this.points.C.y, OfficialRole.backPackRef));
-		this.officials.push(new Official(this.points.D.x, this.points.D.y, OfficialRole.frontPackRef));
+		this.skatingOfficials.push(
+			new SkatingOfficial(this.points.C.x, this.points.C.y, SkatingOfficialRole.backPackRef)
+		);
+		this.skatingOfficials.push(
+			new SkatingOfficial(this.points.D.x, this.points.D.y, SkatingOfficialRole.frontPackRef)
+		);
 
 		// Add outside pack refs
 		for (let i = 0; i < 3; i++) {
-			this.officials.push(
-				new Official(this.points.E.x + i * 30, this.points.E.y, OfficialRole.outsidePackRef)
+			this.skatingOfficials.push(
+				new SkatingOfficial(
+					this.points.E.x + i * 30,
+					this.points.E.y,
+					SkatingOfficialRole.outsidePackRef
+				)
 			);
 		}
 	}
@@ -276,7 +288,7 @@ export class PlayerManager {
 			entity.y = y - entity.dragOffsetY;
 
 			// Check collisions with all entities
-			const allEntities = [...this.players, ...this.officials];
+			const allEntities = [...this.players, ...this.skatingOfficials];
 			allEntities.forEach((otherEntity) => {
 				if (otherEntity !== entity && this.checkCollision(entity, otherEntity)) {
 					this.handlePush(entity, otherEntity);
@@ -298,7 +310,7 @@ export class PlayerManager {
 		const y = event.clientY - rect.top;
 
 		// Check all draggable entities in order of priority
-		const draggableEntities = [...this.players, ...this.officials];
+		const draggableEntities = [...this.players, ...this.skatingOfficials];
 
 		for (const entity of draggableEntities) {
 			if (entity.containsPoint(x, y)) {

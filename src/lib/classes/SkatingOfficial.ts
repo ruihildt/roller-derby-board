@@ -1,6 +1,6 @@
 import { Player } from './Player';
 
-export enum OfficialRole {
+export enum SkatingOfficialRole {
 	jamRef = 'jamRef',
 	backPackRef = 'backPackRef',
 	frontPackRef = 'frontPackRef',
@@ -8,10 +8,10 @@ export enum OfficialRole {
 	alternate = 'alternate'
 }
 
-export class Official extends Player {
-	role: OfficialRole;
+export class SkatingOfficial extends Player {
+	role: SkatingOfficialRole;
 
-	constructor(x: number, y: number, role: OfficialRole) {
+	constructor(x: number, y: number, role: SkatingOfficialRole) {
 		super(x, y);
 		this.role = role;
 	}
