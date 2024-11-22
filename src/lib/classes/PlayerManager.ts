@@ -293,14 +293,15 @@ export class PlayerManager {
 		target.x = pusher.x + dirX * (pusher.radius + target.radius + pushForce);
 		target.y = pusher.y + dirY * (pusher.radius + target.radius + pushForce);
 
-		// Check for chain reactions with other players
-		this.players.forEach((otherPlayer) => {
+		// Check for chain reactions with ALL entities
+		const allEntities = [...this.players, ...this.skatingOfficials];
+		allEntities.forEach((otherEntity) => {
 			if (
-				otherPlayer !== target &&
-				otherPlayer !== pusher &&
-				this.checkCollision(target, otherPlayer)
+				otherEntity !== target &&
+				otherEntity !== pusher &&
+				this.checkCollision(target, otherEntity)
 			) {
-				this.handlePush(target, otherPlayer);
+				this.handlePush(target, otherEntity);
 			}
 		});
 
