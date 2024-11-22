@@ -11,8 +11,8 @@ export enum OfficialRole {
 export class Official extends Skater {
 	role: OfficialRole;
 
-	constructor(x: number, y: number, role: OfficialRole, radius: number) {
-		super(x, y, radius);
+	constructor(x: number, y: number, role: OfficialRole) {
+		super(x, y);
 		this.role = role;
 	}
 }

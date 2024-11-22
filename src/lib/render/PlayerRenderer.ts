@@ -1,5 +1,6 @@
 import type { PackManager } from '../classes/PackManager';
 import { PlayerRole, type Player } from '../classes/Player';
+import { Official } from '../classes/SkatingOfficial';
 import { TrackGeometry } from '../classes/TrackGeometry';
 
 export class PlayerRenderer {
@@ -29,6 +30,88 @@ export class PlayerRenderer {
 	drawPlayers(players: Player[]): void {
 		for (const player of players) {
 			this.drawPlayer(player, this.ctx);
+		}
+	}
+
+	drawOfficials(officials: Official[]): void {
+		const ctx = this.ctx;
+		for (const official of officials) {
+			// Base white circle
+			ctx.beginPath();
+			ctx.arc(official.x, official.y, official.radius, 0, Math.PI * 2);
+			ctx.fillStyle = 'white';
+			ctx.fill();
+
+			// Draw 7 vertical stripes
+			const stripeCount = 7;
+			const stripeWidth = (official.radius * 2) / stripeCount;
+
+			ctx.save();
+			ctx.beginPath();
+			ctx.arc(official.x, official.y, official.radius, 0, Math.PI * 2);
+			ctx.clip();
+
+			for (let i = 0; i < stripeCount; i++) {
+				if (i % 2 === 0) {
+					ctx.fillStyle = 'black';
+					ctx.fillRect(
+						official.x - official.radius + i * stripeWidth,
+						official.y - official.radius,
+						stripeWidth,
+						official.radius * 2
+					);
+				}
+			}
+			ctx.restore();
+
+			// Circle border
+			ctx.beginPath();
+			ctx.arc(official.x, official.y, official.radius, 0, Math.PI * 2);
+			ctx.strokeStyle = 'black';
+			ctx.lineWidth = 2;
+			ctx.stroke();
+		}
+	}
+
+	drawOfficialsHighRes(officials: Official[]): void {
+		if (!this.highResCanvas) return;
+
+		const ctx = this.highResCtx;
+		for (const official of officials) {
+			// Base white circle
+			ctx.beginPath();
+			ctx.arc(official.x, official.y, official.radius, 0, Math.PI * 2);
+			ctx.fillStyle = 'white';
+			ctx.fill();
+
+			// Draw 7 vertical stripes
+			const stripeCount = 7;
+			const stripeWidth = (official.radius * 2) / stripeCount;
+
+			ctx.save();
+			ctx.beginPath();
+			ctx.arc(official.x, official.y, official.radius, 0, Math.PI * 2);
+			ctx.clip();
+
+			for (let i = 0; i < stripeCount; i++) {
+				if (i % 2 === 0) {
+					ctx.fillStyle = 'black';
+					ctx.fillRect(
+						official.x - official.radius + i * stripeWidth,
+						official.y - official.radius,
+						stripeWidth,
+						official.radius * 2
+					);
+				}
+			}
+			ctx.restore();
+
+			// Circle border
+			ctx.beginPath();
+			ctx.arc(official.x, official.y, official.radius, 0, Math.PI * 2);
+			ctx.strokeStyle = 'black';
+			ctx.lineWidth = 2;
+			ctx.stroke();
 		}
 	}
 

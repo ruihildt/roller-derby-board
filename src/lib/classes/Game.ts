@@ -120,6 +120,7 @@ export class Game {
 
 		// Draw the players in their new positions
 		this.playerRenderer.drawPlayers(this.playerManager.players);
+		this.playerRenderer.drawOfficials(this.playerManager.officials);
 
 		// Update pack zone renderer with new dimensions
 		this.packZoneRenderer = new PackZoneRenderer(
@@ -161,12 +162,14 @@ export class Game {
 		this.renderer.draw();
 		this.packZoneRenderer.drawEngagementZone(this.ctx);
 		this.playerRenderer.drawPlayers(this.playerManager.players);
+		this.playerRenderer.drawOfficials(this.playerManager.officials);
 	}
 
 	drawHighRes(): void {
 		this.renderer.drawHighRes();
 		this.packZoneRenderer.drawEngagementZoneHighRes();
 		this.playerRenderer.drawPlayersHighRes(this.playerManager.players);
+		this.playerRenderer.drawOfficialsHighRes(this.playerManager.officials);
 	}
 
 	gameLoop(): void {

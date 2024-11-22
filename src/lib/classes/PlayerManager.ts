@@ -4,6 +4,7 @@ import { Renderer } from '$lib/render/Renderer';
 import type { Point } from '$lib/types';
 import { TrackGeometry } from './TrackGeometry';
 import { Skater } from './Skater';
+import { Official, OfficialRole } from './SkatingOfficial';
 
 export class PlayerManager {
 	canvas: HTMLCanvasElement;
@@ -11,6 +12,7 @@ export class PlayerManager {
 	points: Record<string, Point>;
 	PIXELS_PER_METER: number;
 	players: Player[];
+	officials: Official[];
 	selectedPlayer: Player | null;
 	trackGeometry: TrackGeometry;
 	renderer: Renderer;
@@ -35,6 +37,7 @@ export class PlayerManager {
 		this.PIXELS_PER_METER = PIXELS_PER_METER;
 		Skater.setCanvasWidth(canvas.width);
 		this.players = [];
+		this.officials = [];
 		this.selectedPlayer = null;
 		this.trackGeometry = new TrackGeometry(canvas, ctx, points, PIXELS_PER_METER);
 		this.renderer = renderer;
@@ -47,6 +50,7 @@ export class PlayerManager {
 		this.packManager = new PackManager(PIXELS_PER_METER, points, this.trackGeometry);
 
 		if (isInitialLoad) {
+			this.initializeOfficials();
 			this.initializePlayers();
 			this.packManager.updatePlayers(this.players);
 		}
@@ -121,6 +125,23 @@ export class PlayerManager {
 			this.trackGeometry.updatePlayerZone(player);
 			this.trackGeometry.updatePlayerCoordinates(player);
 		});
+	}
+
+	initializeOfficials(): void {
+		// Add jam refs
+		this.officials.push(new Official(this.points.A.x, this.points.A.y, OfficialRole.jamRef));
+		this.officials.push(new Official(this.points.B.x, this.points.B.y, OfficialRole.jamRef));
+
+		// Add pack refs
+		this.officials.push(new Official(this.points.C.x, this.points.C.y, OfficialRole.backPackRef));
+		this.officials.push(new Official(this.points.D.x, this.points.D.y, OfficialRole.frontPackRef));
+
+		// Add outside pack refs
+		for (let i = 0; i < 3; i++) {
+			this.officials.push(
+				new Official(this.points.E.x + i * 30, this.points.E.y, OfficialRole.outsidePackRef)
+			);
+		}
 	}
 
 	getRandomBlockerPosition(role: PlayerRole): Point {
