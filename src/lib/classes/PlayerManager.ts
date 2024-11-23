@@ -50,13 +50,13 @@ export class PlayerManager {
 
 		this.packManager = new PackManager(PIXELS_PER_METER, points, this.trackGeometry);
 		this.positions = {
-			OPR1: { x: this.canvas.width * 0.317, y: this.canvas.height * 0.04 },
-			OPR2: { x: this.canvas.width * 0.54, y: this.canvas.height * 0.04 },
-			OPR3: { x: this.canvas.width * 0.63, y: this.canvas.height * 0.03 },
-			FPR: { x: this.canvas.width * 0.46, y: this.canvas.height * 0.422 },
-			BPR: { x: this.canvas.width * 0.64, y: this.canvas.height * 0.422 },
-			JRTeamA: { x: this.canvas.width * 0.66, y: this.canvas.height * 0.333 },
-			JRTeamB: { x: this.canvas.width * 0.634, y: this.canvas.height * 0.356 }
+			OPR1: { x: this.canvas.width * 0.347, y: this.canvas.height * 0.115 },
+			OPR2: { x: this.canvas.width * 0.535, y: this.canvas.height * 0.11 },
+			OPR3: { x: this.canvas.width * 0.61, y: this.canvas.height * 0.11 },
+			FPR: { x: this.canvas.width * 0.46, y: this.canvas.height * 0.44 },
+			BPR: { x: this.canvas.width * 0.616, y: this.canvas.height * 0.44 },
+			JRTeamA: { x: this.canvas.width * 0.631, y: this.canvas.height * 0.359 },
+			JRTeamB: { x: this.canvas.width * 0.61, y: this.canvas.height * 0.38 }
 		};
 
 		if (isInitialLoad) {

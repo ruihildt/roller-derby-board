@@ -27,7 +27,7 @@
 <style>
 	main {
 		aspect-ratio: 3/2;
-		max-width: 1000px;
+		max-width: 1200px;
 		width: 100%;
 		max-height: 100vh;
 		position: absolute;

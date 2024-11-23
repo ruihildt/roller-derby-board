@@ -4,15 +4,17 @@ import { PlayerManager } from '$lib/classes/PlayerManager';
 import { PlayerRenderer } from '../render/PlayerRenderer';
 import { PackZoneRenderer } from '../render/PackZoneRenderer';
 import { Player } from './Player';
+import { ScalingManager } from './ScalingManager';
 
 export class Game {
 	private static readonly CANVAS_WIDTH_DIVISOR = 250; // For LINE_WIDTH calculation
-	private static readonly TRACK_WIDTH_METERS = 29; // Track width in meters
+	private static readonly TRACK_WIDTH_METERS = 35.1; // Track width in meters
 	private static readonly CENTER_POINT_OFFSET = 5.33; // Distance from center in meters
 	private static readonly VERTICAL_OFFSET_1 = 3.81; // First vertical offset in meters
 	private static readonly VERTICAL_OFFSET_2 = 0.3; // Second vertical offset in meters
 	private static readonly OUTER_VERTICAL_OFFSET_1 = 8.38; // First outer vertical offset in meters
 	private static readonly OUTER_VERTICAL_OFFSET_2 = 7.78; // Second outer vertical offset in meters
+	private scalingManager: ScalingManager;
 
 	canvas: HTMLCanvasElement;
 	highResCanvas: HTMLCanvasElement;
@@ -28,6 +30,8 @@ export class Game {
 	packZoneRenderer: PackZoneRenderer;
 
 	constructor(canvas: HTMLCanvasElement, highResCanvas: HTMLCanvasElement, isRecording: boolean) {
+		this.scalingManager = ScalingManager.getInstance();
+		this.scalingManager.updateDimensions(canvas, Game.TRACK_WIDTH_METERS);
 		this.canvas = canvas;
 		this.ctx = canvas.getContext('2d')!;
 		this.highResCanvas = highResCanvas;
@@ -91,6 +95,7 @@ export class Game {
 	}
 
 	resize(): void {
+		this.scalingManager.updateDimensions(this.canvas, Game.TRACK_WIDTH_METERS);
 		this.LINE_WIDTH = Math.max(1, this.canvas.width / Game.CANVAS_WIDTH_DIVISOR);
 		this.PIXELS_PER_METER = this.canvas.width / Game.TRACK_WIDTH_METERS;
 

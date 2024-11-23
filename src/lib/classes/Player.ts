@@ -2,7 +2,7 @@ export class Player {
 	private static _playerRadius: number = 0;
 
 	static setCanvasWidth(width: number) {
-		this._playerRadius = Math.max(0, Math.floor(width / 70));
+		this._playerRadius = Math.max(0, Math.floor(width / 84));
 	}
 
 	static get playerRadius(): number {
