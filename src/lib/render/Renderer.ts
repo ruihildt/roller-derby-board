@@ -20,6 +20,7 @@ export class Renderer {
 	turn1Area: Path2D;
 	turn2Area: Path2D;
 	trackSurface: Path2D;
+	outerOfficialLanePath: Path2D;
 	midTrackPath: Path2D;
 	tenFeetLines: Path2D;
 	constructor(
@@ -49,6 +50,7 @@ export class Renderer {
 		this.turn1Area = this.trackGeometry.turn1Area;
 		this.turn2Area = this.trackGeometry.turn2Area;
 		this.trackSurface = this.trackGeometry.trackSurface;
+		this.outerOfficialLanePath = this.trackGeometry.outerOfficialLanePath;
 		this.midTrackPath = this.trackGeometry.midTrackPath;
 		this.tenFeetLines = this.trackGeometry.tenFeetLines;
 	}
@@ -91,6 +93,15 @@ export class Renderer {
 		ctx.lineWidth = this.LINE_WIDTH;
 		ctx.stroke(this.innerTrackPath);
 		ctx.stroke(this.outerTrackPath);
+
+		// Draw official lane dotted line
+		ctx.save();
+		ctx.setLineDash([1, 10]);
+		ctx.lineWidth = 1;
+		ctx.strokeStyle = '#000000';
+		ctx.stroke(this.outerOfficialLanePath);
+		ctx.setLineDash([]);
+		ctx.restore();
 
 		// Draw pivot and jammer lines
 		this.drawPivotLine(ctx);

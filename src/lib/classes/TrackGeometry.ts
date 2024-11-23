@@ -51,6 +51,7 @@ export class TrackGeometry {
 	innerTrackPath: Path2D;
 	outerTrackPath: Path2D;
 	trackSurface: Path2D;
+	outerOfficialLanePath: Path2D;
 	midTrackPath: Path2D;
 	pivotLinePath: Path2D;
 	jammerLinePath: Path2D;
@@ -106,6 +107,7 @@ export class TrackGeometry {
 		this.innerTrackPath = this.createInnerTrackPath();
 		this.outerTrackPath = this.createOuterTrackPath();
 		this.trackSurface = this.createTrackSurfacePath();
+		this.outerOfficialLanePath = this.createOuterOfficialLanePath();
 		this.midTrackPath = this.createMidTrackPath();
 		this.pivotLinePath = this.createPivotLinePath();
 		this.jammerLinePath = this.createJammerLinePath();
@@ -171,6 +173,47 @@ export class TrackGeometry {
 		trackSurface.addPath(this.outerTrackPath);
 		trackSurface.addPath(this.innerTrackPath);
 		return trackSurface;
+	}
+
+	createOuterOfficialLanePath(): Path2D {
+		const path = new Path2D();
+		const zones = this.zones;
+		const officialLaneDistance = 3.05 * this.PIXELS_PER_METER;
+
+		// Calculate angle for straight 1
+		const angle1 = Math.atan2(
+			zones[1].outerEnd.y - zones[1].outerStart.y,
+			zones[1].outerEnd.x - zones[1].outerStart.x
+		);
+
+		// Calculate parallel offset points for zone 1
+		const start1X = zones[1].outerStart.x - officialLaneDistance * Math.sin(angle1);
+		const start1Y = zones[1].outerStart.y + officialLaneDistance * Math.cos(angle1);
+		const end1X = zones[1].outerEnd.x - officialLaneDistance * Math.sin(angle1);
+		const end1Y = zones[1].outerEnd.y + officialLaneDistance * Math.cos(angle1);
+
+		path.moveTo(start1X, start1Y);
+		path.lineTo(end1X, end1Y);
+		path.arc(
+			zones[2].centerOuter.x,
+			zones[2].centerOuter.y,
+			Math.abs(zones[2].outerStart.y - zones[2].centerOuter.y) + officialLaneDistance,
+			-HALF_PI,
+			HALF_PI,
+			CLOCKWISE
+		);
+		path.lineTo(zones[3].outerEnd.x, zones[3].outerEnd.y + officialLaneDistance);
+		path.arc(
+			zones[4].centerOuter.x,
+			zones[4].centerOuter.y,
+			Math.abs(zones[4].outerStart.y - zones[4].centerOuter.y) + officialLaneDistance,
+			HALF_PI,
+			-HALF_PI,
+			CLOCKWISE
+		);
+		path.lineTo(start1X, start1Y);
+
+		return path;
 	}
 
 	createStraightPath(straight: StraightKey): Path2D {
