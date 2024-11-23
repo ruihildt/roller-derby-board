@@ -9,7 +9,6 @@ export enum PlayerRole {
 export class TeamPlayer extends Player {
 	team: string;
 	role: PlayerRole;
-	color: string;
 	zone: number;
 	inBounds: boolean;
 	isInPack: boolean;
@@ -21,7 +20,6 @@ export class TeamPlayer extends Player {
 		super(x, y);
 		this.team = team;
 		this.role = role;
-		this.color = team === 'A' ? 'rebeccapurple' : 'yellow';
 		this.zone = 0;
 		this.inBounds = false;
 		this.isInPack = false;

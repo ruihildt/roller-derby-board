@@ -3,6 +3,28 @@ import { PlayerRole, type TeamPlayer } from '../classes/TeamPlayer';
 import { SkatingOfficial } from '../classes/SkatingOfficial';
 import { TrackGeometry } from '../classes/TrackGeometry';
 
+export interface Colors {
+	teamAPrimary: string;
+	teamASecondary: string;
+	teamBPrimary: string;
+	teamBSecondary: string;
+	outOfBounds: string;
+	inBounds: string;
+	inEngagementZone: string;
+	inPack: string;
+}
+
+export const colors: Colors = {
+	teamAPrimary: 'yellow',
+	teamASecondary: 'black',
+	teamBPrimary: 'deepskyblue',
+	teamBSecondary: 'rebeccapurple',
+	outOfBounds: 'red',
+	inBounds: 'black',
+	inEngagementZone: 'orange',
+	inPack: 'green'
+};
+
 export class PlayerRenderer {
 	canvas: HTMLCanvasElement;
 	ctx: CanvasRenderingContext2D;
@@ -10,6 +32,7 @@ export class PlayerRenderer {
 	highResCtx: CanvasRenderingContext2D;
 	trackGeometry: TrackGeometry;
 	packManager: PackManager;
+	colors: Colors;
 
 	constructor(
 		canvas: HTMLCanvasElement,
@@ -25,6 +48,7 @@ export class PlayerRenderer {
 		this.highResCtx = highResCtx;
 		this.trackGeometry = trackGeometry;
 		this.packManager = packManager;
+		this.colors = colors;
 	}
 
 	drawPlayers(players: TeamPlayer[]): void {
@@ -125,17 +149,21 @@ export class PlayerRenderer {
 	}
 
 	drawPlayer(player: TeamPlayer, ctx: CanvasRenderingContext2D): void {
+		const colors = this.colors;
+
+		const teamColor = player.team === 'A' ? colors.teamAPrimary : colors.teamBPrimary;
+
 		// Base circle
 		ctx.beginPath();
 		ctx.arc(player.x, player.y, player.radius, 0, Math.PI * 2);
-		ctx.fillStyle = player.color;
+		ctx.fillStyle = teamColor;
 		ctx.fill();
 
 		// Draw pivot stripe
 		if (player.role === PlayerRole.pivot) {
 			ctx.beginPath();
 			ctx.rect(player.x - player.radius, player.y - 4, player.radius * 2, 7);
-			ctx.fillStyle = player.team === 'A' ? 'deepskyblue' : 'black';
+			ctx.fillStyle = player.team === 'A' ? colors.teamASecondary : colors.teamBSecondary;
 			ctx.fill();
 		}
 
@@ -151,7 +179,7 @@ export class PlayerRenderer {
 				else ctx.lineTo(x, y);
 			}
 			ctx.closePath();
-			ctx.fillStyle = player.team === 'A' ? 'deepskyblue' : 'black';
+			ctx.fillStyle = player.team === 'A' ? colors.teamASecondary : colors.teamBSecondary;
 			ctx.fill();
 		}
 
@@ -159,12 +187,12 @@ export class PlayerRenderer {
 		ctx.beginPath();
 		ctx.arc(player.x, player.y, player.radius, 0, Math.PI * 2);
 		ctx.strokeStyle = player.isInPack
-			? 'green'
+			? colors.inPack
 			: player.isInEngagementZone && player.role !== PlayerRole.jammer
-				? 'orange'
+				? colors.inEngagementZone
 				: player.inBounds
-					? 'black'
-					: 'red';
+					? colors.inBounds
+					: colors.outOfBounds;
 
 		ctx.lineWidth = 4;
 		ctx.stroke();
