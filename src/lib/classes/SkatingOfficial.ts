@@ -1,7 +1,8 @@
 import { Player } from './Player';
 
 export enum SkatingOfficialRole {
-	jamRef = 'jamRef',
+	jamRefA = 'jamRefA',
+	jamRefB = 'jamRefB',
 	backPackRef = 'backPackRef',
 	frontPackRef = 'frontPackRef',
 	outsidePackRef = 'outsidePackRef',

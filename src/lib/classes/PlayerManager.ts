@@ -158,13 +158,13 @@ export class PlayerManager {
 		const jamRefTeamA = new SkatingOfficial(
 			positions.JRTeamA.x,
 			positions.JRTeamA.y,
-			SkatingOfficialRole.jamRef
+			SkatingOfficialRole.jamRefA
 		);
 
 		const jamRefTeamB = new SkatingOfficial(
 			positions.JRTeamB.x,
 			positions.JRTeamB.y,
-			SkatingOfficialRole.jamRef
+			SkatingOfficialRole.jamRefB
 		);
 
 		this.skatingOfficials.push(jamRefTeamA);
