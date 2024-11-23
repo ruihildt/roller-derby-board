@@ -314,7 +314,7 @@ export class TrackGeometry {
 		return path;
 	}
 
-	drawStraight1TenFeetLines(): Path2D {
+	drawStraight2TenFeetLines(): Path2D {
 		const path = new Path2D();
 		const p = this.points;
 
@@ -354,14 +354,13 @@ export class TrackGeometry {
 		return path;
 	}
 
-	drawStraight2TenFeetLines(): Path2D {
+	drawStraight1TenFeetLines(): Path2D {
 		const path = new Path2D();
 		const p = this.points;
 
 		// Calculate distances in pixels
 		const tenFeet = 3.05 * this.PIXELS_PER_METER;
 		const twentyFeet = 6.1 * this.PIXELS_PER_METER;
-		const thirtyFeet = 9.15 * this.PIXELS_PER_METER;
 		const lineLength = 0.8 * this.PIXELS_PER_METER;
 
 		// Create a dummy player to use updatePlayerCoordinates
@@ -372,7 +371,7 @@ export class TrackGeometry {
 			outerPoint: { x: 0, y: 0 }
 		} as Player;
 
-		[0, tenFeet, twentyFeet, thirtyFeet].forEach((distance) => {
+		[tenFeet, twentyFeet].forEach((distance) => {
 			dummyPlayer.x = p.E.x + distance;
 			this.updatePlayerCoordinates(dummyPlayer);
 
