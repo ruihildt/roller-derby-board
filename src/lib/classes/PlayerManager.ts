@@ -316,11 +316,21 @@ export class PlayerManager {
 		const entity = this.selectedPlayer;
 		if (entity?.isDragging) {
 			const rect = this.canvas.getBoundingClientRect();
-			const x = event.clientX - rect.left;
-			const y = event.clientY - rect.top;
+			let x = event.clientX - rect.left;
+			let y = event.clientY - rect.top;
 
-			entity.x = x - entity.dragOffsetX;
-			entity.y = y - entity.dragOffsetY;
+			// Constrain x and y to keep player fully within canvas bounds
+			x = Math.max(
+				entity.radius,
+				Math.min(this.canvas.width - entity.radius, x - entity.dragOffsetX)
+			);
+			y = Math.max(
+				entity.radius,
+				Math.min(this.canvas.height - entity.radius, y - entity.dragOffsetY)
+			);
+
+			entity.x = x;
+			entity.y = y;
 
 			// Check collisions with all entities
 			const allEntities = [...this.players, ...this.skatingOfficials];
