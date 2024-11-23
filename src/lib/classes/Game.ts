@@ -6,6 +6,14 @@ import { PackZoneRenderer } from '../render/PackZoneRenderer';
 import { Player } from './Player';
 
 export class Game {
+	private static readonly CANVAS_WIDTH_DIVISOR = 250; // For LINE_WIDTH calculation
+	private static readonly TRACK_WIDTH_METERS = 29; // Track width in meters
+	private static readonly CENTER_POINT_OFFSET = 5.33; // Distance from center in meters
+	private static readonly VERTICAL_OFFSET_1 = 3.81; // First vertical offset in meters
+	private static readonly VERTICAL_OFFSET_2 = 0.3; // Second vertical offset in meters
+	private static readonly OUTER_VERTICAL_OFFSET_1 = 8.38; // First outer vertical offset in meters
+	private static readonly OUTER_VERTICAL_OFFSET_2 = 7.78; // Second outer vertical offset in meters
+
 	canvas: HTMLCanvasElement;
 	highResCanvas: HTMLCanvasElement;
 	ctx: CanvasRenderingContext2D;
@@ -26,8 +34,8 @@ export class Game {
 		this.highResCtx = highResCanvas.getContext('2d')!;
 		this.isRecording = isRecording;
 
-		this.LINE_WIDTH = Math.max(1, Math.floor(this.canvas.width / 250));
-		this.PIXELS_PER_METER = this.canvas.width / 29;
+		this.LINE_WIDTH = Math.max(1, Math.floor(this.canvas.width / Game.CANVAS_WIDTH_DIVISOR));
+		this.PIXELS_PER_METER = this.canvas.width / Game.TRACK_WIDTH_METERS;
 
 		this.points = this.initializePoints();
 
@@ -83,8 +91,8 @@ export class Game {
 	}
 
 	resize(): void {
-		this.LINE_WIDTH = Math.max(1, this.canvas.width / 250);
-		this.PIXELS_PER_METER = this.canvas.width / 29;
+		this.LINE_WIDTH = Math.max(1, this.canvas.width / Game.CANVAS_WIDTH_DIVISOR);
+		this.PIXELS_PER_METER = this.canvas.width / Game.TRACK_WIDTH_METERS;
 
 		const newPoints = this.initializePoints();
 		this.points = newPoints;
@@ -143,18 +151,48 @@ export class Game {
 		const scale = this.PIXELS_PER_METER;
 
 		return {
-			A: { x: centerX + 5.33 * scale, y: centerY },
-			B: { x: centerX - 5.33 * scale, y: centerY },
-			C: { x: centerX + 5.33 * scale, y: centerY - 3.81 * scale },
-			D: { x: centerX + 5.33 * scale, y: centerY + 3.81 * scale },
-			E: { x: centerX - 5.33 * scale, y: centerY - 3.81 * scale },
-			F: { x: centerX - 5.33 * scale, y: centerY + 3.81 * scale },
-			G: { x: centerX + 5.33 * scale, y: centerY - 0.3 * scale },
-			H: { x: centerX - 5.33 * scale, y: centerY + 0.3 * scale },
-			I: { x: centerX + 5.33 * scale, y: centerY - 8.38 * scale },
-			J: { x: centerX + 5.33 * scale, y: centerY + 7.78 * scale },
-			K: { x: centerX - 5.33 * scale, y: centerY - 7.78 * scale },
-			L: { x: centerX - 5.33 * scale, y: centerY + 8.38 * scale }
+			A: { x: centerX + Game.CENTER_POINT_OFFSET * scale, y: centerY },
+			B: { x: centerX - Game.CENTER_POINT_OFFSET * scale, y: centerY },
+			C: {
+				x: centerX + Game.CENTER_POINT_OFFSET * scale,
+				y: centerY - Game.VERTICAL_OFFSET_1 * scale
+			},
+			D: {
+				x: centerX + Game.CENTER_POINT_OFFSET * scale,
+				y: centerY + Game.VERTICAL_OFFSET_1 * scale
+			},
+			E: {
+				x: centerX - Game.CENTER_POINT_OFFSET * scale,
+				y: centerY - Game.VERTICAL_OFFSET_1 * scale
+			},
+			F: {
+				x: centerX - Game.CENTER_POINT_OFFSET * scale,
+				y: centerY + Game.VERTICAL_OFFSET_1 * scale
+			},
+			G: {
+				x: centerX + Game.CENTER_POINT_OFFSET * scale,
+				y: centerY - Game.VERTICAL_OFFSET_2 * scale
+			},
+			H: {
+				x: centerX - Game.CENTER_POINT_OFFSET * scale,
+				y: centerY + Game.VERTICAL_OFFSET_2 * scale
+			},
+			I: {
+				x: centerX + Game.CENTER_POINT_OFFSET * scale,
+				y: centerY - Game.OUTER_VERTICAL_OFFSET_1 * scale
+			},
+			J: {
+				x: centerX + Game.CENTER_POINT_OFFSET * scale,
+				y: centerY + Game.OUTER_VERTICAL_OFFSET_2 * scale
+			},
+			K: {
+				x: centerX - Game.CENTER_POINT_OFFSET * scale,
+				y: centerY - Game.OUTER_VERTICAL_OFFSET_2 * scale
+			},
+			L: {
+				x: centerX - Game.CENTER_POINT_OFFSET * scale,
+				y: centerY + Game.OUTER_VERTICAL_OFFSET_1 * scale
+			}
 		};
 	}
 
