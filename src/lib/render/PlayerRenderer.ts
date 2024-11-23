@@ -168,6 +168,44 @@ export class PlayerRenderer {
 			}
 			ctx.restore();
 
+			// Inside the if block for jam refs
+			if (
+				skatingOfficial.role === SkatingOfficialRole.jamRefA ||
+				skatingOfficial.role === SkatingOfficialRole.jamRefB
+			) {
+				const starSize = skatingOfficial.radius * 0.7;
+				const outlineSize = starSize + 4; // Slightly larger for outline
+
+				// Draw outline star first
+				ctx.beginPath();
+				for (let i = 0; i < 5; i++) {
+					const angle = (i * 4 * Math.PI) / 5 - Math.PI / 2;
+					const x = skatingOfficial.x + Math.cos(angle) * outlineSize;
+					const y = skatingOfficial.y + Math.sin(angle) * outlineSize;
+					if (i === 0) ctx.moveTo(x, y);
+					else ctx.lineTo(x, y);
+				}
+				ctx.closePath();
+				ctx.fillStyle = 'black';
+				ctx.fill();
+
+				// Draw main star
+				ctx.beginPath();
+				for (let i = 0; i < 5; i++) {
+					const angle = (i * 4 * Math.PI) / 5 - Math.PI / 2;
+					const x = skatingOfficial.x + Math.cos(angle) * starSize;
+					const y = skatingOfficial.y + Math.sin(angle) * starSize;
+					if (i === 0) ctx.moveTo(x, y);
+					else ctx.lineTo(x, y);
+				}
+				ctx.closePath();
+				ctx.fillStyle =
+					skatingOfficial.role === SkatingOfficialRole.jamRefA
+						? this.colors.teamAPrimary
+						: this.colors.teamBPrimary;
+				ctx.fill();
+			}
+
 			// Circle border
 			ctx.beginPath();
 			ctx.arc(skatingOfficial.x, skatingOfficial.y, skatingOfficial.radius, 0, Math.PI * 2);
