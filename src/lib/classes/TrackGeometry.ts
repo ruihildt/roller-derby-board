@@ -137,6 +137,7 @@ export class TrackGeometry {
 			-HALF_PI,
 			CLOCKWISE
 		);
+		path.closePath();
 
 		return path;
 	}
@@ -164,6 +165,7 @@ export class TrackGeometry {
 			-HALF_PI,
 			CLOCKWISE
 		);
+		path.closePath();
 
 		return path;
 	}
