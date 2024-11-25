@@ -206,8 +206,13 @@ export class Game {
 	}
 
 	draw(): void {
+		// 1. Clear and draw background
 		this.renderer.draw();
+		// 2. Draw engagement zone
 		this.packZoneRenderer.drawEngagementZone(this.ctx);
+		// 3. Draw track boundaries
+		this.renderer.drawTrackBoundaries(this.ctx);
+		// 4. Draw all players and officials on top
 		this.playerRenderer.drawPlayers(this.playerManager.players);
 		this.playerRenderer.drawSkatingOfficials(this.playerManager.skatingOfficials);
 	}
@@ -215,6 +220,7 @@ export class Game {
 	drawHighRes(): void {
 		this.renderer.drawHighRes();
 		this.packZoneRenderer.drawEngagementZoneHighRes();
+		this.renderer.drawTrackBoundariesHighRes();
 		this.playerRenderer.drawPlayersHighRes(this.playerManager.players);
 		this.playerRenderer.drawSkatingOfficialsHighRes(this.playerManager.skatingOfficials);
 	}

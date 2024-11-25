@@ -112,6 +112,60 @@ export class Renderer {
 		ctx.lineWidth = this.LINE_WIDTH / 2;
 		ctx.stroke(this.tenFeetLines);
 	}
+	drawTrackBoundaries(ctx: CanvasRenderingContext2D): void {
+		// Draw the inner and outer track lines
+		ctx.strokeStyle = 'blue';
+		ctx.lineWidth = this.LINE_WIDTH;
+		ctx.stroke(this.innerTrackPath);
+		ctx.stroke(this.outerTrackPath);
+
+		// Draw official lane dotted line
+		ctx.save();
+		ctx.setLineDash([1, 10]);
+		ctx.lineWidth = 1;
+		ctx.strokeStyle = '#000000';
+		ctx.stroke(this.outerOfficialLanePath);
+		ctx.setLineDash([]);
+		ctx.restore();
+
+		// Draw pivot and jammer lines
+		this.drawPivotLine(ctx);
+		this.drawJammerLine(ctx);
+
+		// Draw the 10-foot lines
+		ctx.strokeStyle = 'black';
+		ctx.lineWidth = this.LINE_WIDTH / 2;
+		ctx.stroke(this.tenFeetLines);
+	}
+
+	drawTrackBoundariesHighRes(): void {
+		if (!this.highResCanvas) return;
+		const ctx = this.highResCtx;
+
+		// Draw the inner and outer track lines
+		ctx.strokeStyle = 'blue';
+		ctx.lineWidth = this.LINE_WIDTH;
+		ctx.stroke(this.innerTrackPath);
+		ctx.stroke(this.outerTrackPath);
+
+		// Draw official lane dotted line
+		ctx.save();
+		ctx.setLineDash([1, 10]);
+		ctx.lineWidth = 1;
+		ctx.strokeStyle = '#000000';
+		ctx.stroke(this.outerOfficialLanePath);
+		ctx.setLineDash([]);
+		ctx.restore();
+
+		// Draw pivot and jammer lines
+		this.drawPivotLine(ctx);
+		this.drawJammerLine(ctx);
+
+		// Draw the 10-foot lines
+		ctx.strokeStyle = 'black';
+		ctx.lineWidth = this.LINE_WIDTH / 2;
+		ctx.stroke(this.tenFeetLines);
+	}
 
 	drawPivotLine(ctx: CanvasRenderingContext2D): void {
 		ctx.lineWidth = this.LINE_WIDTH;
