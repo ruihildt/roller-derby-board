@@ -60,7 +60,7 @@
 		align-items: center;
 		width: 100%;
 		height: 100%;
-		background-color: aquamarine;
+		background-color: #f0f0f0;
 	}
 
 	.highResCanvas {
