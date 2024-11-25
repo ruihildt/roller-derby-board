@@ -49,7 +49,7 @@
 
 <div bind:this={container} class="board-container">
 	<canvas bind:this={canvas}></canvas>
-	<canvas bind:this={highResCanvas} style="display: none;"></canvas>
+	<canvas bind:this={highResCanvas} class="highResCanvas"></canvas>
 	<ControlBar {highResCanvas} recordingComplete={handleRecordingComplete} />
 </div>
 
@@ -61,5 +61,9 @@
 		width: 100%;
 		height: 100%;
 		background-color: aquamarine;
+	}
+
+	.highResCanvas {
+		display: none;
 	}
 </style>

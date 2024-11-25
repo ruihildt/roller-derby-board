@@ -16,7 +16,7 @@ export function calculateCanvasSize(
 	containerWidth: number,
 	containerHeight: number
 ): { width: number; height: number } {
-	const aspectRatio = 100 / 66;
+	const aspectRatio = 100 / 67;
 	let width = containerWidth;
 	let height = containerWidth / aspectRatio;
 

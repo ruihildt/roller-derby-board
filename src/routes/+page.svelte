@@ -37,7 +37,7 @@
 		place-items: center;
 	}
 	.centering-container {
-		aspect-ratio: 3/2;
+		aspect-ratio: 59.8/42;
 		width: 100%;
 		max-width: 1200px;
 		max-height: 100vh;
