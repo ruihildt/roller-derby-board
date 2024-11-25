@@ -16,7 +16,11 @@
 
 	function handleResize() {
 		if (!container) return;
-		const { width, height } = calculateCanvasSize(container.clientWidth, container.clientHeight);
+		// Subtract control bar height
+		const controlBarHeight = 40;
+		const availableHeight = container.clientHeight - controlBarHeight;
+		const { width, height } = calculateCanvasSize(container.clientWidth, availableHeight);
+
 		canvas.width = width;
 		canvas.height = height;
 		highResCanvas.width = width * 2;
@@ -43,16 +47,19 @@
 	}
 </script>
 
-<div bind:this={container}>
+<div bind:this={container} class="board-container">
 	<canvas bind:this={canvas}></canvas>
 	<canvas bind:this={highResCanvas} style="display: none;"></canvas>
 	<ControlBar {highResCanvas} recordingComplete={handleRecordingComplete} />
 </div>
 
 <style>
-	div {
+	.board-container {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
 		width: 100%;
 		height: 100%;
-		position: relative;
+		background-color: aquamarine;
 	}
 </style>

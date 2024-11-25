@@ -17,22 +17,29 @@
 </script>
 
 <main>
-	<BoardCanvas recordingComplete={handleRecordingComplete} />
-
+	<div class="centering-container">
+		<BoardCanvas recordingComplete={handleRecordingComplete} />
+	</div>
 	{#if showPreview && recordedBlob}
 		<VideoPreview videoBlob={recordedBlob} close={handlePreviewClose} />
 	{/if}
 </main>
 
 <style>
+	:global(body) {
+		margin: 0;
+		height: 100vh;
+		display: grid;
+	}
+
 	main {
+		display: grid;
+		place-items: center;
+	}
+	.centering-container {
 		aspect-ratio: 3/2;
-		max-width: 1200px;
 		width: 100%;
+		max-width: 1200px;
 		max-height: 100vh;
-		position: absolute;
-		top: 50%;
-		left: 50%;
-		transform: translate(-50%, -50%);
 	}
 </style>
