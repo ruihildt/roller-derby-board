@@ -127,9 +127,6 @@
 
 <style>
 	.controls-container {
-		position: absolute;
-		bottom: 20px;
-		right: 20px;
 		display: flex;
 		align-items: center;
 		gap: 10px;
@@ -152,12 +149,10 @@
 		font-weight: 500;
 		display: flex;
 		align-items: center;
-		height: 40px;
 	}
 
 	.mic-button {
 		position: relative;
-		padding: 13px;
 	}
 
 	.mic-emoji {
@@ -176,7 +171,6 @@
 		text-align: center;
 		justify-content: center;
 		gap: 8px;
-		padding: 10px 20px;
 	}
 
 	.recording-dot {

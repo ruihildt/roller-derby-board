@@ -53,9 +53,6 @@
 		background: #f1ecec;
 	}
 	.about-button {
-		position: absolute;
-		bottom: 20px;
-		left: 20px;
 		background: white;
 		border: 1px solid #ccc;
 		border-radius: 4px;
@@ -65,13 +62,11 @@
 			-apple-system,
 			sans-serif;
 		font-weight: 500;
-		height: 40px;
-		min-width: 100px;
+
 		display: flex;
 		align-items: center;
 		justify-content: center;
 		gap: 8px;
-		padding: 10px 20px;
 	}
 
 	.about-overlay {

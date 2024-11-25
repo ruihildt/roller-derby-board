@@ -2,8 +2,7 @@
 	import { onMount } from 'svelte';
 	import { Game } from '$lib/classes/Game';
 	import { calculateCanvasSize } from '$lib/utils/utils';
-	import RecordingControls from '$lib/components/RecordingControls.svelte';
-	import AboutPage from '$lib/components/AboutPage.svelte';
+	import ControlBar from '$lib/components/ControlBar.svelte';
 
 	let { recordingComplete } = $props<{
 		recordingComplete: (blob: Blob) => void;
@@ -47,8 +46,7 @@
 <div bind:this={container}>
 	<canvas bind:this={canvas}></canvas>
 	<canvas bind:this={highResCanvas} style="display: none;"></canvas>
-	<AboutPage />
-	<RecordingControls {highResCanvas} recordingComplete={handleRecordingComplete} />
+	<ControlBar {highResCanvas} recordingComplete={handleRecordingComplete} />
 </div>
 
 <style>
