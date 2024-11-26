@@ -25,6 +25,6 @@
 		{#if showPreview && recordedBlob}
 			<VideoPreview videoBlob={recordedBlob} close={handlePreviewClose} />
 		{/if}
-		<AboutPage />
 	</div>
+	<AboutPage />
 </main>
