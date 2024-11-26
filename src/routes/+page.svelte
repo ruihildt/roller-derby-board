@@ -17,32 +17,14 @@
 	}
 </script>
 
-<main>
-	<div class="centering-container">
-		<BoardCanvas recordingComplete={handleRecordingComplete} />
+<main class="min-h-screen bg-gray-100">
+	<div class="container mx-auto px-4 py-8">
+		<div class="aspect-[59.8/42] w-full max-w-[1200px] max-h-screen mx-auto">
+			<BoardCanvas recordingComplete={handleRecordingComplete} />
+		</div>
+		{#if showPreview && recordedBlob}
+			<VideoPreview videoBlob={recordedBlob} close={handlePreviewClose} />
+		{/if}
+		<AboutPage />
 	</div>
-	{#if showPreview && recordedBlob}
-		<VideoPreview videoBlob={recordedBlob} close={handlePreviewClose} />
-	{/if}
-	<AboutPage />
 </main>
-
-<style>
-	:global(body) {
-		margin: 0;
-		height: 100vh;
-		display: grid;
-		background-color: #f0f0f0;
-	}
-
-	main {
-		display: grid;
-		place-items: center;
-	}
-	.centering-container {
-		aspect-ratio: 59.8/42;
-		width: 100%;
-		max-width: 1200px;
-		max-height: 100vh;
-	}
-</style>
