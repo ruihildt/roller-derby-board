@@ -48,9 +48,9 @@
 </script>
 
 <div bind:this={container} class="board-container">
-	<canvas bind:this={canvas}></canvas>
-	<canvas bind:this={highResCanvas} class="highResCanvas"></canvas>
 	<ControlBar {highResCanvas} recordingComplete={handleRecordingComplete} />
+	<canvas bind:this={canvas} class="regular-canvas"></canvas>
+	<canvas bind:this={highResCanvas} class="highResCanvas"></canvas>
 </div>
 
 <style>
@@ -60,10 +60,13 @@
 		align-items: center;
 		width: 100%;
 		height: 100%;
-		background-color: #f0f0f0;
 	}
 
 	.highResCanvas {
 		display: none;
+	}
+
+	.regular-canvas {
+		border: solid 1px #cccccc;
 	}
 </style>

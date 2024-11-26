@@ -46,27 +46,38 @@
 	</div>
 {/if}
 
-<button class="about-button" on:click={() => (showAbout = true)}> ℹ️ About </button>
+<button class="about-button" on:click={() => (showAbout = true)}>
+	<span class="info-icon">ℹ️</span>
+</button>
 
 <style>
-	button:hover {
-		background: #f1ecec;
+	.info-icon {
+		font-size: 22px;
 	}
-	.about-button {
-		background: white;
-		border: 1px solid #ccc;
-		border-radius: 4px;
-		cursor: pointer;
-		font-family:
-			system-ui,
-			-apple-system,
-			sans-serif;
-		font-weight: 500;
 
+	.about-button {
+		position: absolute;
+		bottom: 20px;
+		right: 20px;
+		width: 40px;
+		height: 40px;
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		gap: 8px;
+		background: white;
+		border: 1px solid #ccc;
+		border-radius: 50%;
+		cursor: pointer;
+		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+		transition:
+			transform 0.2s ease,
+			box-shadow 0.2s ease;
+	}
+
+	.about-button:hover {
+		background: #f1ecec;
+		transform: translateY(-1px);
+		box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 	}
 
 	.about-overlay {

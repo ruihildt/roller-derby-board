@@ -1,4 +1,5 @@
 <script lang="ts">
+	import AboutPage from '$lib/components/AboutPage.svelte';
 	import BoardCanvas from '$lib/components/BoardCanvas.svelte';
 	import VideoPreview from '$lib/components/VideoPreview.svelte';
 
@@ -23,6 +24,7 @@
 	{#if showPreview && recordedBlob}
 		<VideoPreview videoBlob={recordedBlob} close={handlePreviewClose} />
 	{/if}
+	<AboutPage />
 </main>
 
 <style>
@@ -30,6 +32,7 @@
 		margin: 0;
 		height: 100vh;
 		display: grid;
+		background-color: #f0f0f0;
 	}
 
 	main {

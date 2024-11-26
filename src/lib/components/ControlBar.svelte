@@ -7,7 +7,6 @@
 </script>
 
 <div class="control-bar">
-	<AboutPage />
 	<RecordingControls {highResCanvas} {recordingComplete} />
 </div>
 
@@ -17,7 +16,6 @@
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-		background-color: rebeccapurple;
 		height: 40px;
 	}
 </style>
