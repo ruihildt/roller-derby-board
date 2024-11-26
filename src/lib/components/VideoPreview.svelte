@@ -5,6 +5,13 @@
 	}>();
 
 	let videoUrl = URL.createObjectURL(videoBlob);
+	let videoElement: HTMLVideoElement;
+
+	$effect(() => {
+		if (videoElement) {
+			videoElement.load();
+		}
+	});
 
 	function handleDownload() {
 		const url = URL.createObjectURL(videoBlob);
@@ -26,7 +33,6 @@
 	}
 
 	function handleBackdropClick(event: MouseEvent) {
-		// Close the modal only if the backdrop is clicked
 		if (event.target === event.currentTarget) {
 			close();
 		}
@@ -39,74 +45,32 @@
 
 <!-- svelte-ignore a11y_no_static_element_interactions -->
 <!-- svelte-ignore a11y_click_events_have_key_events -->
-<div class="modal" onclick={handleBackdropClick}>
-	<div class="modal-content">
+<div
+	class="fixed inset-0 bg-black/70 flex justify-center items-center z-[1000]"
+	onclick={handleBackdropClick}
+>
+	<div class="bg-gray-100 w-full h-full grid grid-rows-[1fr_50px]">
 		<!-- svelte-ignore a11y_media_has_caption -->
-		<video controls src={videoUrl} preload="auto" playsinline></video>
-		<div class="actions">
-			<button onclick={handleDiscard} class="discard">🗑️ Discard</button>
-			<button onclick={handleDownload}>💾 Download</button>
+		<video
+			controls={true}
+			src={videoUrl}
+			preload="auto"
+			playsinline
+			class="w-full h-full object-contain"
+		></video>
+		<div class="flex justify-end p-[3px_5px]">
+			<button
+				onclick={handleDiscard}
+				class="bg-white border border-gray-300 rounded cursor-pointer font-system font-medium h-10 min-w-[100px] text-center px-5 py-2.5 m-[3px] hover:bg-gray-100 hover:bg-red-600 hover:text-white"
+			>
+				🗑️ Discard
+			</button>
+			<button
+				onclick={handleDownload}
+				class="bg-white border border-gray-300 rounded cursor-pointer font-system font-medium h-10 min-w-[100px] text-center px-5 py-2.5 m-[3px] hover:bg-gray-100"
+			>
+				💾 Download
+			</button>
 		</div>
 	</div>
 </div>
-
-<style>
-	.modal {
-		position: fixed;
-		top: 0;
-		left: 0;
-		width: 100%;
-		height: 100%;
-		background: rgba(0, 0, 0, 0.7);
-		display: flex;
-		justify-content: center;
-		align-items: center;
-		z-index: 1000;
-	}
-
-	.modal-content {
-		background: #f0f0f0;
-		width: 100%;
-		height: 100%;
-		display: grid;
-		grid-template-rows: 1fr 50px;
-	}
-
-	video {
-		width: 100%;
-		height: 100%;
-		object-fit: contain;
-	}
-
-	.actions {
-		display: flex;
-		justify-content: flex-end;
-		padding: 3px 5px;
-	}
-
-	button {
-		background: white;
-		border: 1px solid #ccc;
-		border-radius: 4px;
-		cursor: pointer;
-		font-family:
-			system-ui,
-			-apple-system,
-			sans-serif;
-		font-weight: 500;
-		height: 40px;
-		min-width: 100px;
-		text-align: center;
-		padding: 10px 20px;
-		margin: 3px;
-	}
-
-	button:hover {
-		background: #f1ecec;
-	}
-
-	.discard:hover {
-		background: #d64545;
-		color: white;
-	}
-</style>

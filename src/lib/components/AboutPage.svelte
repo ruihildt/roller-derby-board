@@ -4,147 +4,61 @@
 </script>
 
 {#if showAbout}
-	<div class="about-overlay">
-		<div class="about-content">
+	<div class="fixed inset-0 bg-black/70 flex justify-center items-center z-[1000]">
+		<div
+			class="bg-white p-8 rounded-lg w-[90%] max-w-[600px] max-h-[80%] overflow-y-auto relative font-sans"
+		>
 			<button
-				class="close-button"
+				class="absolute top-2.5 right-2.5 border-none bg-transparent text-2xl cursor-pointer hover:text-primary-600"
 				on:click={() => {
 					showAbout = false;
 				}}>×</button
 			>
-			<div class="title-container">
-				<h1>🛼 Roller Derby Strategy Board</h1>
-				<span class="version-badge">{version} | {buildDate}</span>
+			<div class="flex items-center gap-4 mb-4">
+				<h1 class="text-2xl m-0">🛼 Roller Derby Strategy Board</h1>
+				<span class="bg-gray-100 text-gray-600 px-2 py-1 rounded-xl text-sm font-medium"
+					>{version} | {buildDate}</span
+				>
 			</div>
-			<p>
+			<p class="mb-4">
 				An interactive web application for real-time recording of roller derby strategies through
 				your browser.
 			</p>
 
-			<p>
+			<p class="mb-4">
 				More information about the project and code can be found on <a
 					href="https://github.com/ruihildt/roller-derby-strategy"
+					class="text-primary-600 hover:text-primary-700"
 					target="_blank">Github</a
 				>. The whole project is licensed under (<a
 					href="https://www.gnu.org/licenses/agpl-3.0.en.html"
+					class="text-primary-600 hover:text-primary-700"
 					target="_blank"
 				>
 					AGPLv3</a
 				>).
 			</p>
 
-			<hr class="separator" />
+			<hr class="border-0 h-px bg-gray-100 my-6" />
 
 			<p>
 				For feedback or suggestions, please <a
 					href="https://github.com/ruihildt/roller-derby-strategy/issues"
+					class="text-primary-600 hover:text-primary-700"
 					target="_blank">open an issue</a
 				>
-				or <a href="mailto:ruihildt@protonmail.com">email me</a>.
+				or
+				<a href="mailto:ruihildt@protonmail.com" class="text-primary-600 hover:text-primary-700"
+					>email me</a
+				>.
 			</p>
 		</div>
 	</div>
 {/if}
 
-<button class="about-button" on:click={() => (showAbout = true)}>
-	<span class="info-icon">ℹ️</span>
+<button
+	class="absolute bottom-5 right-5 w-10 h-10 flex items-center justify-center bg-white border border-gray-300 rounded-full cursor-pointer shadow-sm hover:bg-gray-50 hover:-translate-y-0.5 hover:shadow-md transition-all duration-200"
+	on:click={() => (showAbout = true)}
+>
+	<span class="text-2xl">ℹ️</span>
 </button>
-
-<style>
-	.info-icon {
-		font-size: 22px;
-	}
-
-	.about-button {
-		position: absolute;
-		bottom: 20px;
-		right: 20px;
-		width: 40px;
-		height: 40px;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		background: white;
-		border: 1px solid #ccc;
-		border-radius: 50%;
-		cursor: pointer;
-		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-		transition:
-			transform 0.2s ease,
-			box-shadow 0.2s ease;
-	}
-
-	.about-button:hover {
-		background: #f1ecec;
-		transform: translateY(-1px);
-		box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-	}
-
-	.about-overlay {
-		position: absolute;
-		top: 0;
-		left: 0;
-		right: 0;
-		bottom: 0;
-		background: rgba(0, 0, 0, 0.7);
-		display: flex;
-		justify-content: center;
-		align-items: center;
-		z-index: 1000;
-	}
-
-	.about-content {
-		background: white;
-		padding: 2rem;
-		border-radius: 8px;
-		width: 90%;
-		max-width: 600px;
-		max-height: 80%;
-		overflow-y: auto;
-		position: relative;
-		font-family:
-			system-ui,
-			-apple-system,
-			sans-serif;
-	}
-
-	.close-button {
-		position: absolute;
-		top: 10px;
-		right: 10px;
-		border: none;
-		background: none;
-		font-size: 24px;
-		cursor: pointer;
-	}
-
-	.version-badge {
-		bottom: 10px;
-		right: 10px;
-		background: #e9ecef;
-		color: #495057;
-		padding: 4px 8px;
-		border-radius: 12px;
-		font-size: 0.9rem;
-		font-weight: 500;
-	}
-
-	h1 {
-		font-size: 1.5rem;
-		margin: 0;
-	}
-
-	.title-container {
-		display: flex;
-		align-items: center;
-		gap: 1rem;
-		margin-bottom: 1rem;
-	}
-
-	.separator {
-		border: 0;
-		height: 1px;
-		background-color: #e9ecef;
-		margin: 1.5rem 0;
-	}
-</style>

@@ -108,91 +108,23 @@
 	}
 </script>
 
-<div class="controls-container">
+<div class="flex items-center gap-2.5">
 	<button
-		class="mic-button"
+		class="relative flex items-center bg-white border border-gray-300 rounded cursor-pointer hover:bg-gray-100"
 		title={withAudio ? 'Audio recording ON' : 'Audio recording OFF'}
 		onclick={() => (withAudio = !withAudio)}
 	>
-		<span class="mic-emoji">🎙️</span>
+		<span class="text-lg">🎙️</span>
 		{#if !withAudio}
-			<span class="x-overlay">❌</span>
+			<span class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">❌</span>
 		{/if}
 	</button>
-	<button class="record-button" onclick={toggleRecording}>
-		<span class="recording-dot" class:recording={isRecording}></span>
+	<button
+		class="flex items-center justify-center gap-2 min-w-[100px] bg-white border border-gray-300 rounded cursor-pointer hover:bg-gray-100 font-medium"
+		onclick={toggleRecording}
+	>
+		<span class={`w-2.5 h-2.5 rounded-full bg-red-600 ${isRecording ? 'animate-pulse' : ''}`}
+		></span>
 		{isRecording ? 'Stop' : 'Start'}
 	</button>
 </div>
-
-<style>
-	.controls-container {
-		display: flex;
-		align-items: center;
-		gap: 10px;
-	}
-
-	button:hover {
-		background: #f1ecec;
-	}
-
-	.mic-button,
-	.record-button {
-		background: white;
-		border: 1px solid #ccc;
-		border-radius: 4px;
-		cursor: pointer;
-		font-family:
-			system-ui,
-			-apple-system,
-			sans-serif;
-		font-weight: 500;
-		display: flex;
-		align-items: center;
-	}
-
-	.mic-button {
-		position: relative;
-	}
-
-	.mic-emoji {
-		font-size: 1.2em;
-	}
-
-	.x-overlay {
-		position: absolute;
-		left: 50%;
-		top: 50%;
-		transform: translate(-50%, -50%);
-	}
-
-	.record-button {
-		min-width: 100px;
-		text-align: center;
-		justify-content: center;
-		gap: 8px;
-	}
-
-	.recording-dot {
-		width: 10px;
-		height: 10px;
-		background-color: red;
-		border-radius: 50%;
-	}
-
-	.recording-dot.recording {
-		animation: pulse 1.5s ease-in-out infinite;
-	}
-
-	@keyframes pulse {
-		0% {
-			opacity: 1;
-		}
-		50% {
-			opacity: 0.3;
-		}
-		100% {
-			opacity: 1;
-		}
-	}
-</style>
