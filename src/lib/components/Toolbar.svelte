@@ -6,11 +6,13 @@
 	let {
 		recordingComplete,
 		highResCanvas,
-		isRecording = $bindable()
+		isRecording = $bindable(),
+		countdown = $bindable()
 	} = $props<{
 		recordingComplete: (blob: Blob) => void;
 		highResCanvas: HTMLCanvasElement;
 		isRecording: boolean;
+		countdown: number | null;
 	}>();
 
 	let audioStream = $state<MediaStream | null>(null);
@@ -20,9 +22,18 @@
 	let withAudio = $state(false);
 
 	async function startRecording(withAudio: boolean = true) {
+		countdown = 3;
+		const countdownInterval = setInterval(() => {
+			countdown = countdown! - 1;
+		}, 1000);
+
+		await new Promise((resolve) => setTimeout(resolve, 3000));
+		clearInterval(countdownInterval);
+		countdown = null;
+
 		if (highResCanvas) {
 			recordedChunks = [];
-			const canvasStream = highResCanvas.captureStream(60); // 60 FPS
+			const canvasStream = highResCanvas.captureStream(30); // 30 FPS
 			let combinedStream;
 
 			if (withAudio) {
@@ -111,6 +122,6 @@
 	>
 		<span class={`h-2.5 w-2.5 rounded-full bg-red-600 ${isRecording ? 'animate-pulse' : ''}`}
 		></span>
-		{isRecording ? 'Stop' : 'Start'}
+		{isRecording ? 'Stop' : 'Start recording'}
 	</ToolbarButton>
 </Toolbar>
