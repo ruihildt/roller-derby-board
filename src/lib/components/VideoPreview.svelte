@@ -1,8 +1,5 @@
 <script lang="ts">
-	import { Toolbar, ToolbarButton } from 'flowbite-svelte';
-	import { ArrowsRepeatOutline, DownloadOutline } from 'flowbite-svelte-icons';
-
-	let { videoBlob, close } = $props<{
+	let { videoBlob = $bindable(), close } = $props<{
 		videoBlob: Blob;
 		close: () => void;
 	}>();
@@ -16,33 +13,10 @@
 		}
 	});
 
-	function handleDownload() {
-		const url = URL.createObjectURL(videoBlob);
-		const a = document.createElement('a');
-		a.href = url;
-
-		const now = new Date();
-		const year = now.getFullYear().toString().slice(-2);
-		const month = String(now.getMonth() + 1).padStart(2, '0');
-		const day = String(now.getDate()).padStart(2, '0');
-
-		a.download = `rollerderby.click-${year}-${month}-${day}.webm`;
-
-		document.body.appendChild(a);
-		a.click();
-		document.body.removeChild(a);
-		URL.revokeObjectURL(url);
-		close();
-	}
-
 	function handleBackdropClick(event: MouseEvent) {
 		if (event.target === event.currentTarget) {
 			close();
 		}
-	}
-
-	function handleDiscard() {
-		close();
 	}
 </script>
 
@@ -61,17 +35,5 @@
 			playsinline
 			class="h-full w-full object-contain"
 		></video>
-		<Toolbar
-			class="fixed bottom-4 left-1/2 inline-flex -translate-x-1/2 rounded-lg border bg-white shadow-lg"
-		>
-			<ToolbarButton class="flex items-center gap-2" onclick={handleDiscard}>
-				<ArrowsRepeatOutline />
-				Restart
-			</ToolbarButton>
-			<ToolbarButton class="flex items-center gap-2" onclick={handleDownload}>
-				<DownloadOutline />
-				Download
-			</ToolbarButton>
-		</Toolbar>
 	</div>
 </div>

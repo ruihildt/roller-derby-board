@@ -5,7 +5,7 @@
 	import Toolbar from '$lib/components/Toolbar.svelte';
 
 	let showPreview = $state(false);
-	let recordedBlob: Blob | null = $state(null);
+	let recordedBlob = $state<Blob | null>(null);
 	let highResCanvas = $state<HTMLCanvasElement>()!;
 	let isRecording = $state(false);
 	let countdown = $state<number | null>(null);
@@ -32,7 +32,7 @@
 			</div>
 		{/if}
 		{#if showPreview && recordedBlob}
-			<VideoPreview videoBlob={recordedBlob} close={handlePreviewClose} />
+			<VideoPreview bind:videoBlob={recordedBlob} close={handlePreviewClose} />
 		{/if}
 	</div>
 </main>
@@ -40,7 +40,9 @@
 <Toolbar
 	bind:isRecording
 	bind:countdown
+	bind:videoBlob={recordedBlob}
 	{highResCanvas}
 	recordingComplete={handleRecordingComplete}
+	onDiscard={handlePreviewClose}
 />
 <AboutPage />

@@ -1,18 +1,27 @@
 <script lang="ts">
 	import { Toolbar, ToolbarButton } from 'flowbite-svelte';
+	import {
+		MicrophoneOutline,
+		MicrophoneSlashOutline,
+		ArrowsRepeatOutline,
+		DownloadOutline
+	} from 'flowbite-svelte-icons';
 	import fixWebmDuration from 'fix-webm-duration';
-	import { MicrophoneOutline, MicrophoneSlashOutline } from 'flowbite-svelte-icons';
 
 	let {
 		recordingComplete,
 		highResCanvas,
 		isRecording = $bindable(),
-		countdown = $bindable()
+		countdown = $bindable(),
+		videoBlob = $bindable(),
+		onDiscard = $bindable()
 	} = $props<{
 		recordingComplete: (blob: Blob) => void;
 		highResCanvas: HTMLCanvasElement;
 		isRecording: boolean;
 		countdown: number | null;
+		videoBlob?: Blob | null;
+		onDiscard?: () => void;
 	}>();
 
 	let audioStream = $state<MediaStream | null>(null);
@@ -99,22 +108,53 @@
 			}
 		}
 	}
+
+	function handleDownload() {
+		if (!videoBlob) return;
+
+		const url = URL.createObjectURL(videoBlob);
+		const a = document.createElement('a');
+		a.href = url;
+
+		const now = new Date();
+		const year = now.getFullYear().toString().slice(-2);
+		const month = String(now.getMonth() + 1).padStart(2, '0');
+		const day = String(now.getDate()).padStart(2, '0');
+
+		a.download = `rollerderby.click-${year}-${month}-${day}.webm`;
+
+		document.body.appendChild(a);
+		a.click();
+		document.body.removeChild(a);
+		URL.revokeObjectURL(url);
+	}
 </script>
 
 <Toolbar
 	class="fixed left-1/2 top-4 inline-flex -translate-x-1/2 rounded-lg border bg-white shadow-lg"
 >
-	<ToolbarButton class="relative" on:click={() => (withAudio = !withAudio)}>
-		{#if withAudio}
-			<MicrophoneOutline />
-		{:else}
-			<MicrophoneSlashOutline />
-		{/if}
-	</ToolbarButton>
+	{#if !videoBlob}
+		<ToolbarButton class="relative" on:click={() => (withAudio = !withAudio)}>
+			{#if withAudio}
+				<MicrophoneOutline />
+			{:else}
+				<MicrophoneSlashOutline />
+			{/if}
+		</ToolbarButton>
 
-	<ToolbarButton class="flex items-center gap-2" on:click={toggleRecording}>
-		<span class={`h-2.5 w-2.5 rounded-full bg-red-600 ${isRecording ? 'animate-pulse' : ''}`}
-		></span>
-		{isRecording ? 'Stop recording' : 'Start recording'}
-	</ToolbarButton>
+		<ToolbarButton class="flex items-center gap-2" on:click={toggleRecording}>
+			<span class={`h-2.5 w-2.5 rounded-full bg-red-600 ${isRecording ? 'animate-pulse' : ''}`}
+			></span>
+			{isRecording ? 'Stop recording' : 'Start recording'}
+		</ToolbarButton>
+	{:else}
+		<ToolbarButton class="flex items-center gap-2" on:click={onDiscard}>
+			<ArrowsRepeatOutline />
+			Restart
+		</ToolbarButton>
+		<ToolbarButton class="flex items-center gap-2" on:click={handleDownload}>
+			<DownloadOutline />
+			Download
+		</ToolbarButton>
+	{/if}
 </Toolbar>
