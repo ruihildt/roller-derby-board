@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { Toolbar, ToolbarButton } from 'flowbite-svelte';
 	import fixWebmDuration from 'fix-webm-duration';
+	import { MicrophoneOutline, MicrophoneSlashOutline } from 'flowbite-svelte-icons';
 
 	let {
 		recordingComplete,
@@ -103,24 +104,17 @@
 <Toolbar
 	class="fixed left-1/2 top-4 inline-flex -translate-x-1/2 rounded-lg border bg-white shadow-lg"
 >
-	<ToolbarButton
-		color={withAudio ? 'default' : 'primary'}
-		class="relative"
-		on:click={() => (withAudio = !withAudio)}
-	>
-		<span class="text-lg">🎙️</span>
-		{#if !withAudio}
-			<span class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">❌</span>
+	<ToolbarButton class="relative" on:click={() => (withAudio = !withAudio)}>
+		{#if withAudio}
+			<MicrophoneOutline />
+		{:else}
+			<MicrophoneSlashOutline />
 		{/if}
 	</ToolbarButton>
 
-	<ToolbarButton
-		color={isRecording ? 'default' : 'primary'}
-		class="flex items-center gap-2"
-		on:click={toggleRecording}
-	>
+	<ToolbarButton class="flex items-center gap-2" on:click={toggleRecording}>
 		<span class={`h-2.5 w-2.5 rounded-full bg-red-600 ${isRecording ? 'animate-pulse' : ''}`}
 		></span>
-		{isRecording ? 'Stop' : 'Start recording'}
+		{isRecording ? 'Stop recording' : 'Start recording'}
 	</ToolbarButton>
 </Toolbar>

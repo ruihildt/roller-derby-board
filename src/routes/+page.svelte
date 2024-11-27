@@ -24,19 +24,18 @@
 <main
 	class={`bg-b flex min-h-screen items-center justify-center ${isRecording ? 'bg-black' : 'bg-[#f0f0f0]'}`}
 >
-	{#if countdown}
-		<div class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
-			<span class="text-9xl font-bold text-red-600">{countdown}</span>
-		</div>
-	{/if}
-	<div class="mx-auto aspect-[100/67] max-h-screen w-full max-w-[1200px]">
+	<div class="relative mx-auto aspect-[100/67] max-h-screen w-full max-w-[1200px]">
 		<BoardCanvas bind:highResCanvas recordingComplete={handleRecordingComplete} />
+		{#if countdown}
+			<div class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+				<span class="text-9xl font-bold text-red-600">{countdown}</span>
+			</div>
+		{/if}
+		{#if showPreview && recordedBlob}
+			<VideoPreview videoBlob={recordedBlob} close={handlePreviewClose} />
+		{/if}
 	</div>
 </main>
-
-{#if showPreview && recordedBlob}
-	<VideoPreview videoBlob={recordedBlob} close={handlePreviewClose} />
-{/if}
 
 <Toolbar
 	bind:isRecording

@@ -1,4 +1,7 @@
 <script lang="ts">
+	import { Toolbar, ToolbarButton } from 'flowbite-svelte';
+	import { ArrowsRepeatOutline, DownloadOutline } from 'flowbite-svelte-icons';
+
 	let { videoBlob, close } = $props<{
 		videoBlob: Blob;
 		close: () => void;
@@ -46,31 +49,29 @@
 <!-- svelte-ignore a11y_no_static_element_interactions -->
 <!-- svelte-ignore a11y_click_events_have_key_events -->
 <div
-	class="fixed inset-0 bg-black/70 flex justify-center items-center z-[1000]"
+	class="absolute inset-0 z-[1000] flex items-center justify-center bg-black/70"
 	onclick={handleBackdropClick}
 >
-	<div class="bg-gray-100 w-full h-full grid grid-rows-[1fr_50px]">
+	<div class="grey h-full w-full">
 		<!-- svelte-ignore a11y_media_has_caption -->
 		<video
 			controls={true}
 			src={videoUrl}
 			preload="auto"
 			playsinline
-			class="w-full h-full object-contain"
+			class="h-full w-full object-contain"
 		></video>
-		<div class="flex justify-end p-[3px_5px]">
-			<button
-				onclick={handleDiscard}
-				class="bg-white border border-gray-300 rounded cursor-pointer font-system font-medium h-10 min-w-[100px] text-center px-5 py-2.5 m-[3px] hover:bg-gray-100 hover:bg-red-600 hover:text-white"
-			>
-				🗑️ Discard
-			</button>
-			<button
-				onclick={handleDownload}
-				class="bg-white border border-gray-300 rounded cursor-pointer font-system font-medium h-10 min-w-[100px] text-center px-5 py-2.5 m-[3px] hover:bg-gray-100"
-			>
-				💾 Download
-			</button>
-		</div>
+		<Toolbar
+			class="fixed bottom-4 left-1/2 inline-flex -translate-x-1/2 rounded-lg border bg-white shadow-lg"
+		>
+			<ToolbarButton class="flex items-center gap-2" onclick={handleDiscard}>
+				<ArrowsRepeatOutline />
+				Restart
+			</ToolbarButton>
+			<ToolbarButton class="flex items-center gap-2" onclick={handleDownload}>
+				<DownloadOutline />
+				Download
+			</ToolbarButton>
+		</Toolbar>
 	</div>
 </div>
