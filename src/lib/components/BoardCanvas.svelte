@@ -41,6 +41,6 @@
 </script>
 
 <div bind:this={container} class="grid h-full w-full place-items-center">
-	<canvas bind:this={canvas}></canvas>
+	<canvas bind:this={canvas} class="dashed grey border border-2"></canvas>
 	<canvas bind:this={highResCanvas} class="hidden"></canvas>
 </div>
