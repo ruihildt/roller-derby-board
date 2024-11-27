@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { Toolbar, ToolbarButton } from 'flowbite-svelte';
 	import fixWebmDuration from 'fix-webm-duration';
 
 	let { recordingComplete, highResCanvas } = $props<{
@@ -54,30 +55,6 @@
 				}
 			};
 
-			// IF playback of audio doesn't start reliably, we can try this
-			//
-			// mediaRecorder.onstop = async () => {
-			// 	const blob = new Blob(recordedChunks, { type: 'video/webm; codecs=vp8,opus' });
-			// 	const duration = Date.now() - recordingStartTime;
-			// 	const fixedBlob = await fixWebmDuration(blob, duration);
-
-			// 	// Force metadata loading before passing the blob
-			// 	const videoElement = document.createElement('video');
-			// 	videoElement.preload = 'metadata';
-
-			// 	const blobUrl = URL.createObjectURL(fixedBlob);
-			// 	videoElement.src = blobUrl;
-
-			// 	videoElement.onloadedmetadata = () => {
-			// 		URL.revokeObjectURL(blobUrl);
-			// 		recordingComplete(fixedBlob);
-			// 	};
-
-			// 	if (audioStream) {
-			// 		audioStream.getTracks().forEach((track) => track.stop());
-			// 	}
-			// };
-
 			recordingStartTime = Date.now();
 			mediaRecorder.start();
 			isRecording = true;
@@ -108,23 +85,27 @@
 	}
 </script>
 
-<div class="flex items-center gap-2.5">
-	<button
-		class="relative flex cursor-pointer items-center rounded border border-gray-300 bg-white hover:bg-gray-100"
-		title={withAudio ? 'Audio recording ON' : 'Audio recording OFF'}
-		onclick={() => (withAudio = !withAudio)}
-	>
-		<span class="text-lg">🎙️</span>
-		{#if !withAudio}
-			<span class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">❌</span>
-		{/if}
-	</button>
-	<button
-		class="flex min-w-[100px] cursor-pointer items-center justify-center gap-2 rounded border border-gray-300 bg-white font-medium hover:bg-gray-100"
-		onclick={toggleRecording}
-	>
-		<span class={`h-2.5 w-2.5 rounded-full bg-red-600 ${isRecording ? 'animate-pulse' : ''}`}
-		></span>
-		{isRecording ? 'Stop' : 'Start'}
-	</button>
+<div class="fixed bottom-0 left-0 right-0 z-50 mb-0 flex justify-center p-4">
+	<Toolbar class="inline-flex rounded-lg border bg-white shadow-lg">
+		<ToolbarButton
+			color={withAudio ? 'default' : 'primary'}
+			class="relative"
+			on:click={() => (withAudio = !withAudio)}
+		>
+			<span class="text-lg">🎙️</span>
+			{#if !withAudio}
+				<span class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">❌</span>
+			{/if}
+		</ToolbarButton>
+
+		<ToolbarButton
+			color={isRecording ? 'default' : 'primary'}
+			class="flex items-center gap-2"
+			on:click={toggleRecording}
+		>
+			<span class={`h-2.5 w-2.5 rounded-full bg-red-600 ${isRecording ? 'animate-pulse' : ''}`}
+			></span>
+			{isRecording ? 'Stop' : 'Start'}
+		</ToolbarButton>
+	</Toolbar>
 </div>
