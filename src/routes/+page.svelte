@@ -19,8 +19,8 @@
 	}
 </script>
 
-<main class="flex min-h-screen items-center justify-center bg-gray-100">
-	<div class="mx-auto aspect-[59.8/42] max-h-screen w-full max-w-[1200px]">
+<main class="flex min-h-screen items-center justify-center bg-[#f0f0f0]">
+	<div class="mx-auto aspect-[100/67] max-h-screen w-full max-w-[1200px]">
 		<BoardCanvas bind:highResCanvas recordingComplete={handleRecordingComplete} />
 	</div>
 </main>

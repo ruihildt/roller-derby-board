@@ -40,7 +40,7 @@
 	});
 </script>
 
-<div bind:this={container} class="flex h-full w-full flex-col items-center">
-	<canvas bind:this={canvas} class="border border-solid border-[#cccccc]"></canvas>
+<div bind:this={container} class="grid h-full w-full place-items-center">
+	<canvas bind:this={canvas}></canvas>
 	<canvas bind:this={highResCanvas} class="hidden"></canvas>
 </div>

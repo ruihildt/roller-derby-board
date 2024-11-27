@@ -86,7 +86,7 @@
 </script>
 
 <Toolbar
-	class="fixed bottom-4 left-1/2 inline-flex -translate-x-1/2 rounded-lg border bg-white shadow-lg"
+	class="fixed left-1/2 top-4 inline-flex -translate-x-1/2 rounded-lg border bg-white shadow-lg"
 >
 	<ToolbarButton
 		color={withAudio ? 'default' : 'primary'}
