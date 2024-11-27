@@ -135,9 +135,11 @@
 	}
 </script>
 
-<Toolbar class="fixed left-1/2 top-4 z-[11] inline-flex -translate-x-1/2 rounded-lg  shadow-lg">
+<Toolbar
+	class="fixed left-1/2 top-4 z-[11] inline-flex -translate-x-1/2 rounded-lg !p-1 shadow-lg shadow-black/5"
+>
 	{#if !videoBlob}
-		<ToolbarButton class="relative" on:click={() => (withAudio = !withAudio)}>
+		<ToolbarButton class="hover:bg-primary-200" on:click={() => (withAudio = !withAudio)}>
 			{#if withAudio}
 				<MicrophoneOutline />
 			{:else}
@@ -145,17 +147,23 @@
 			{/if}
 		</ToolbarButton>
 
-		<ToolbarButton class="flex items-center gap-2" on:click={toggleRecording}>
+		<ToolbarButton
+			class="flex items-center gap-2 px-3 hover:bg-primary-200"
+			on:click={toggleRecording}
+		>
 			<span class={`h-2.5 w-2.5 rounded-full bg-red-600 ${isRecording ? 'animate-pulse' : ''}`}
 			></span>
 			{isRecording ? 'Stop recording' : 'Start recording'}
 		</ToolbarButton>
 	{:else}
-		<ToolbarButton class="flex items-center gap-2" on:click={onDiscard}>
+		<ToolbarButton class="flex items-center gap-2 px-3 hover:bg-primary-200" on:click={onDiscard}>
 			<ArrowsRepeatOutline />
 			Restart
 		</ToolbarButton>
-		<ToolbarButton class="flex items-center gap-2" on:click={handleDownload}>
+		<ToolbarButton
+			class="flex items-center gap-2 px-3 hover:bg-primary-200"
+			on:click={handleDownload}
+		>
 			<DownloadOutline />
 			Download
 		</ToolbarButton>
