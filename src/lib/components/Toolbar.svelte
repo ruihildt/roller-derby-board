@@ -1,13 +1,18 @@
+<!-- src/lib/components/Toolbar.svelte -->
 <script lang="ts">
 	import { Toolbar, ToolbarButton } from 'flowbite-svelte';
 	import fixWebmDuration from 'fix-webm-duration';
 
-	let { recordingComplete, highResCanvas } = $props<{
+	let {
+		recordingComplete,
+		highResCanvas,
+		isRecording = $bindable()
+	} = $props<{
 		recordingComplete: (blob: Blob) => void;
 		highResCanvas: HTMLCanvasElement;
+		isRecording: boolean;
 	}>();
 
-	let isRecording = $state(false);
 	let audioStream = $state<MediaStream | null>(null);
 	let mediaRecorder: MediaRecorder | null = $state(null);
 	let recordedChunks = $state<Blob[]>([]);

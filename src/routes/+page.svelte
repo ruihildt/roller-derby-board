@@ -1,3 +1,4 @@
+<!-- src/routes/+page.svelte -->
 <script lang="ts">
 	import AboutPage from '$lib/components/AboutPage.svelte';
 	import BoardCanvas from '$lib/components/BoardCanvas.svelte';
@@ -7,6 +8,7 @@
 	let showPreview = $state(false);
 	let recordedBlob: Blob | null = $state(null);
 	let highResCanvas = $state<HTMLCanvasElement>()!;
+	let isRecording = $state(false); // Add this line
 
 	function handleRecordingComplete(blob: Blob) {
 		recordedBlob = blob;
@@ -19,7 +21,9 @@
 	}
 </script>
 
-<main class="flex min-h-screen items-center justify-center bg-[#f0f0f0]">
+<main
+	class={`bg-b flex min-h-screen items-center justify-center ${isRecording ? 'bg-black' : 'bg-[#f0f0f0]'}`}
+>
 	<div class="mx-auto aspect-[100/67] max-h-screen w-full max-w-[1200px]">
 		<BoardCanvas bind:highResCanvas recordingComplete={handleRecordingComplete} />
 	</div>
@@ -29,5 +33,5 @@
 	<VideoPreview videoBlob={recordedBlob} close={handlePreviewClose} />
 {/if}
 
-<Toolbar {highResCanvas} recordingComplete={handleRecordingComplete} />
+<Toolbar bind:isRecording {highResCanvas} recordingComplete={handleRecordingComplete} />
 <AboutPage />
