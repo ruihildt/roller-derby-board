@@ -11,6 +11,7 @@
 	let {
 		recordingComplete,
 		highResCanvas,
+		isDarkBackground = $bindable(),
 		isRecording = $bindable(),
 		countdown = $bindable(),
 		videoBlob = $bindable(),
@@ -18,6 +19,7 @@
 	} = $props<{
 		recordingComplete: (blob: Blob) => void;
 		highResCanvas: HTMLCanvasElement;
+		isDarkBackground: boolean;
 		isRecording: boolean;
 		countdown: number | null;
 		videoBlob?: Blob | null;
@@ -31,6 +33,7 @@
 	let withAudio = $state(false);
 
 	async function startRecording(withAudio: boolean = true) {
+		isDarkBackground = true;
 		countdown = 3;
 		const countdownInterval = setInterval(() => {
 			countdown = countdown! - 1;
@@ -127,11 +130,13 @@
 		a.click();
 		document.body.removeChild(a);
 		URL.revokeObjectURL(url);
+
+		onDiscard();
 	}
 </script>
 
 <Toolbar
-	class="fixed left-1/2 top-4 inline-flex -translate-x-1/2 rounded-lg border bg-white shadow-lg"
+	class="fixed left-1/2 top-4 z-[11] inline-flex -translate-x-1/2 rounded-lg border bg-white shadow-lg"
 >
 	{#if !videoBlob}
 		<ToolbarButton class="relative" on:click={() => (withAudio = !withAudio)}>

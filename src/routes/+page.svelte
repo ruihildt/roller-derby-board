@@ -9,6 +9,7 @@
 	let highResCanvas = $state<HTMLCanvasElement>()!;
 	let isRecording = $state(false);
 	let countdown = $state<number | null>(null);
+	let isDarkBackground = $state(false);
 
 	function handleRecordingComplete(blob: Blob) {
 		recordedBlob = blob;
@@ -18,11 +19,14 @@
 	function handlePreviewClose() {
 		showPreview = false;
 		recordedBlob = null;
+		isDarkBackground = false;
 	}
 </script>
 
 <main
-	class={`bg-b flex min-h-screen items-center justify-center ${isRecording ? 'bg-black' : 'bg-[#f0f0f0]'}`}
+	class={`bg-b flex min-h-screen items-center justify-center transition-colors duration-300 ${
+		isDarkBackground ? 'bg-black' : 'bg-[#f0f0f0]'
+	}`}
 >
 	<div class="relative mx-auto aspect-[100/67] max-h-screen w-full max-w-[1200px]">
 		<BoardCanvas bind:highResCanvas recordingComplete={handleRecordingComplete} />
@@ -41,6 +45,7 @@
 	bind:isRecording
 	bind:countdown
 	bind:videoBlob={recordedBlob}
+	bind:isDarkBackground
 	{highResCanvas}
 	recordingComplete={handleRecordingComplete}
 	onDiscard={handlePreviewClose}
