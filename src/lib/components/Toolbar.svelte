@@ -135,9 +135,7 @@
 	}
 </script>
 
-<Toolbar
-	class="fixed left-1/2 top-4 z-[11] inline-flex -translate-x-1/2 rounded-lg border bg-white shadow-lg"
->
+<Toolbar class="fixed left-1/2 top-4 z-[11] inline-flex -translate-x-1/2 rounded-lg  shadow-lg">
 	{#if !videoBlob}
 		<ToolbarButton class="relative" on:click={() => (withAudio = !withAudio)}>
 			{#if withAudio}

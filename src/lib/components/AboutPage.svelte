@@ -5,11 +5,11 @@
 	let open = false;
 </script>
 
-<Modal bind:open size="lg">
+<Modal bind:open size="md">
 	<div class="font-sans">
-		<div class="flex items-center gap-4 mb-4">
-			<h1 class="text-2xl m-0">🛼 Roller Derby Strategy Board</h1>
-			<Badge color="pink">{version} | {buildDate}</Badge>
+		<div class="mb-4 flex items-center gap-4">
+			<h1 class="m-0 text-2xl">🛼 Roller Derby Strategy Board</h1>
+			<Badge color="primary">{version} | {buildDate}</Badge>
 		</div>
 		<p class="mb-4">
 			An interactive web application for real-time recording of roller derby strategies through your
@@ -36,11 +36,6 @@
 	</div>
 </Modal>
 
-<Button
-	class="absolute bottom-5 right-5 hover:-translate-y-0.5 transition-transform duration-200 !p-2.5 w-10 h-10"
-	size="xl"
-	pill={true}
-	on:click={() => (open = true)}
->
-	<InfoCircleSolid class="w-9 h-9" />
+<Button class="absolute bottom-5 right-5 h-10 w-10 !p-2.5" pill on:click={() => (open = true)}>
+	<InfoCircleSolid class="h-10 w-10" />
 </Button>
