@@ -8,7 +8,6 @@
 	let recordedBlob = $state<Blob | null>(null);
 	let highResCanvas = $state<HTMLCanvasElement>()!;
 	let isRecording = $state(false);
-	let countdown = $state<number | null>(null);
 	let isDarkBackground = $state(false);
 
 	function handleRecordingComplete(blob: Blob) {
@@ -30,11 +29,6 @@
 >
 	<div class="relative mx-auto aspect-[100/67] max-h-screen w-full max-w-[1200px]">
 		<BoardCanvas bind:highResCanvas recordingComplete={handleRecordingComplete} />
-		{#if countdown}
-			<div class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
-				<span class="text-9xl font-bold text-red-600">{countdown}</span>
-			</div>
-		{/if}
 		{#if showPreview && recordedBlob}
 			<VideoPreview bind:videoBlob={recordedBlob} close={handlePreviewClose} />
 		{/if}
@@ -43,7 +37,6 @@
 
 <Toolbar
 	bind:isRecording
-	bind:countdown
 	bind:videoBlob={recordedBlob}
 	bind:isDarkBackground
 	{highResCanvas}

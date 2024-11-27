@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { Toolbar, ToolbarButton } from 'flowbite-svelte';
+	import { Badge, Toolbar, ToolbarButton } from 'flowbite-svelte';
+	import { StopSolid } from 'flowbite-svelte-icons';
 	import {
 		MicrophoneOutline,
 		MicrophoneSlashOutline,
@@ -13,7 +14,6 @@
 		highResCanvas,
 		isDarkBackground = $bindable(),
 		isRecording = $bindable(),
-		countdown = $bindable(),
 		videoBlob = $bindable(),
 		onDiscard = $bindable()
 	} = $props<{
@@ -21,7 +21,6 @@
 		highResCanvas: HTMLCanvasElement;
 		isDarkBackground: boolean;
 		isRecording: boolean;
-		countdown: number | null;
 		videoBlob?: Blob | null;
 		onDiscard?: () => void;
 	}>();
@@ -31,6 +30,9 @@
 	let recordedChunks = $state<Blob[]>([]);
 	let recordingStartTime = $state<number>(0);
 	let withAudio = $state(false);
+	let countdown = $state<number | null>(null);
+	let elapsedTime = $state(0);
+	let timeInterval = $state<number | null>(null);
 
 	async function startRecording(withAudio: boolean = true) {
 		isDarkBackground = true;
@@ -84,6 +86,9 @@
 			};
 
 			recordingStartTime = Date.now();
+			timeInterval = setInterval(() => {
+				elapsedTime = Date.now() - recordingStartTime;
+			}, 1000);
 			mediaRecorder.start();
 			isRecording = true;
 		}
@@ -91,6 +96,12 @@
 
 	function stopRecording() {
 		if (mediaRecorder && isRecording) {
+			if (timeInterval) {
+				clearInterval(timeInterval);
+				timeInterval = null;
+			}
+			elapsedTime = 0;
+
 			mediaRecorder.stop();
 			isRecording = false;
 
@@ -139,7 +150,13 @@
 	class="fixed left-1/2 top-4 z-[11] inline-flex -translate-x-1/2 rounded-lg !p-1 shadow-lg shadow-black/5"
 >
 	{#if !videoBlob}
-		<ToolbarButton class="hover:bg-primary-200" on:click={() => (withAudio = !withAudio)}>
+		<ToolbarButton
+			class={isRecording || countdown !== null
+				? 'cursor-not-allowed opacity-50'
+				: 'hover:bg-primary-200'}
+			on:click={() => (withAudio = !withAudio)}
+			disabled={isRecording || countdown !== null}
+		>
 			{#if withAudio}
 				<MicrophoneOutline />
 			{:else}
@@ -148,13 +165,27 @@
 		</ToolbarButton>
 
 		<ToolbarButton
-			class="flex items-center gap-2 px-3 hover:bg-primary-200"
+			class="flex items-center gap-2 px-3 {countdown !== null
+				? 'cursor-not-allowed opacity-50'
+				: 'hover:bg-primary-200'}"
 			on:click={toggleRecording}
+			disabled={countdown !== null}
 		>
-			<span class={`h-2.5 w-2.5 rounded-full bg-red-600 ${isRecording ? 'animate-pulse' : ''}`}
-			></span>
-			{isRecording ? 'Stop recording' : 'Start recording'}
+			{#if isRecording}
+				<StopSolid class="text-red-600" />
+			{:else}
+				<span class="h-2.5 w-2.5 rounded-full bg-red-600"></span>
+			{/if}
+			{isRecording ? 'Stop' : countdown !== null ? `Starting in ${countdown}...` : 'Record'}
 		</ToolbarButton>
+
+		{#if isRecording}
+			<div class="mx-2">
+				{Math.floor(elapsedTime / 60000)}:{Math.floor((elapsedTime % 60000) / 1000)
+					.toString()
+					.padStart(2, '0')}
+			</div>
+		{/if}
 	{:else}
 		<ToolbarButton class="flex items-center gap-2 px-3 hover:bg-primary-200" on:click={onDiscard}>
 			<ArrowsRepeatOutline />

@@ -9,7 +9,7 @@
 	<div class="font-sans">
 		<div class="mb-4 flex items-center gap-4">
 			<h1 class="m-0 text-2xl">🛼 Roller Derby Strategy Board</h1>
-			<Badge color="primary">{version} | {buildDate}</Badge>
+			<Badge large color="primary">{version} | {buildDate}</Badge>
 		</div>
 		<p class="mb-4">
 			An interactive web application for real-time recording of roller derby strategies through your
