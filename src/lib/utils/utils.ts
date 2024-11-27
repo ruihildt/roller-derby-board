@@ -16,13 +16,14 @@ export function calculateCanvasSize(
 	containerWidth: number,
 	containerHeight: number
 ): { width: number; height: number } {
+	const borderWidth = 4; // 2px border * 2 sides
 	const aspectRatio = 100 / 67;
-	let width = containerWidth;
-	let height = containerWidth / aspectRatio;
+	let width = containerWidth - borderWidth;
+	let height = width / aspectRatio;
 
-	if (height > containerHeight) {
-		height = containerHeight;
-		width = containerHeight * aspectRatio;
+	if (height > containerHeight - borderWidth) {
+		height = containerHeight - borderWidth;
+		width = height * aspectRatio;
 	}
 
 	return { width, height };

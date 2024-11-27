@@ -1,4 +1,3 @@
-<!-- src/routes/+page.svelte -->
 <script lang="ts">
 	import AboutPage from '$lib/components/AboutPage.svelte';
 	import BoardCanvas from '$lib/components/BoardCanvas.svelte';

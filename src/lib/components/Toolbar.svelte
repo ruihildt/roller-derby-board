@@ -1,4 +1,3 @@
-<!-- src/lib/components/Toolbar.svelte -->
 <script lang="ts">
 	import { Toolbar, ToolbarButton } from 'flowbite-svelte';
 	import fixWebmDuration from 'fix-webm-duration';
