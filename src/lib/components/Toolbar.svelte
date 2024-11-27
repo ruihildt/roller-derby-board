@@ -85,27 +85,27 @@
 	}
 </script>
 
-<div class="fixed bottom-0 left-0 right-0 z-50 mb-0 flex justify-center p-4">
-	<Toolbar class="inline-flex rounded-lg border bg-white shadow-lg">
-		<ToolbarButton
-			color={withAudio ? 'default' : 'primary'}
-			class="relative"
-			on:click={() => (withAudio = !withAudio)}
-		>
-			<span class="text-lg">🎙️</span>
-			{#if !withAudio}
-				<span class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">❌</span>
-			{/if}
-		</ToolbarButton>
+<Toolbar
+	class="fixed bottom-4 left-1/2 inline-flex -translate-x-1/2 rounded-lg border bg-white shadow-lg"
+>
+	<ToolbarButton
+		color={withAudio ? 'default' : 'primary'}
+		class="relative"
+		on:click={() => (withAudio = !withAudio)}
+	>
+		<span class="text-lg">🎙️</span>
+		{#if !withAudio}
+			<span class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">❌</span>
+		{/if}
+	</ToolbarButton>
 
-		<ToolbarButton
-			color={isRecording ? 'default' : 'primary'}
-			class="flex items-center gap-2"
-			on:click={toggleRecording}
-		>
-			<span class={`h-2.5 w-2.5 rounded-full bg-red-600 ${isRecording ? 'animate-pulse' : ''}`}
-			></span>
-			{isRecording ? 'Stop' : 'Start'}
-		</ToolbarButton>
-	</Toolbar>
-</div>
+	<ToolbarButton
+		color={isRecording ? 'default' : 'primary'}
+		class="flex items-center gap-2"
+		on:click={toggleRecording}
+	>
+		<span class={`h-2.5 w-2.5 rounded-full bg-red-600 ${isRecording ? 'animate-pulse' : ''}`}
+		></span>
+		{isRecording ? 'Stop' : 'Start'}
+	</ToolbarButton>
+</Toolbar>

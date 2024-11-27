@@ -2,17 +2,15 @@
 	import { onMount } from 'svelte';
 	import { Game } from '$lib/classes/Game';
 	import { calculateCanvasSize } from '$lib/utils/utils';
-	import Toolbar from '$lib/components/Toolbar.svelte';
 
-	let { recordingComplete } = $props<{
+	let { recordingComplete, highResCanvas = $bindable() } = $props<{
 		recordingComplete: (blob: Blob) => void;
+		highResCanvas: HTMLCanvasElement;
 	}>();
 
 	let container: HTMLDivElement;
 	let canvas: HTMLCanvasElement;
 	let game: Game;
-
-	let highResCanvas = $state<HTMLCanvasElement>()!;
 
 	function handleResize() {
 		if (!container) return;
@@ -40,13 +38,8 @@
 			game?.cleanup();
 		};
 	});
-
-	function handleRecordingComplete(blob: Blob) {
-		recordingComplete(blob);
-	}
 </script>
 
-<Toolbar {highResCanvas} recordingComplete={handleRecordingComplete} />
 <div bind:this={container} class="flex h-full w-full flex-col items-center">
 	<canvas bind:this={canvas} class="border border-solid border-[#cccccc]"></canvas>
 	<canvas bind:this={highResCanvas} class="hidden"></canvas>
