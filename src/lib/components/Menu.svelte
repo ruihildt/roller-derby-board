@@ -1,0 +1,41 @@
+<script lang="ts">
+	import { Dropdown, DropdownItem, Button, DropdownDivider } from 'flowbite-svelte';
+	import {
+		BarsOutline,
+		ArrowDownToBracketOutline,
+		FolderOpenOutline,
+		RefreshOutline,
+		ImageOutline,
+		InfoCircleOutline
+	} from 'flowbite-svelte-icons';
+</script>
+
+<div class="absolute left-4 top-4 z-50">
+	<Button class="bg-white !p-2 hover:bg-primary-200">
+		<BarsOutline class="h-6 w-6" color="gray" />
+	</Button>
+	<Dropdown class="w-40">
+		<DropdownItem class="flex items-center hover:bg-primary-200">
+			<FolderOpenOutline class="mr-2 h-4 w-4" />
+			<span>Open</span>
+		</DropdownItem>
+		<DropdownItem class="flex items-center hover:bg-primary-200">
+			<ArrowDownToBracketOutline class="mr-2 h-4 w-4" />
+			<span>Save to disk</span>
+		</DropdownItem>
+		<DropdownItem class="flex items-center hover:bg-primary-200">
+			<ImageOutline class="mr-2 h-4 w-4" />
+			<span>Export image</span>
+		</DropdownItem>
+		<DropdownDivider />
+		<DropdownItem class="flex items-center hover:bg-primary-200">
+			<RefreshOutline class="mr-2 h-4 w-4" />
+			<span>Reset board</span>
+		</DropdownItem>
+		<DropdownDivider />
+		<DropdownItem class="flex items-center hover:bg-primary-200">
+			<InfoCircleOutline class="mr-2 h-4 w-4" />
+			<span>About</span>
+		</DropdownItem>
+	</Dropdown>
+</div>

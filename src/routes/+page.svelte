@@ -3,6 +3,7 @@
 	import BoardCanvas from '$lib/components/BoardCanvas.svelte';
 	import VideoPreview from '$lib/components/VideoPreview.svelte';
 	import Toolbar from '$lib/components/Toolbar.svelte';
+	import Menu from '$lib/components/Menu.svelte';
 
 	let showPreview = $state(false);
 	let recordedBlob = $state<Blob | null>(null);
@@ -43,4 +44,7 @@
 	recordingComplete={handleRecordingComplete}
 	onDiscard={handlePreviewClose}
 />
+
 <AboutPage />
+
+<Menu />
