@@ -1,4 +1,6 @@
 <script lang="ts">
+	import type { Game } from '$lib/classes/Game';
+
 	import { Dropdown, DropdownItem, Button, DropdownDivider } from 'flowbite-svelte';
 	import {
 		BarsOutline,
@@ -8,6 +10,14 @@
 		ImageOutline,
 		InfoCircleOutline
 	} from 'flowbite-svelte-icons';
+
+	let { game } = $props<{
+		game: Game;
+	}>();
+
+	function handleReset() {
+		game.playerManager.resetPlayers();
+	}
 
 	function handleOpen() {
 		const input = document.createElement('input');
@@ -48,10 +58,11 @@
 			<span>Export image</span>
 		</DropdownItem>
 		<DropdownDivider />
-		<DropdownItem class="flex items-center hover:bg-primary-200">
+		<DropdownItem class="flex items-center hover:bg-primary-200" on:click={handleReset}>
 			<RefreshOutline class="mr-2 h-4 w-4" />
 			<span>Reset board</span>
 		</DropdownItem>
+
 		<DropdownDivider />
 		<DropdownItem class="flex items-center hover:bg-primary-200">
 			<InfoCircleOutline class="mr-2 h-4 w-4" />

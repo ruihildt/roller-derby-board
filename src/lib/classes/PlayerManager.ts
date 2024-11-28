@@ -61,7 +61,7 @@ export class PlayerManager {
 
 		if (isInitialLoad) {
 			this.initializeSkatingOfficials();
-			this.initializePlayers();
+			this.initializeTeamPlayers();
 			this.packManager.updatePlayers(this.players);
 		}
 	}
@@ -123,7 +123,17 @@ export class PlayerManager {
 		this.packManager.updatePlayers(this.players);
 	}
 
-	initializePlayers(): void {
+	addTeamPlayer(x: number, y: number, team: string, role: TeamPlayerRole): TeamPlayer {
+		const player = new TeamPlayer(x, y, team, role);
+		player.inBounds = this.trackGeometry.isPlayerInBounds(player);
+		this.trackGeometry.updatePlayerZone(player);
+		this.trackGeometry.updatePlayerCoordinates(player);
+		this.players.push(player);
+		this.packManager.updatePlayers(this.players);
+		return player;
+	}
+
+	initializeTeamPlayers(): void {
 		// Create 4 blockers for Team A
 		for (let i = 0; i < 4; i++) {
 			const role = i < 3 ? TeamPlayerRole.blocker : TeamPlayerRole.pivot;
@@ -143,16 +153,6 @@ export class PlayerManager {
 		this.addTeamPlayer(jammerPosA.x, jammerPosA.y, 'A', TeamPlayerRole.jammer);
 		const jammerPosB = this.getRandomJammerPosition();
 		this.addTeamPlayer(jammerPosB.x, jammerPosB.y, 'B', TeamPlayerRole.jammer);
-	}
-
-	addTeamPlayer(x: number, y: number, team: string, role: TeamPlayerRole): TeamPlayer {
-		const player = new TeamPlayer(x, y, team, role);
-		player.inBounds = this.trackGeometry.isPlayerInBounds(player);
-		this.trackGeometry.updatePlayerZone(player);
-		this.trackGeometry.updatePlayerCoordinates(player);
-		this.players.push(player);
-		this.packManager.updatePlayers(this.players);
-		return player;
 	}
 
 	initializeSkatingOfficials(): void {
@@ -192,6 +192,14 @@ export class PlayerManager {
 		this.skatingOfficials.push(
 			new SkatingOfficial(positions.OPR3.x, positions.OPR3.y, SkatingOfficialRole.outsidePackRef)
 		);
+	}
+
+	resetPlayers(): void {
+		this.players = [];
+		this.skatingOfficials = [];
+		this.selectedPlayer = null;
+		this.initializeSkatingOfficials();
+		this.initializeTeamPlayers();
 	}
 
 	getRandomBlockerPosition(role: TeamPlayerRole): Point {

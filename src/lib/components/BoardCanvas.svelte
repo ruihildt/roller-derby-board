@@ -3,14 +3,13 @@
 	import { Game } from '$lib/classes/Game';
 	import { calculateCanvasSize } from '$lib/utils/utils';
 
-	let { recordingComplete, highResCanvas = $bindable() } = $props<{
-		recordingComplete: (blob: Blob) => void;
+	let { highResCanvas = $bindable(), game = $bindable() } = $props<{
 		highResCanvas: HTMLCanvasElement;
+		game: Game;
 	}>();
 
 	let container: HTMLDivElement;
 	let canvas: HTMLCanvasElement;
-	let game: Game;
 
 	function handleResize() {
 		if (!container) return;

@@ -4,10 +4,12 @@
 	import VideoPreview from '$lib/components/VideoPreview.svelte';
 	import Toolbar from '$lib/components/Toolbar.svelte';
 	import Menu from '$lib/components/Menu.svelte';
+	import type { Game } from '$lib/classes/Game';
 
 	let showPreview = $state(false);
 	let recordedBlob = $state<Blob | null>(null);
 	let highResCanvas = $state<HTMLCanvasElement>()!;
+	let game = $state<Game>()!;
 	let isRecording = $state(false);
 	let isDarkBackground = $state(false);
 
@@ -29,7 +31,7 @@
 	}`}
 >
 	<div class="relative mx-auto aspect-[100/67] max-h-screen w-full max-w-[1200px]">
-		<BoardCanvas bind:highResCanvas recordingComplete={handleRecordingComplete} />
+		<BoardCanvas bind:highResCanvas bind:game />
 		{#if showPreview && recordedBlob}
 			<VideoPreview bind:videoBlob={recordedBlob} close={handlePreviewClose} />
 		{/if}
@@ -47,4 +49,4 @@
 
 <AboutPage />
 
-<Menu />
+<Menu {game} />
