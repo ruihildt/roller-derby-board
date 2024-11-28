@@ -132,6 +132,11 @@ export class PlayerManager {
 		this.packManager.updatePlayers(this.players);
 	}
 
+	removeAllTeamPlayers(): void {
+		this.players = [];
+		this.packManager.updatePlayers(this.players);
+	}
+
 	initializeTeamPlayers(): void {
 		// Create 4 blockers for Team A
 		for (let i = 0; i < 4; i++) {
@@ -193,8 +198,8 @@ export class PlayerManager {
 		);
 	}
 
-	resetPlayers(): void {
-		this.players = [];
+	resetPlayers(players?: TeamPlayer[]): void {
+		this.players = players || [];
 		this.skatingOfficials = [];
 		this.selectedPlayer = null;
 		this.initializeSkatingOfficials();

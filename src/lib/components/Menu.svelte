@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { Game } from '$lib/classes/Game';
+	import { savePositionsJSON, loadPositionsJSON } from '$lib/utils/positions';
 
 	import { Dropdown, DropdownItem, Button, DropdownDivider } from 'flowbite-svelte';
 	import {
@@ -25,18 +26,17 @@
 		input.accept = '.json';
 		input.click();
 
-		input.onchange = (e) => {
+		input.onchange = async (e) => {
 			const file = (e.target as HTMLInputElement).files?.[0];
 			if (file) {
-				// Handle the selected file here
-				const reader = new FileReader();
-				reader.onload = (e) => {
-					const content = e.target?.result;
-					// TODO HERE
-				};
-				reader.readAsText(file);
+				game.playerManager.removeAllTeamPlayers();
+				await loadPositionsJSON(game, file);
 			}
 		};
+	}
+
+	function handleSave() {
+		savePositionsJSON(game);
 	}
 </script>
 
@@ -49,7 +49,7 @@
 			<FolderOpenOutline class="mr-2 h-4 w-4" />
 			<span>Open</span>
 		</DropdownItem>
-		<DropdownItem class="flex items-center hover:bg-primary-200">
+		<DropdownItem class="flex items-center hover:bg-primary-200" on:click={handleSave}>
 			<ArrowDownToBracketOutline class="mr-2 h-4 w-4" />
 			<span>Save to disk</span>
 		</DropdownItem>
