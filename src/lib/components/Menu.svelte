@@ -42,6 +42,14 @@
 		};
 	}
 
+	function handleExportImage() {
+		const link = document.createElement('a');
+		link.download = `derby-board-${new Date().toISOString().slice(0, 10)}.png`;
+		link.href = game.renderer.highResCanvas.toDataURL('image/png');
+		link.click();
+		dropdownOpen = false;
+	}
+
 	function handleSave() {
 		exportBoardToFile(game);
 		dropdownOpen = false;
@@ -62,13 +70,11 @@
 			<ArrowDownToBracketOutline class="mr-2 h-4 w-4" />
 			<span>Save to disk</span>
 		</DropdownItem>
-		<DropdownItem
-			class="flex items-center hover:bg-primary-200"
-			onclick={() => (dropdownOpen = false)}
-		>
+		<DropdownItem class="flex items-center hover:bg-primary-200" onclick={handleExportImage}>
 			<ImageOutline class="mr-2 h-4 w-4" />
 			<span>Export image</span>
 		</DropdownItem>
+
 		<DropdownDivider />
 		<DropdownItem class="flex items-center hover:bg-primary-200" onclick={handleReset}>
 			<RefreshOutline class="mr-2 h-4 w-4" />
