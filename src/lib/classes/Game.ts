@@ -202,10 +202,10 @@ export class Game {
 		};
 	}
 
-	exportPositions(): string {
-		const positions: TeamPlayerPosition[] = this.playerManager.players.map((player) => {
+	exportTeamPlayers(): string {
+		const teamPlayers: TeamPlayerPosition[] = this.playerManager.players.map((player) => {
 			return {
-				position: {
+				absolute: {
 					x: player.x / this.canvas.width, // Store as percentage of track width
 					y: player.y / this.canvas.height // Store as percentage of track height
 				},
@@ -214,7 +214,7 @@ export class Game {
 			} as TeamPlayerPosition;
 		});
 
-		return JSON.stringify(positions, null, 2);
+		return JSON.stringify(teamPlayers, null, 2);
 	}
 
 	update(): void {

@@ -1,8 +1,8 @@
 import type { Game } from '$lib/classes/Game';
 import { type TeamPlayerPosition } from '$lib/classes/TeamPlayer';
 
-export function savePositionsJSON(game: Game) {
-	const positions = game.exportPositions();
+export function exportPlayersToFile(game: Game) {
+	const positions = game.exportTeamPlayers();
 	const blob = new Blob([positions], { type: 'application/json' });
 	const url = URL.createObjectURL(blob);
 
@@ -14,12 +14,15 @@ export function savePositionsJSON(game: Game) {
 	URL.revokeObjectURL(url);
 }
 
-export async function loadPositionsJSON(game: Game, jsonFile: File) {
+export async function loadPlayersFromFile(game: Game, jsonFile: File) {
 	const text = await jsonFile.text();
-	const positions: TeamPlayerPosition[] = JSON.parse(text);
+	const teamPlayers: TeamPlayerPosition[] = JSON.parse(text);
 
-	positions.forEach((player) => {
-		const scaledPos = game.scalingManager.scalePosition(player.position.x, player.position.y);
-		game.playerManager.addTeamPlayer(scaledPos.x, scaledPos.y, player.team, player.role);
+	teamPlayers.forEach((teamPlayer) => {
+		const position = game.scalingManager.scalePosition(
+			teamPlayer.absolute.x,
+			teamPlayer.absolute.y
+		);
+		game.playerManager.addTeamPlayer(position.x, position.y, teamPlayer.team, teamPlayer.role);
 	});
 }

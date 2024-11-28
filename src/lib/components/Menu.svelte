@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { Game } from '$lib/classes/Game';
-	import { savePositionsJSON, loadPositionsJSON } from '$lib/utils/positions';
+	import { exportPlayersToFile, loadPlayersFromFile } from '$lib/utils/positions';
 
 	import { Dropdown, DropdownItem, Button, DropdownDivider } from 'flowbite-svelte';
 	import {
@@ -30,13 +30,13 @@
 			const file = (e.target as HTMLInputElement).files?.[0];
 			if (file) {
 				game.playerManager.removeAllTeamPlayers();
-				await loadPositionsJSON(game, file);
+				await loadPlayersFromFile(game, file);
 			}
 		};
 	}
 
 	function handleSave() {
-		savePositionsJSON(game);
+		exportPlayersToFile(game);
 	}
 </script>
 

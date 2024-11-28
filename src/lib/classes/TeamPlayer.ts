@@ -12,7 +12,7 @@ export enum PlayerTeam {
 }
 
 export type TeamPlayerPosition = {
-	position: { x: number; y: number };
+	absolute: { x: number; y: number };
 	role: TeamPlayerRole;
 	team: PlayerTeam;
 };
