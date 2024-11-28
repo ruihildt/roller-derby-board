@@ -21,6 +21,7 @@ export class PlayerManager {
 	turn1Area: Path2D;
 	turn2Area: Path2D;
 	startZone: Path2D;
+	jammerStartZone: Path2D;
 	packManager: PackManager;
 	positions: Record<string, Point>;
 
@@ -47,6 +48,7 @@ export class PlayerManager {
 		this.turn1Area = renderer.turn1Area;
 		this.turn2Area = renderer.turn2Area;
 		this.startZone = this.trackGeometry.startZone;
+		this.jammerStartZone = this.trackGeometry.createJammerStartZone();
 
 		this.packManager = new PackManager(PIXELS_PER_METER, points, this.trackGeometry);
 		this.positions = {
@@ -197,6 +199,12 @@ export class PlayerManager {
 		this.players = players || [];
 		this.skatingOfficials = [];
 		this.selectedPlayer = null;
+
+		// Update all track zones before initializing new players
+		this.straight1Area = this.renderer.straight1Area;
+		this.startZone = this.trackGeometry.startZone;
+		this.jammerStartZone = this.trackGeometry.createJammerStartZone();
+
 		this.initializeSkatingOfficials();
 		this.initializeTeamPlayers();
 	}
@@ -246,8 +254,6 @@ export class PlayerManager {
 		let attempts = 0;
 		const maxAttempts = 1000;
 
-		const jammerStartZone = this.trackGeometry.createJammerStartZone();
-
 		while (attempts < maxAttempts) {
 			const x = Math.random() * this.canvas.width;
 			const y = Math.random() * this.canvas.height;
@@ -262,7 +268,7 @@ export class PlayerManager {
 
 			const allPointsValid = pointsToCheck.every(
 				(point) =>
-					ctx.isPointInPath(jammerStartZone, point.x, point.y) &&
+					ctx.isPointInPath(this.jammerStartZone, point.x, point.y) &&
 					this.trackGeometry.isPlayerInBounds(
 						new TeamPlayer(point.x, point.y, 'A', TeamPlayerRole.jammer)
 					)
