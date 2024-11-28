@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { Game } from '$lib/classes/Game';
 	import { exportBoardToFile, loadBoardFromFile } from '$lib/utils/boardState';
+	import AboutPage from './AboutPage.svelte';
 
 	import { Dropdown, DropdownItem, Button, DropdownDivider } from 'flowbite-svelte';
 	import {
@@ -17,6 +18,7 @@
 	}>();
 
 	let dropdownOpen = $state(false);
+	let aboutModalOpen = $state(false);
 
 	function toggleMenu() {
 		dropdownOpen = !dropdownOpen;
@@ -54,6 +56,11 @@
 		exportBoardToFile(game);
 		dropdownOpen = false;
 	}
+
+	function handleAboutClick() {
+		aboutModalOpen = true;
+		dropdownOpen = false;
+	}
 </script>
 
 <div class="absolute left-4 top-4 z-50">
@@ -81,12 +88,11 @@
 			<span>Reset board</span>
 		</DropdownItem>
 		<DropdownDivider />
-		<DropdownItem
-			class="flex items-center hover:bg-primary-200"
-			onclick={() => (dropdownOpen = false)}
-		>
+		<DropdownItem class="flex items-center hover:bg-primary-200" onclick={handleAboutClick}>
 			<InfoCircleOutline class="mr-2 h-4 w-4" />
 			<span>About</span>
 		</DropdownItem>
 	</Dropdown>
 </div>
+
+<AboutPage bind:open={aboutModalOpen} />

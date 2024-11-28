@@ -1,8 +1,7 @@
 <script lang="ts">
 	import { buildDate, version } from '../utils/appVersion';
-	import { Modal, Badge, Hr, A, Button } from 'flowbite-svelte';
-	import { InfoCircleSolid } from 'flowbite-svelte-icons';
-	let open = false;
+	import { Modal, Badge, Hr, A } from 'flowbite-svelte';
+	export let open = false;
 </script>
 
 <Modal bind:open size="md">
@@ -35,7 +34,3 @@
 		</p>
 	</div>
 </Modal>
-
-<Button class="absolute bottom-5 right-5 h-10 w-10 !p-2.5" pill on:click={() => (open = true)}>
-	<InfoCircleSolid class="h-10 w-10" />
-</Button>
