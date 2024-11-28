@@ -9,6 +9,11 @@ export enum SkatingOfficialRole {
 	alternate = 'alternate'
 }
 
+export type SkatingOfficialPosition = {
+	absolute: { x: number; y: number };
+	role: SkatingOfficialRole;
+};
+
 export class SkatingOfficial extends Player {
 	role: SkatingOfficialRole;
 

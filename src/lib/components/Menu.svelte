@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { Game } from '$lib/classes/Game';
-	import { exportPlayersToFile, loadPlayersFromFile } from '$lib/utils/positions';
+	import { exportBoardToFile, loadBoardFromFile } from '$lib/utils/positions';
 
 	import { Dropdown, DropdownItem, Button, DropdownDivider } from 'flowbite-svelte';
 	import {
@@ -29,14 +29,13 @@
 		input.onchange = async (e) => {
 			const file = (e.target as HTMLInputElement).files?.[0];
 			if (file) {
-				game.playerManager.removeAllTeamPlayers();
-				await loadPlayersFromFile(game, file);
+				await loadBoardFromFile(game, file);
 			}
 		};
 	}
 
 	function handleSave() {
-		exportPlayersToFile(game);
+		exportBoardToFile(game);
 	}
 </script>
 

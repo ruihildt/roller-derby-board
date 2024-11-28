@@ -5,7 +5,6 @@ import { PlayerRenderer } from '../render/PlayerRenderer';
 import { PackZoneRenderer } from '../render/PackZoneRenderer';
 import { Player } from './Player';
 import { ScalingManager } from './ScalingManager';
-import type { TeamPlayerPosition } from './TeamPlayer';
 
 export class Game {
 	private static readonly CANVAS_WIDTH_DIVISOR = 250; // For LINE_WIDTH calculation
@@ -200,21 +199,6 @@ export class Game {
 				y: centerY + Game.OUTER_VERTICAL_OFFSET_1 * scale
 			}
 		};
-	}
-
-	exportTeamPlayers(): string {
-		const teamPlayers: TeamPlayerPosition[] = this.playerManager.players.map((player) => {
-			return {
-				absolute: {
-					x: player.x / this.canvas.width, // Store as percentage of track width
-					y: player.y / this.canvas.height // Store as percentage of track height
-				},
-				role: player.role,
-				team: player.team
-			} as TeamPlayerPosition;
-		});
-
-		return JSON.stringify(teamPlayers, null, 2);
 	}
 
 	update(): void {
