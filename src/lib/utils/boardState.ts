@@ -3,17 +3,23 @@ import { SkatingOfficial, type SkatingOfficialPosition } from '$lib/classes/Skat
 import { type TeamPlayerPosition } from '$lib/classes/TeamPlayer';
 
 type boardState = {
+	version: number;
+	createdAt: string;
+	name?: string;
 	teamPlayers: TeamPlayerPosition[];
 	skatingOfficials: SkatingOfficialPosition[];
 };
 
-export function exportBoardToFile(game: Game) {
+export function exportBoardToFile(game: Game, name?: string) {
 	const positions: boardState = {
+		version: 1,
+		createdAt: new Date().toISOString(),
+		name,
 		teamPlayers: game.playerManager.players.map((player) => {
 			return {
 				absolute: {
-					x: player.x / game.canvas.width, // Store as percentage of track width
-					y: player.y / game.canvas.height // Store as percentage of track height
+					x: player.x / game.canvas.width,
+					y: player.y / game.canvas.height
 				},
 				role: player.role,
 				team: player.team
@@ -33,7 +39,10 @@ export function exportBoardToFile(game: Game) {
 
 	const link = document.createElement('a');
 	link.href = url;
-	link.download = `derby-board-situation-${new Date().toISOString().slice(0, 10)}.json`;
+	const fileName = name
+		? `derby-board-${name}-${new Date().toISOString().slice(0, 10)}.json`
+		: `derby-board-${new Date().toISOString().slice(0, 10)}.json`;
+	link.download = fileName;
 	link.click();
 
 	URL.revokeObjectURL(url);
@@ -41,7 +50,13 @@ export function exportBoardToFile(game: Game) {
 
 export async function loadBoardFromFile(game: Game, jsonFile: File) {
 	const text = await jsonFile.text();
-	const positions: boardState = JSON.parse(text);
+	const data = JSON.parse(text);
+
+	if (!hasRequiredBoardStateFields(data)) {
+		throw new Error('Invalid board file format');
+	}
+
+	const positions: boardState = data;
 
 	// Clear existing players and officials
 	game.playerManager.players = [];
@@ -63,4 +78,15 @@ export async function loadBoardFromFile(game: Game, jsonFile: File) {
 			new SkatingOfficial(position.x, position.y, official.role)
 		);
 	});
+}
+
+function hasRequiredBoardStateFields(obj: unknown): obj is boardState {
+	const board = obj as boardState;
+	return (
+		board !== null &&
+		typeof board.version === 'number' &&
+		typeof board.createdAt === 'string' &&
+		Array.isArray(board.teamPlayers) &&
+		Array.isArray(board.skatingOfficials)
+	);
 }
