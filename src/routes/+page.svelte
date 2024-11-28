@@ -1,7 +1,7 @@
 <script lang="ts">
-	import AboutPage from '$lib/components/AboutPage.svelte';
-	import BoardCanvas from '$lib/components/BoardCanvas.svelte';
-	import VideoPreview from '$lib/components/VideoPreview.svelte';
+	import About from '$lib/components/About.svelte';
+	import Board from '$lib/components/Board.svelte';
+	import Video from '$lib/components/Video.svelte';
 	import Toolbar from '$lib/components/Toolbar.svelte';
 	import Menu from '$lib/components/Menu.svelte';
 	import type { Game } from '$lib/classes/Game';
@@ -31,9 +31,9 @@
 	}`}
 >
 	<div class="relative mx-auto aspect-[100/67] max-h-screen w-full max-w-[1200px]">
-		<BoardCanvas bind:highResCanvas bind:game />
+		<Board bind:highResCanvas bind:game />
 		{#if showPreview && recordedBlob}
-			<VideoPreview bind:videoBlob={recordedBlob} close={handlePreviewClose} />
+			<Video bind:videoBlob={recordedBlob} close={handlePreviewClose} />
 		{/if}
 	</div>
 </main>
@@ -47,6 +47,6 @@
 	onDiscard={handlePreviewClose}
 />
 
-<AboutPage />
+<About />
 
 <Menu {game} />

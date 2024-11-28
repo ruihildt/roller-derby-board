@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { Game } from '$lib/classes/Game';
 	import { exportBoardToFile, loadBoardFromFile } from '$lib/utils/boardState';
-	import AboutPage from './AboutPage.svelte';
+	import AboutPage from './About.svelte';
 
 	import { Dropdown, DropdownItem, Button, DropdownDivider } from 'flowbite-svelte';
 	import {
