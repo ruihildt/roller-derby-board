@@ -123,14 +123,13 @@ export class PlayerManager {
 		this.packManager.updatePlayers(this.players);
 	}
 
-	addTeamPlayer(x: number, y: number, team: string, role: TeamPlayerRole): TeamPlayer {
+	addTeamPlayer(x: number, y: number, team: string, role: TeamPlayerRole) {
 		const player = new TeamPlayer(x, y, team, role);
 		player.inBounds = this.trackGeometry.isPlayerInBounds(player);
 		this.trackGeometry.updatePlayerZone(player);
 		this.trackGeometry.updatePlayerCoordinates(player);
 		this.players.push(player);
 		this.packManager.updatePlayers(this.players);
-		return player;
 	}
 
 	initializeTeamPlayers(): void {
