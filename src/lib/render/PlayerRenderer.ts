@@ -1,5 +1,5 @@
 import type { PackManager } from '../classes/PackManager';
-import { PlayerRole, type TeamPlayer } from '../classes/TeamPlayer';
+import { TeamPlayerRole, type TeamPlayer } from '../classes/TeamPlayer';
 import { SkatingOfficial, SkatingOfficialRole } from '../classes/SkatingOfficial';
 import { TrackGeometry } from '../classes/TrackGeometry';
 
@@ -236,7 +236,7 @@ export class PlayerRenderer {
 		ctx.fill();
 
 		// Draw pivot stripe
-		if (player.role === PlayerRole.pivot) {
+		if (player.role === TeamPlayerRole.pivot) {
 			ctx.beginPath();
 			ctx.rect(player.x - player.radius, player.y - 4, player.radius * 2, 7);
 			ctx.fillStyle = player.team === 'A' ? colors.teamASecondary : colors.teamBSecondary;
@@ -244,7 +244,7 @@ export class PlayerRenderer {
 		}
 
 		// Draw jammer star
-		if (player.role === PlayerRole.jammer) {
+		if (player.role === TeamPlayerRole.jammer) {
 			const starSize = player.radius * 0.8;
 			ctx.beginPath();
 			for (let i = 0; i < 5; i++) {
@@ -264,7 +264,7 @@ export class PlayerRenderer {
 		ctx.arc(player.x, player.y, player.radius, 0, Math.PI * 2);
 		ctx.strokeStyle = player.isInPack
 			? colors.inPack
-			: player.isInEngagementZone && player.role !== PlayerRole.jammer
+			: player.isInEngagementZone && player.role !== TeamPlayerRole.jammer
 				? colors.inEngagementZone
 				: player.inBounds
 					? colors.inBounds

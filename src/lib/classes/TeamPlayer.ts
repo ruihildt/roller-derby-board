@@ -1,14 +1,25 @@
 import { Player } from './Player';
 
-export enum PlayerRole {
+export enum TeamPlayerRole {
 	jammer = 'jammer',
 	blocker = 'blocker',
 	pivot = 'pivot'
 }
 
+export enum PlayerTeam {
+	jammer = 'A',
+	blocker = 'B'
+}
+
+export type TeamPlayerPosition = {
+	position: { x: number; y: number };
+	role: TeamPlayerRole;
+	team: PlayerTeam;
+};
+
 export class TeamPlayer extends Player {
 	team: string;
-	role: PlayerRole;
+	role: TeamPlayerRole;
 	zone: number;
 	inBounds: boolean;
 	isInPack: boolean;
@@ -16,7 +27,7 @@ export class TeamPlayer extends Player {
 	isForemost: boolean;
 	isInEngagementZone: boolean;
 
-	constructor(x: number, y: number, team: string, role: PlayerRole) {
+	constructor(x: number, y: number, team: string, role: TeamPlayerRole) {
 		super(x, y);
 		this.team = team;
 		this.role = role;

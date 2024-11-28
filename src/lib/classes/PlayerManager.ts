@@ -1,4 +1,4 @@
-import { TeamPlayer, PlayerRole } from '$lib/classes/TeamPlayer';
+import { TeamPlayer, TeamPlayerRole } from '$lib/classes/TeamPlayer';
 import { PackManager } from '$lib/classes/PackManager';
 import { Renderer } from '$lib/render/Renderer';
 import type { Point } from '$lib/types';
@@ -126,29 +126,33 @@ export class PlayerManager {
 	initializePlayers(): void {
 		// Create 4 blockers for Team A
 		for (let i = 0; i < 4; i++) {
-			const role = i < 3 ? PlayerRole.blocker : PlayerRole.pivot;
+			const role = i < 3 ? TeamPlayerRole.blocker : TeamPlayerRole.pivot;
 			const pos = this.getRandomBlockerPosition(role);
-			this.players.push(new TeamPlayer(pos.x, pos.y, 'A', role));
+			this.addTeamPlayer(pos.x, pos.y, 'A', role);
 		}
 
 		// Create 4 blockers for Team B
 		for (let i = 0; i < 4; i++) {
-			const role = i < 3 ? PlayerRole.blocker : PlayerRole.pivot;
+			const role = i < 3 ? TeamPlayerRole.blocker : TeamPlayerRole.pivot;
 			const pos = this.getRandomBlockerPosition(role);
-			this.players.push(new TeamPlayer(pos.x, pos.y, 'B', role));
+			this.addTeamPlayer(pos.x, pos.y, 'B', role);
 		}
 
 		// Add jammers
 		const jammerPosA = this.getRandomJammerPosition();
-		this.players.push(new TeamPlayer(jammerPosA.x, jammerPosA.y, 'A', PlayerRole.jammer));
+		this.addTeamPlayer(jammerPosA.x, jammerPosA.y, 'A', TeamPlayerRole.jammer);
 		const jammerPosB = this.getRandomJammerPosition();
-		this.players.push(new TeamPlayer(jammerPosB.x, jammerPosB.y, 'B', PlayerRole.jammer));
+		this.addTeamPlayer(jammerPosB.x, jammerPosB.y, 'B', TeamPlayerRole.jammer);
+	}
 
-		this.players.forEach((player) => {
-			player.inBounds = this.trackGeometry.isPlayerInBounds(player);
-			this.trackGeometry.updatePlayerZone(player);
-			this.trackGeometry.updatePlayerCoordinates(player);
-		});
+	addTeamPlayer(x: number, y: number, team: string, role: TeamPlayerRole): TeamPlayer {
+		const player = new TeamPlayer(x, y, team, role);
+		player.inBounds = this.trackGeometry.isPlayerInBounds(player);
+		this.trackGeometry.updatePlayerZone(player);
+		this.trackGeometry.updatePlayerCoordinates(player);
+		this.players.push(player);
+		this.packManager.updatePlayers(this.players);
+		return player;
 	}
 
 	initializeSkatingOfficials(): void {
@@ -190,7 +194,7 @@ export class PlayerManager {
 		);
 	}
 
-	getRandomBlockerPosition(role: PlayerRole): Point {
+	getRandomBlockerPosition(role: TeamPlayerRole): Point {
 		const ctx = this.ctx;
 		let attempts = 0;
 		const maxAttempts = 1000; // Adjust this value as needed
@@ -253,7 +257,7 @@ export class PlayerManager {
 				(point) =>
 					ctx.isPointInPath(jammerStartZone, point.x, point.y) &&
 					this.trackGeometry.isPlayerInBounds(
-						new TeamPlayer(point.x, point.y, 'A', PlayerRole.jammer)
+						new TeamPlayer(point.x, point.y, 'A', TeamPlayerRole.jammer)
 					)
 			);
 

@@ -5,6 +5,7 @@ import { PlayerRenderer } from '../render/PlayerRenderer';
 import { PackZoneRenderer } from '../render/PackZoneRenderer';
 import { Player } from './Player';
 import { ScalingManager } from './ScalingManager';
+import type { TeamPlayerPosition } from './TeamPlayer';
 
 export class Game {
 	private static readonly CANVAS_WIDTH_DIVISOR = 250; // For LINE_WIDTH calculation
@@ -14,7 +15,6 @@ export class Game {
 	private static readonly VERTICAL_OFFSET_2 = 0.3; // Second vertical offset in meters
 	private static readonly OUTER_VERTICAL_OFFSET_1 = 8.38; // First outer vertical offset in meters
 	private static readonly OUTER_VERTICAL_OFFSET_2 = 7.78; // Second outer vertical offset in meters
-	private scalingManager: ScalingManager;
 
 	canvas: HTMLCanvasElement;
 	highResCanvas: HTMLCanvasElement;
@@ -24,6 +24,7 @@ export class Game {
 	LINE_WIDTH: number;
 	PIXELS_PER_METER: number;
 	points: Record<string, Point>;
+	scalingManager: ScalingManager;
 	renderer: Renderer;
 	playerRenderer: PlayerRenderer;
 	playerManager: PlayerManager;
@@ -199,6 +200,21 @@ export class Game {
 				y: centerY + Game.OUTER_VERTICAL_OFFSET_1 * scale
 			}
 		};
+	}
+
+	exportPositions(): string {
+		const positions: TeamPlayerPosition[] = this.playerManager.players.map((player) => {
+			return {
+				position: {
+					x: player.x / this.canvas.width, // Store as percentage of track width
+					y: player.y / this.canvas.height // Store as percentage of track height
+				},
+				role: player.role,
+				team: player.team
+			} as TeamPlayerPosition;
+		});
+
+		return JSON.stringify(positions, null, 2);
 	}
 
 	update(): void {

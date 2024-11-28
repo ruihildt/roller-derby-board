@@ -1,4 +1,4 @@
-import { TeamPlayer, PlayerRole } from './TeamPlayer';
+import { TeamPlayer, TeamPlayerRole } from './TeamPlayer';
 import { TrackGeometry } from './TrackGeometry';
 import type { Point } from '../types';
 import { distance } from '../utils/utils';
@@ -33,7 +33,9 @@ export class PackManager extends EventTarget {
 			player.isInEngagementZone = false;
 		});
 
-		const inBoundsBlockers = this.players.filter((p) => p.inBounds && p.role !== PlayerRole.jammer);
+		const inBoundsBlockers = this.players.filter(
+			(p) => p.inBounds && p.role !== TeamPlayerRole.jammer
+		);
 		const groups = this.groupBlockers(inBoundsBlockers);
 		const validGroups = groups.filter(this.isValidGroup);
 
