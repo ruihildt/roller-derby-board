@@ -16,8 +16,15 @@
 		game: Game;
 	}>();
 
+	let dropdownOpen = $state(false);
+
+	function toggleMenu() {
+		dropdownOpen = !dropdownOpen;
+	}
+
 	function handleReset() {
 		game.playerManager.resetPlayers();
+		dropdownOpen = false;
 	}
 
 	function handleOpen() {
@@ -25,6 +32,7 @@
 		input.type = 'file';
 		input.accept = '.json';
 		input.click();
+		dropdownOpen = false;
 
 		input.onchange = async (e) => {
 			const file = (e.target as HTMLInputElement).files?.[0];
@@ -36,34 +44,41 @@
 
 	function handleSave() {
 		exportBoardToFile(game);
+		dropdownOpen = false;
 	}
 </script>
 
 <div class="absolute left-4 top-4 z-50">
-	<Button class="bg-white !p-2 hover:bg-primary-200">
+	<Button class="bg-white !p-2 hover:bg-primary-200" onclick={() => toggleMenu}>
 		<BarsOutline class="h-6 w-6" color="gray" />
 	</Button>
-	<Dropdown class="w-40">
-		<DropdownItem class="flex items-center hover:bg-primary-200" on:click={handleOpen}>
+
+	<Dropdown bind:open={dropdownOpen} class="w-40">
+		<DropdownItem class="flex items-center hover:bg-primary-200" onclick={handleOpen}>
 			<FolderOpenOutline class="mr-2 h-4 w-4" />
 			<span>Open</span>
 		</DropdownItem>
-		<DropdownItem class="flex items-center hover:bg-primary-200" on:click={handleSave}>
+		<DropdownItem class="flex items-center hover:bg-primary-200" onclick={handleSave}>
 			<ArrowDownToBracketOutline class="mr-2 h-4 w-4" />
 			<span>Save to disk</span>
 		</DropdownItem>
-		<DropdownItem class="flex items-center hover:bg-primary-200">
+		<DropdownItem
+			class="flex items-center hover:bg-primary-200"
+			onclick={() => (dropdownOpen = false)}
+		>
 			<ImageOutline class="mr-2 h-4 w-4" />
 			<span>Export image</span>
 		</DropdownItem>
 		<DropdownDivider />
-		<DropdownItem class="flex items-center hover:bg-primary-200" on:click={handleReset}>
+		<DropdownItem class="flex items-center hover:bg-primary-200" onclick={handleReset}>
 			<RefreshOutline class="mr-2 h-4 w-4" />
 			<span>Reset board</span>
 		</DropdownItem>
-
 		<DropdownDivider />
-		<DropdownItem class="flex items-center hover:bg-primary-200">
+		<DropdownItem
+			class="flex items-center hover:bg-primary-200"
+			onclick={() => (dropdownOpen = false)}
+		>
 			<InfoCircleOutline class="mr-2 h-4 w-4" />
 			<span>About</span>
 		</DropdownItem>
