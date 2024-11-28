@@ -8,6 +8,26 @@
 		ImageOutline,
 		InfoCircleOutline
 	} from 'flowbite-svelte-icons';
+
+	function handleOpen() {
+		const input = document.createElement('input');
+		input.type = 'file';
+		input.accept = '.json';
+		input.click();
+
+		input.onchange = (e) => {
+			const file = (e.target as HTMLInputElement).files?.[0];
+			if (file) {
+				// Handle the selected file here
+				const reader = new FileReader();
+				reader.onload = (e) => {
+					const content = e.target?.result;
+					// TODO HERE
+				};
+				reader.readAsText(file);
+			}
+		};
+	}
 </script>
 
 <div class="absolute left-4 top-4 z-50">
@@ -15,7 +35,7 @@
 		<BarsOutline class="h-6 w-6" color="gray" />
 	</Button>
 	<Dropdown class="w-40">
-		<DropdownItem class="flex items-center hover:bg-primary-200">
+		<DropdownItem class="flex items-center hover:bg-primary-200" on:click={handleOpen}>
 			<FolderOpenOutline class="mr-2 h-4 w-4" />
 			<span>Open</span>
 		</DropdownItem>
