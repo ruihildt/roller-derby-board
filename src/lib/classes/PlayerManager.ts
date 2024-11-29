@@ -462,11 +462,6 @@ export class PlayerManager {
 				this.trackGeometry.updatePlayerCoordinates(entity);
 				this.packManager.updatePlayers(this.players);
 			}
-
-			// Log position changes for skating officials
-			if (entity instanceof SkatingOfficial) {
-				console.log(`${entity.role} moved from to (${entity.x}, ${entity.y})`);
-			}
 		}
 	}
 
@@ -494,6 +489,76 @@ export class PlayerManager {
 			this.selectedPlayer.isDragging = false;
 			this.selectedPlayer = null;
 			saveBoardState(this.game);
+		}
+	}
+
+	// Add these methods to the PlayerManager class
+
+	handleTouchStart(event: TouchEvent): void {
+		event.preventDefault();
+		const touch = event.touches[0];
+		const rect = this.canvas.getBoundingClientRect();
+		const x = touch.clientX - rect.left;
+		const y = touch.clientY - rect.top;
+
+		// Use the same logic as mouseDown
+		const draggableEntities = [...this.players, ...this.skatingOfficials];
+
+		for (const entity of draggableEntities) {
+			if (entity.containsPoint(x, y)) {
+				this.selectedPlayer = entity;
+				entity.isDragging = true;
+				entity.dragOffsetX = x - entity.x;
+				entity.dragOffsetY = y - entity.y;
+				break;
+			}
+		}
+	}
+
+	handleTouchMove(event: TouchEvent): void {
+		event.preventDefault();
+		const touch = event.touches[0];
+		const entity = this.selectedPlayer;
+
+		if (entity?.isDragging) {
+			const rect = this.canvas.getBoundingClientRect();
+			let x = touch.clientX - rect.left;
+			let y = touch.clientY - rect.top;
+
+			// Constrain x and y to keep player within canvas bounds
+			x = Math.max(
+				entity.radius,
+				Math.min(this.canvas.width - entity.radius, x - entity.dragOffsetX)
+			);
+			y = Math.max(
+				entity.radius,
+				Math.min(this.canvas.height - entity.radius, y - entity.dragOffsetY)
+			);
+
+			entity.x = x;
+			entity.y = y;
+
+			// Handle collisions
+			const allEntities = [...this.players, ...this.skatingOfficials];
+			allEntities.forEach((otherEntity) => {
+				if (otherEntity !== entity && this.checkCollision(entity, otherEntity)) {
+					this.handlePush(entity, otherEntity);
+				}
+			});
+
+			if (entity instanceof TeamPlayer) {
+				entity.inBounds = this.trackGeometry.isPlayerInBounds(entity);
+				this.trackGeometry.updatePlayerZone(entity);
+				this.trackGeometry.updatePlayerCoordinates(entity);
+				this.packManager.updatePlayers(this.players);
+			}
+		}
+	}
+
+	handleTouchEnd(): void {
+		if (this.selectedPlayer) {
+			this.selectedPlayer.isDragging = false;
+			this.selectedPlayer = null;
 		}
 	}
 

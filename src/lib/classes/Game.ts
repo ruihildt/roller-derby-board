@@ -83,18 +83,12 @@ export class Game {
 			this.playerManager.packManager
 		);
 
-		this.canvas.addEventListener(
-			'mousedown',
-			this.playerManager.handleMouseDown.bind(this.playerManager)
-		);
-		this.canvas.addEventListener(
-			'mousemove',
-			this.playerManager.handleMouseMove.bind(this.playerManager)
-		);
-		this.canvas.addEventListener(
-			'mouseup',
-			this.playerManager.handleMouseUp.bind(this.playerManager)
-		);
+		canvas.addEventListener('mousedown', (e) => this.playerManager.handleMouseDown(e));
+		canvas.addEventListener('mousemove', (e) => this.playerManager.handleMouseMove(e));
+		canvas.addEventListener('mouseup', () => this.playerManager.handleMouseUp());
+		canvas.addEventListener('touchstart', (e) => this.playerManager.handleTouchStart(e));
+		canvas.addEventListener('touchmove', (e) => this.playerManager.handleTouchMove(e));
+		canvas.addEventListener('touchend', () => this.playerManager.handleTouchEnd());
 
 		boardState.subscribe((state) => {
 			if (state.teamPlayers.length > 0) {
