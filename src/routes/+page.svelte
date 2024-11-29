@@ -4,6 +4,7 @@
 	import Toolbar from '$lib/components/Toolbar.svelte';
 	import Menu from '$lib/components/Menu.svelte';
 	import type { Game } from '$lib/classes/Game';
+	import Changelog from '$lib/components/Changelog.svelte';
 
 	let showPreview = $state(false);
 	let recordedBlob = $state<Blob | null>(null);
@@ -47,3 +48,4 @@
 />
 
 <Menu {game} />
+<Changelog />
