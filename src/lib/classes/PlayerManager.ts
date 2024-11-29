@@ -31,6 +31,7 @@ export class PlayerManager {
 	jammerStartZone: Path2D;
 	packManager: PackManager;
 	positions: Record<string, Point>;
+	activeTouches: Map<number, { player: Player; touch: Touch }>;
 
 	constructor(
 		game: Game,
@@ -98,6 +99,8 @@ export class PlayerManager {
 			}
 			this.packManager.updatePlayers(this.players);
 		}
+
+		this.activeTouches = new Map();
 	}
 
 	resize(
@@ -496,70 +499,70 @@ export class PlayerManager {
 
 	handleTouchStart(event: TouchEvent): void {
 		event.preventDefault();
-		const touch = event.touches[0];
 		const rect = this.canvas.getBoundingClientRect();
-		const x = touch.clientX - rect.left;
-		const y = touch.clientY - rect.top;
 
-		// Use the same logic as mouseDown
-		const draggableEntities = [...this.players, ...this.skatingOfficials];
+		// Handle each new touch
+		Array.from(event.changedTouches).forEach((touch) => {
+			const x = touch.clientX - rect.left;
+			const y = touch.clientY - rect.top;
 
-		for (const entity of draggableEntities) {
-			if (entity.containsPoint(x, y)) {
-				this.selectedPlayer = entity;
-				entity.isDragging = true;
-				entity.dragOffsetX = x - entity.x;
-				entity.dragOffsetY = y - entity.y;
-				break;
+			const draggableEntities = [...this.players, ...this.skatingOfficials];
+			for (const entity of draggableEntities) {
+				if (entity.containsPoint(x, y)) {
+					entity.isDragging = true;
+					this.activeTouches.set(touch.identifier, {
+						player: entity,
+						touch: touch
+					});
+					break;
+				}
 			}
-		}
+		});
 	}
 
 	handleTouchMove(event: TouchEvent): void {
 		event.preventDefault();
-		const touch = event.touches[0];
-		const entity = this.selectedPlayer;
+		const rect = this.canvas.getBoundingClientRect();
 
-		if (entity?.isDragging) {
-			const rect = this.canvas.getBoundingClientRect();
-			let x = touch.clientX - rect.left;
-			let y = touch.clientY - rect.top;
+		Array.from(event.changedTouches).forEach((touch) => {
+			const activeTouch = this.activeTouches.get(touch.identifier);
+			if (activeTouch) {
+				const entity = activeTouch.player;
+				let x = touch.clientX - rect.left;
+				let y = touch.clientY - rect.top;
 
-			// Constrain x and y to keep player within canvas bounds
-			x = Math.max(
-				entity.radius,
-				Math.min(this.canvas.width - entity.radius, x - entity.dragOffsetX)
-			);
-			y = Math.max(
-				entity.radius,
-				Math.min(this.canvas.height - entity.radius, y - entity.dragOffsetY)
-			);
+				x = Math.max(entity.radius, Math.min(this.canvas.width - entity.radius, x));
+				y = Math.max(entity.radius, Math.min(this.canvas.height - entity.radius, y));
 
-			entity.x = x;
-			entity.y = y;
+				entity.x = x;
+				entity.y = y;
 
-			// Handle collisions
-			const allEntities = [...this.players, ...this.skatingOfficials];
-			allEntities.forEach((otherEntity) => {
-				if (otherEntity !== entity && this.checkCollision(entity, otherEntity)) {
-					this.handlePush(entity, otherEntity);
+				// Handle collisions and updates
+				const allEntities = [...this.players, ...this.skatingOfficials];
+				allEntities.forEach((otherEntity) => {
+					if (otherEntity !== entity && this.checkCollision(entity, otherEntity)) {
+						this.handlePush(entity, otherEntity);
+					}
+				});
+
+				if (entity instanceof TeamPlayer) {
+					entity.inBounds = this.trackGeometry.isPlayerInBounds(entity);
+					this.trackGeometry.updatePlayerZone(entity);
+					this.trackGeometry.updatePlayerCoordinates(entity);
+					this.packManager.updatePlayers(this.players);
 				}
-			});
-
-			if (entity instanceof TeamPlayer) {
-				entity.inBounds = this.trackGeometry.isPlayerInBounds(entity);
-				this.trackGeometry.updatePlayerZone(entity);
-				this.trackGeometry.updatePlayerCoordinates(entity);
-				this.packManager.updatePlayers(this.players);
 			}
-		}
+		});
 	}
 
-	handleTouchEnd(): void {
-		if (this.selectedPlayer) {
-			this.selectedPlayer.isDragging = false;
-			this.selectedPlayer = null;
-		}
+	handleTouchEnd(event: TouchEvent): void {
+		Array.from(event.changedTouches).forEach((touch) => {
+			const activeTouch = this.activeTouches.get(touch.identifier);
+			if (activeTouch) {
+				activeTouch.player.isDragging = false;
+				this.activeTouches.delete(touch.identifier);
+			}
+		});
 	}
 
 	updatePlayers(): void {
