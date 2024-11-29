@@ -37,10 +37,10 @@
 			<p>We welcome skating officials on board. Please behave.</p>
 		</TimelineItem>
 		<TimelineItem title="Covering your track" date="2024 November 20th" classLi="!mb-7">
-			<p>Quick, take cover! Here, pivots stripe and jammers star.</p>
+			<p>Quick, take cover! Here pivots stripe and jammers star.</p>
 		</TimelineItem>
 		<TimelineItem title="Second chance" date="2024 November 19th" classLi="!mb-7">
-			<p>Before saving a recording, you get a chance to review it. Annoying, right?</p>
+			<p>Before saving a recording, you get a chance to review it. Annoying voice, right?</p>
 		</TimelineItem>
 		<TimelineItem title="Derbyboard is out!" date="2024 November 18th" classLi="!mb-7">
 			<p>
