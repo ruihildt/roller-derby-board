@@ -1,3 +1,5 @@
+import { get } from 'svelte/store';
+
 import { TeamPlayer, TeamPlayerRole } from '$lib/classes/TeamPlayer';
 import { PackManager } from '$lib/classes/PackManager';
 import { Renderer } from '$lib/render/Renderer';
@@ -5,6 +7,7 @@ import type { Point } from '$lib/types';
 import { TrackGeometry } from './TrackGeometry';
 import { Player } from './Player';
 import { SkatingOfficial, SkatingOfficialRole } from './SkatingOfficial';
+import { persistedBoardState, updateBoardState, type BoardState } from '$lib/stores/boardState';
 
 export class PlayerManager {
 	canvas: HTMLCanvasElement;
@@ -62,8 +65,25 @@ export class PlayerManager {
 		};
 
 		if (isInitialLoad) {
-			this.initializeSkatingOfficials();
-			this.initializeTeamPlayers();
+			const savedState: BoardState = get(persistedBoardState);
+
+			if (savedState?.players?.length > 0) {
+				this.players = savedState.players.map((p) => {
+					const player = new TeamPlayer(p.x, p.y, p.team, p.role);
+					player.inBounds = this.trackGeometry.isPlayerInBounds(player);
+					this.trackGeometry.updatePlayerZone(player);
+					this.trackGeometry.updatePlayerCoordinates(player);
+					return player;
+				});
+				this.skatingOfficials = (savedState.skatingOfficials || []).map(
+					(o) => new SkatingOfficial(o.x, o.y, o.role)
+				);
+				this.positions = savedState.positions;
+				this.packManager.updatePlayers(this.players);
+			} else {
+				this.initializeSkatingOfficials();
+				this.initializeTeamPlayers();
+			}
 			this.packManager.updatePlayers(this.players);
 		}
 	}
@@ -394,6 +414,8 @@ export class PlayerManager {
 		if (this.selectedPlayer) {
 			this.selectedPlayer.isDragging = false;
 			this.selectedPlayer = null;
+			// Save state when player is released
+			updateBoardState(this.players, this.skatingOfficials, this.positions);
 		}
 	}
 

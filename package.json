@@ -42,6 +42,7 @@
 	},
 	"type": "module",
 	"dependencies": {
-		"fix-webm-duration": "^1.0.6"
+		"fix-webm-duration": "^1.0.6",
+		"svelte-persisted-store": "^0.12.0"
 	}
 }

@@ -26,6 +26,12 @@
 				<CloseOutline class="h-5 w-5" />
 			</button>
 		</div>
+		<TimelineItem title="Holding on" date="2024 November 30th" classLi="!mb-7">
+			<p>
+				Players will now hold <span class="line-through">grudges</span> on to their positions, even when
+				you refresh the page or restart the browser. Good players!
+			</p>
+		</TimelineItem>
 		<TimelineItem title="A bite for everyone" date="2024 November 29th" classLi="!mb-7">
 			<p>
 				On the menu, a smörgås-board of options: save/load the current board state, export it as an
