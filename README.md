@@ -1,8 +1,10 @@
-# Roller Derby Strategy Board
+# Derbyboard
 
-This is an interactive web application that enables real-time recording of roller derby strategies through your browser. Create dynamic track visualizations with player movements, pack formations while capturing video with optional audio commentary.
+## Record your roller derby tactics from your browser
 
-The main goal is to make it as easy as possible sharing roller derby plays, making it an effective tool for coaches, players, and teams to communicate tactics.
+Derbyboard is an interactive web application that enables recording of roller derby strategies through your browser, with optional audio capture.
+
+The main goal is to make it as easy as possible sharing roller derby tactics and game situations, making it an effective tool for coaches, players, officials and teams to talk about the game.
 
 ## Core features
 
@@ -11,14 +13,19 @@ The main goal is to make it as easy as possible sharing roller derby plays, maki
 - Regulation-size roller derby track
 - Dynamic pack and engagement zone indicators
 - Status-based player coloring system
-- Smooth player animations
+
+🎮 Board state
+
+- Save and load board state
+- Reset board state
 
 🎥 Recording Capabilities
 
 - High-quality video capture
 - Optional audio commentary
 - Direct browser recording
-- Downloadable webm format
+- Download in .webm format
+- Capture the board as an image
 
 ### Potential ideas
 
@@ -65,12 +72,13 @@ Innovative 3D approach to track visualization.
 
 - HTML Canvas
 - MediaRecorder API for audio capture
+- Svelte + Flowbite for the UI
 
 ### About the LLM usage
 
-I have written very few lines of code in this project, on purpose. It was a trial to see how far I could come by prompt engineering with LLMs.
+I have written very few lines of code in this project, on purpose. It is a trial to see how far I can come by prompt engineering with LLMs.
 
-While I'm an ok frontend developer, without LLM help, I would have probably never been able to get this far. I suck at geometry and had no previous experience in HTML canvas, animating game state or browser recording. I can't evern double check if everything is correct `¯\_(ツ)\_/¯`.
+While I'm an ok frontend developer, without LLM help, I would have probably never been able to get this far. I suck at geometry and had no previous experience in HTML canvas, animating game state or browser recording. I can't even double check if everything is correct `¯\_(ツ)\_/¯`.
 
 If you have any suggestions on how to improve the code, I would love to hear them.
 
