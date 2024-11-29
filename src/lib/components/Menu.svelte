@@ -1,7 +1,6 @@
 <script lang="ts">
 	import type { Game } from '$lib/classes/Game';
 	import { exportBoardToFile, loadBoardFromFile } from '$lib/utils/boardState';
-	import AboutPage from './About.svelte';
 
 	import { Dropdown, DropdownItem, Button, DropdownDivider } from 'flowbite-svelte';
 	import {
@@ -56,11 +55,6 @@
 		exportBoardToFile(game);
 		dropdownOpen = false;
 	}
-
-	function handleAboutClick() {
-		aboutModalOpen = true;
-		dropdownOpen = false;
-	}
 </script>
 
 <div class="absolute left-4 top-4 z-50">
@@ -69,30 +63,39 @@
 	</Button>
 
 	<Dropdown bind:open={dropdownOpen} class="w-40">
-		<DropdownItem class="flex items-center hover:bg-primary-200" onclick={handleOpen}>
+		<DropdownItem class="flex items-center text-gray-600 hover:bg-primary-200" onclick={handleOpen}>
 			<FolderOpenOutline class="mr-2 h-4 w-4" />
 			<span>Open</span>
 		</DropdownItem>
-		<DropdownItem class="flex items-center hover:bg-primary-200" onclick={handleSave}>
+		<DropdownItem class="flex items-center text-gray-700 hover:bg-primary-200" onclick={handleSave}>
 			<ArrowDownToBracketOutline class="mr-2 h-4 w-4" />
-			<span>Save to disk</span>
+			<span>Save to...</span>
 		</DropdownItem>
-		<DropdownItem class="flex items-center hover:bg-primary-200" onclick={handleExportImage}>
+		<DropdownItem
+			class="flex items-center text-gray-700 hover:bg-primary-200"
+			onclick={handleExportImage}
+		>
 			<ImageOutline class="mr-2 h-4 w-4" />
-			<span>Export image</span>
+			<span>Export image...</span>
 		</DropdownItem>
 
 		<DropdownDivider />
-		<DropdownItem class="flex items-center hover:bg-primary-200" onclick={handleReset}>
+		<DropdownItem
+			class="flex items-center text-gray-700 hover:bg-primary-200"
+			onclick={handleReset}
+		>
 			<RefreshOutline class="mr-2 h-4 w-4" />
 			<span>Reset board</span>
 		</DropdownItem>
 		<DropdownDivider />
-		<DropdownItem class="flex items-center hover:bg-primary-200" onclick={handleAboutClick}>
+		<DropdownItem
+			class="flex items-center text-gray-700 hover:bg-primary-200"
+			href="https://github.com/ruihildt/derbyboard"
+			target="_blank"
+			onclick={() => (dropdownOpen = false)}
+		>
 			<InfoCircleOutline class="mr-2 h-4 w-4" />
 			<span>About</span>
 		</DropdownItem>
 	</Dropdown>
 </div>
-
-<AboutPage bind:open={aboutModalOpen} />

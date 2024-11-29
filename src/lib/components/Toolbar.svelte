@@ -147,7 +147,7 @@
 </script>
 
 <Toolbar
-	class="fixed left-1/2 top-4 z-[11] inline-flex -translate-x-1/2 rounded-lg !p-1 shadow-lg shadow-black/5"
+	class="fixed left-1/2 top-4 z-[11] inline-flex -translate-x-1/2 rounded-lg !p-1  shadow-lg shadow-black/5"
 >
 	{#if !videoBlob}
 		<ToolbarButton
@@ -158,15 +158,15 @@
 			disabled={isRecording || countdown !== null}
 		>
 			{#if withAudio}
-				<MicrophoneOutline />
+				<MicrophoneOutline class="text-smtext-gray-700" />
 			{:else}
-				<MicrophoneSlashOutline />
+				<MicrophoneSlashOutline class="text-gray-700" />
 			{/if}
 		</ToolbarButton>
 
 		<ToolbarButton
-			class="flex items-center gap-2 px-3 {countdown !== null
-				? 'cursor-not-allowed opacity-50'
+			class="flex items-center gap-2 px-3 text-sm text-gray-700 {countdown !== null
+				? 'cursor-not-allowed'
 				: 'hover:bg-primary-200'}"
 			on:click={toggleRecording}
 			disabled={countdown !== null}
@@ -187,12 +187,15 @@
 			</div>
 		{/if}
 	{:else}
-		<ToolbarButton class="flex items-center gap-2 px-3 hover:bg-primary-200" on:click={onDiscard}>
+		<ToolbarButton
+			class="flex items-center gap-2 px-3 text-sm text-gray-700 hover:bg-primary-200"
+			on:click={onDiscard}
+		>
 			<ArrowsRepeatOutline />
 			Restart
 		</ToolbarButton>
 		<ToolbarButton
-			class="flex items-center gap-2 px-3 hover:bg-primary-200"
+			class="flex items-center gap-2 px-3 text-sm text-gray-700 hover:bg-primary-200"
 			on:click={handleDownload}
 		>
 			<DownloadOutline />

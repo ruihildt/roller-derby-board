@@ -1,5 +1,4 @@
 <script lang="ts">
-	import About from '$lib/components/About.svelte';
 	import Board from '$lib/components/Board.svelte';
 	import Video from '$lib/components/Video.svelte';
 	import Toolbar from '$lib/components/Toolbar.svelte';
@@ -46,7 +45,5 @@
 	recordingComplete={handleRecordingComplete}
 	onDiscard={handlePreviewClose}
 />
-
-<About />
 
 <Menu {game} />
