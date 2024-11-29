@@ -88,7 +88,7 @@ export class Game {
 		canvas.addEventListener('mouseup', () => this.playerManager.handleMouseUp());
 		canvas.addEventListener('touchstart', (e) => this.playerManager.handleTouchStart(e));
 		canvas.addEventListener('touchmove', (e) => this.playerManager.handleTouchMove(e));
-		canvas.addEventListener('touchend', () => this.playerManager.handleTouchEnd());
+		canvas.addEventListener('touchend', (e) => this.playerManager.handleTouchEnd(e));
 
 		boardState.subscribe((state) => {
 			if (state.teamPlayers.length > 0) {

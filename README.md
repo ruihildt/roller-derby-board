@@ -8,11 +8,12 @@ The main goal is to make it as easy as possible sharing roller derby tactics and
 
 ## Core features
 
-✨ Track Visualization
+✨ Track Visualization & interractions
 
 - Regulation-size roller derby track
 - Dynamic pack and engagement zone indicators
 - Status-based player coloring system
+- Multitouch support (select multiple players)
 
 🎮 Board state
 
