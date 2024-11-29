@@ -45,7 +45,7 @@
 
 	function handleExportImage() {
 		const link = document.createElement('a');
-		link.download = `derby-board-${new Date().toISOString().slice(0, 10)}.png`;
+		link.download = `derbyboard-${new Date().toISOString().slice(0, 10)}.png`;
 		link.href = game.renderer.highResCanvas.toDataURL('image/png');
 		link.click();
 		dropdownOpen = false;

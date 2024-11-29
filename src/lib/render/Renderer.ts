@@ -10,6 +10,7 @@ export class Renderer {
 	LINE_WIDTH: number;
 	PIXELS_PER_METER: number;
 	trackGeometry: TrackGeometry;
+	private logoImage: HTMLImageElement;
 
 	innerTrackPath: Path2D;
 	outerTrackPath: Path2D;
@@ -40,6 +41,9 @@ export class Renderer {
 		this.LINE_WIDTH = LINE_WIDTH;
 		this.PIXELS_PER_METER = PIXELS_PER_METER;
 		this.trackGeometry = new TrackGeometry(canvas, ctx, points, PIXELS_PER_METER);
+
+		this.logoImage = new Image();
+		this.logoImage.src = '/derbyboard-logo.svg';
 
 		this.innerTrackPath = this.trackGeometry.innerTrackPath;
 		this.outerTrackPath = this.trackGeometry.outerTrackPath;
@@ -205,14 +209,16 @@ export class Renderer {
 	}
 
 	private drawBranding(ctx: CanvasRenderingContext2D): void {
+		if (!this.logoImage.complete) return;
+
+		const centerX = this.canvas.width / 2;
+		const centerY = this.canvas.height / 2;
+
 		ctx.save();
-		ctx.fillStyle = '#333';
-		ctx.font = '16px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-		ctx.textAlign = 'center';
-		ctx.textBaseline = 'middle';
-		const textX = (this.points.F.x + this.points.D.x) / 2;
-		const textY = this.points.D.y + 22;
-		ctx.fillText('created with www.rollerderby.click', textX, textY);
+		const scale = 0.5;
+		const width = this.logoImage.width * scale;
+		const height = this.logoImage.height * scale;
+		ctx.drawImage(this.logoImage, centerX - width / 2, centerY - height / 2, width, height);
 		ctx.restore();
 	}
 }

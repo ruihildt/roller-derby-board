@@ -135,7 +135,7 @@
 		const month = String(now.getMonth() + 1).padStart(2, '0');
 		const day = String(now.getDate()).padStart(2, '0');
 
-		a.download = `rollerderby.click-${year}-${month}-${day}.webm`;
+		a.download = `derbyboard-${year}-${month}-${day}.webm`;
 
 		document.body.appendChild(a);
 		a.click();
