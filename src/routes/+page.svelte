@@ -46,6 +46,7 @@
 	recordingComplete={handleRecordingComplete}
 	onDiscard={handlePreviewClose}
 />
-
-<Menu {game} />
-<Changelog />
+{#if !isDarkBackground}
+	<Menu {game} />
+	<Changelog />
+{/if}

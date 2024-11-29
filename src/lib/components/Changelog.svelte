@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { Button, Drawer, Timeline, TimelineItem } from 'flowbite-svelte';
-	import { ArrowRightOutline, CloseOutline } from 'flowbite-svelte-icons';
+	import { Drawer, Timeline, TimelineItem } from 'flowbite-svelte';
+	import { CloseOutline } from 'flowbite-svelte-icons';
 	let hidden = true;
 </script>
 

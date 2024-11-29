@@ -17,7 +17,6 @@
 	}>();
 
 	let dropdownOpen = $state(false);
-	let aboutModalOpen = $state(false);
 
 	function toggleMenu() {
 		dropdownOpen = !dropdownOpen;
