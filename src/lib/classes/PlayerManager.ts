@@ -62,13 +62,13 @@ export class PlayerManager {
 
 		this.packManager = new PackManager(PIXELS_PER_METER, points, this.trackGeometry);
 		this.positions = {
-			OPR1: { x: this.canvas.width * 0.347, y: this.canvas.height * 0.115 },
-			OPR2: { x: this.canvas.width * 0.535, y: this.canvas.height * 0.11 },
-			OPR3: { x: this.canvas.width * 0.61, y: this.canvas.height * 0.11 },
-			FPR: { x: this.canvas.width * 0.46, y: this.canvas.height * 0.44 },
-			BPR: { x: this.canvas.width * 0.616, y: this.canvas.height * 0.44 },
-			JRTeamA: { x: this.canvas.width * 0.631, y: this.canvas.height * 0.359 },
-			JRTeamB: { x: this.canvas.width * 0.61, y: this.canvas.height * 0.38 }
+			OPR1: { x: 0.347, y: 0.115 },
+			OPR2: { x: 0.535, y: 0.11 },
+			OPR3: { x: 0.61, y: 0.11 },
+			FPR: { x: 0.46, y: 0.44 },
+			BPR: { x: 0.616, y: 0.44 },
+			JRTeamA: { x: 0.631, y: 0.359 },
+			JRTeamB: { x: 0.61, y: 0.38 }
 		};
 
 		if (isInitialLoad) {
@@ -189,7 +189,36 @@ export class PlayerManager {
 	}
 
 	initializeSkatingOfficials(): void {
-		const positions = this.positions;
+		const positions = {
+			OPR1: {
+				x: this.positions.OPR1.x * this.canvas.width,
+				y: this.positions.OPR1.y * this.canvas.height
+			},
+			OPR2: {
+				x: this.positions.OPR2.x * this.canvas.width,
+				y: this.positions.OPR2.y * this.canvas.height
+			},
+			OPR3: {
+				x: this.positions.OPR3.x * this.canvas.width,
+				y: this.positions.OPR3.y * this.canvas.height
+			},
+			FPR: {
+				x: this.positions.FPR.x * this.canvas.width,
+				y: this.positions.FPR.y * this.canvas.height
+			},
+			BPR: {
+				x: this.positions.BPR.x * this.canvas.width,
+				y: this.positions.BPR.y * this.canvas.height
+			},
+			JRTeamA: {
+				x: this.positions.JRTeamA.x * this.canvas.width,
+				y: this.positions.JRTeamA.y * this.canvas.height
+			},
+			JRTeamB: {
+				x: this.positions.JRTeamB.x * this.canvas.width,
+				y: this.positions.JRTeamB.y * this.canvas.height
+			}
+		};
 
 		// Add jam refs
 		const jamRefTeamA = new SkatingOfficial(
