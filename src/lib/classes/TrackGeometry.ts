@@ -42,7 +42,6 @@ export class TrackGeometry {
 	zones: Zones;
 	jammerLinePoints: Record<string, Point>;
 	PIXELS_PER_METER: number;
-	private LINE_WIDTH: number;
 
 	straight1Area: Path2D;
 	straight2Area: Path2D;
@@ -62,13 +61,11 @@ export class TrackGeometry {
 		canvas: HTMLCanvasElement,
 		ctx: CanvasRenderingContext2D,
 		points: Record<string, Point>,
-		PIXELS_PER_METER: number,
-		LINE_WIDTH: number
+		PIXELS_PER_METER: number
 	) {
 		this.canvas = canvas;
 		this.ctx = ctx;
 		this.PIXELS_PER_METER = PIXELS_PER_METER;
-		this.LINE_WIDTH = LINE_WIDTH;
 
 		this.points = points;
 		this.zones = {

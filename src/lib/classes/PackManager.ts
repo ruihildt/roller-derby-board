@@ -9,6 +9,7 @@ export class PackManager extends EventTarget {
 	points: Record<string, Point>;
 	zones: number[];
 	trackGeometry: TrackGeometry;
+	engagementZone: Path2D | null;
 
 	constructor(pixelsPerMeter: number, points: Record<string, Point>, trackGeometry: TrackGeometry) {
 		super();
@@ -17,6 +18,7 @@ export class PackManager extends EventTarget {
 		this.points = points;
 		this.zones = [];
 		this.trackGeometry = trackGeometry;
+		this.engagementZone = null;
 	}
 
 	updatePlayers(players: TeamPlayer[]) {
@@ -53,7 +55,6 @@ export class PackManager extends EventTarget {
 			// Multiple largest groups of equal size, no pack
 			this.players.forEach((p) => (p.isInPack = false));
 		}
-		this.dispatchEvent(new Event('packChanged'));
 	}
 
 	isValidGroup(group: TeamPlayer[]): boolean {
@@ -100,14 +101,14 @@ export class PackManager extends EventTarget {
 			return;
 		}
 
-		const engagementZonePath = this.trackGeometry.createEngagementZonePath(rearmost, foremost);
+		this.engagementZone = this.trackGeometry.createEngagementZonePath(rearmost, foremost);
 
 		// Only check in-bounds players for engagement zone
 		this.players
 			.filter((player) => player.inBounds)
 			.forEach((player) => {
 				player.isInEngagementZone = this.trackGeometry.ctx.isPointInPath(
-					engagementZonePath,
+					this.engagementZone!,
 					player.x,
 					player.y
 				);

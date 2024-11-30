@@ -42,7 +42,7 @@ export class Renderer {
 		this.points = points;
 		this.LINE_WIDTH = LINE_WIDTH;
 		this.PIXELS_PER_METER = PIXELS_PER_METER;
-		this.trackGeometry = new TrackGeometry(canvas, ctx, points, PIXELS_PER_METER, LINE_WIDTH);
+		this.trackGeometry = new TrackGeometry(canvas, ctx, points, PIXELS_PER_METER);
 		this.scalingManager = ScalingManager.getInstance();
 
 		this.logoImage = new Image();

@@ -24,8 +24,10 @@ export class RenderingPipeline {
 		this.scalingManager.clearAndResetCanvas(this.renderer.canvas);
 		this.scalingManager.applyTransformToCanvas(this.renderer.canvas);
 
-		// Draw all elements in order
+		// Draw static track elements first
 		this.renderer.drawTrack(this.renderer.ctx);
+
+		// Draw dynamic elements after transform
 		this.packZoneRenderer.drawEngagementZone(this.renderer.ctx);
 		this.playerRenderer.drawPlayers(this.playerManager.players);
 		this.playerRenderer.drawSkatingOfficials(this.playerManager.skatingOfficials);

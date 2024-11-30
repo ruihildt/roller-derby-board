@@ -82,7 +82,6 @@ export class Game {
 			this.ctx,
 			this.highResCanvas,
 			this.highResCtx,
-			this.renderer.trackGeometry,
 			this.playerManager.packManager
 		);
 
@@ -161,7 +160,6 @@ export class Game {
 			this.ctx,
 			this.highResCanvas,
 			this.highResCtx,
-			this.renderer.trackGeometry,
 			this.playerManager.packManager
 		);
 
