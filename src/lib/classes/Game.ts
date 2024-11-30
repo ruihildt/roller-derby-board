@@ -6,6 +6,7 @@ import { PackZoneRenderer } from '../render/PackZoneRenderer';
 import { Player } from './Player';
 import { ScalingManager } from './ScalingManager';
 import { boardState } from '$lib/stores/boardState';
+import { RenderingPipeline } from '$lib/render/RenderingPipeline';
 
 export class Game {
 	private static readonly CANVAS_WIDTH_DIVISOR = 250; // For LINE_WIDTH calculation
@@ -15,6 +16,8 @@ export class Game {
 	private static readonly VERTICAL_OFFSET_2 = 0.3; // Second vertical offset in meters
 	private static readonly OUTER_VERTICAL_OFFSET_1 = 8.38; // First outer vertical offset in meters
 	private static readonly OUTER_VERTICAL_OFFSET_2 = 7.78; // Second outer vertical offset in meters
+
+	private renderingPipeline: RenderingPipeline;
 
 	canvas: HTMLCanvasElement;
 	highResCanvas: HTMLCanvasElement;
@@ -83,6 +86,14 @@ export class Game {
 			this.playerManager.packManager
 		);
 
+		this.renderingPipeline = new RenderingPipeline(
+			this.renderer,
+			this.playerRenderer,
+			this.packZoneRenderer,
+			this.scalingManager,
+			this.playerManager
+		);
+
 		canvas.addEventListener('mousedown', (e) => this.playerManager.handleMouseDown(e));
 		canvas.addEventListener('mousemove', (e) => this.playerManager.handleMouseMove(e));
 		canvas.addEventListener('mouseup', () => this.playerManager.handleMouseUp());
@@ -93,7 +104,7 @@ export class Game {
 		boardState.subscribe((state) => {
 			if (state.teamPlayers.length > 0) {
 				this.playerManager.loadFromState(state);
-				this.renderer.draw();
+				this.renderingPipeline.render();
 			}
 		});
 	}
@@ -153,6 +164,18 @@ export class Game {
 			this.renderer.trackGeometry,
 			this.playerManager.packManager
 		);
+
+		// Create new rendering pipeline with updated components
+		this.renderingPipeline = new RenderingPipeline(
+			this.renderer,
+			this.playerRenderer,
+			this.packZoneRenderer,
+			this.scalingManager,
+			this.playerManager
+		);
+
+		// Trigger a render with new dimensions
+		this.renderingPipeline.render();
 	}
 
 	initializePoints(): Record<string, Point> {
@@ -210,30 +233,9 @@ export class Game {
 		this.playerManager.updatePlayers();
 	}
 
-	draw(): void {
-		// 1. Clear and draw background
-		this.renderer.draw();
-		// 2. Draw engagement zone
-		this.packZoneRenderer.drawEngagementZone(this.ctx);
-		// 3. Draw track boundaries
-		this.renderer.drawTrackBoundaries(this.ctx);
-		// 4. Draw all players and officials on top
-		this.playerRenderer.drawPlayers(this.playerManager.players);
-		this.playerRenderer.drawSkatingOfficials(this.playerManager.skatingOfficials);
-	}
-
-	drawHighRes(): void {
-		this.renderer.drawHighRes();
-		this.packZoneRenderer.drawEngagementZoneHighRes();
-		this.renderer.drawTrackBoundariesHighRes();
-		this.playerRenderer.drawPlayersHighRes(this.playerManager.players);
-		this.playerRenderer.drawSkatingOfficialsHighRes(this.playerManager.skatingOfficials);
-	}
-
 	gameLoop(): void {
 		this.update();
-		this.draw();
-		this.drawHighRes();
+		this.renderingPipeline.render();
 		requestAnimationFrame(() => this.gameLoop());
 	}
 
@@ -249,6 +251,18 @@ export class Game {
 		this.canvas.removeEventListener(
 			'mouseup',
 			this.playerManager.handleMouseUp.bind(this.playerManager)
+		);
+		this.canvas.removeEventListener(
+			'touchstart',
+			this.playerManager.handleTouchStart.bind(this.playerManager)
+		);
+		this.canvas.removeEventListener(
+			'touchmove',
+			this.playerManager.handleTouchMove.bind(this.playerManager)
+		);
+		this.canvas.removeEventListener(
+			'touchend',
+			this.playerManager.handleTouchEnd.bind(this.playerManager)
 		);
 	}
 }

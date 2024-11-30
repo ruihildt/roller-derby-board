@@ -6,6 +6,7 @@
 	import type { Game } from '$lib/classes/Game';
 	import Changelog from '$lib/components/Changelog.svelte';
 	import FullscreenButton from '$lib/components/FullscreenButton.svelte';
+	import ZoomControl from '$lib/components/ZoomControl.svelte';
 
 	let showPreview = $state(false);
 	let recordedBlob = $state<Blob | null>(null);
@@ -50,5 +51,8 @@
 {#if !isDarkBackground}
 	<Menu {game} />
 	<Changelog />
-	<FullscreenButton />
+	<div class="absolute bottom-4 left-4 flex gap-2">
+		<FullscreenButton />
+		<ZoomControl />
+	</div>
 {/if}

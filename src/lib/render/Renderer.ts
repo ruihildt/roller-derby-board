@@ -1,3 +1,4 @@
+import { ScalingManager } from '$lib/classes/ScalingManager';
 import type { Point } from '$lib/types';
 import { TrackGeometry } from '../classes/TrackGeometry';
 
@@ -11,6 +12,7 @@ export class Renderer {
 	PIXELS_PER_METER: number;
 	trackGeometry: TrackGeometry;
 	private logoImage: HTMLImageElement;
+	scalingManager: ScalingManager;
 
 	innerTrackPath: Path2D;
 	outerTrackPath: Path2D;
@@ -41,6 +43,7 @@ export class Renderer {
 		this.LINE_WIDTH = LINE_WIDTH;
 		this.PIXELS_PER_METER = PIXELS_PER_METER;
 		this.trackGeometry = new TrackGeometry(canvas, ctx, points, PIXELS_PER_METER, LINE_WIDTH);
+		this.scalingManager = ScalingManager.getInstance();
 
 		this.logoImage = new Image();
 		this.logoImage.src = '/derbyboard-logo.svg';
@@ -57,34 +60,6 @@ export class Renderer {
 		this.outerOfficialLanePath = this.trackGeometry.outerOfficialLanePath;
 		this.midTrackPath = this.trackGeometry.midTrackPath;
 		this.tenFeetLines = this.trackGeometry.tenFeetLines;
-	}
-
-	draw(): void {
-		this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-		this.ctx.fillStyle = '#f0f0f0';
-		this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-
-		this.drawTrack(this.ctx);
-		this.drawBranding(this.ctx);
-	}
-
-	drawHighRes(): void {
-		if (!this.highResCanvas) return;
-
-		const ctx = this.highResCtx;
-		const scale = 2;
-
-		this.highResCanvas.width = this.canvas.width * scale;
-		this.highResCanvas.height = this.canvas.height * scale;
-
-		ctx.scale(scale, scale);
-
-		ctx.clearRect(0, 0, this.highResCanvas.width, this.highResCanvas.height);
-		ctx.fillStyle = '#f0f0f0';
-		ctx.fillRect(0, 0, this.highResCanvas.width, this.highResCanvas.height);
-
-		this.drawTrack(ctx);
-		this.drawBranding(ctx);
 	}
 
 	drawTrack(ctx: CanvasRenderingContext2D): void {
@@ -208,7 +183,7 @@ export class Renderer {
 		}
 	}
 
-	private drawBranding(ctx: CanvasRenderingContext2D): void {
+	drawBranding(ctx: CanvasRenderingContext2D): void {
 		if (!this.logoImage.complete) return;
 
 		const centerX = this.canvas.width / 2;

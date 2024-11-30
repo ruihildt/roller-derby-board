@@ -435,21 +435,20 @@ export class PlayerManager {
 		const entity = this.selectedPlayer;
 		if (entity?.isDragging) {
 			const rect = this.canvas.getBoundingClientRect();
-			let x = event.clientX - rect.left;
-			let y = event.clientY - rect.top;
+			const screenX = event.clientX - rect.left;
+			const screenY = event.clientY - rect.top;
+			const worldCoords = this.game.scalingManager.screenToWorld(screenX, screenY);
+			const x = worldCoords.x * this.canvas.width;
+			const y = worldCoords.y * this.canvas.height;
 
-			// Constrain x and y to keep player fully within canvas bounds
-			x = Math.max(
+			entity.x = Math.max(
 				entity.radius,
 				Math.min(this.canvas.width - entity.radius, x - entity.dragOffsetX)
 			);
-			y = Math.max(
+			entity.y = Math.max(
 				entity.radius,
 				Math.min(this.canvas.height - entity.radius, y - entity.dragOffsetY)
 			);
-
-			entity.x = x;
-			entity.y = y;
 
 			// Check collisions with all entities
 			const allEntities = [...this.players, ...this.skatingOfficials];
@@ -470,10 +469,12 @@ export class PlayerManager {
 
 	handleMouseDown(event: MouseEvent): void {
 		const rect = this.canvas.getBoundingClientRect();
-		const x = event.clientX - rect.left;
-		const y = event.clientY - rect.top;
+		const screenX = event.clientX - rect.left;
+		const screenY = event.clientY - rect.top;
+		const worldCoords = this.game.scalingManager.screenToWorld(screenX, screenY);
+		const x = worldCoords.x * this.canvas.width;
+		const y = worldCoords.y * this.canvas.height;
 
-		// Check all draggable entities in order of priority
 		const draggableEntities = [...this.players, ...this.skatingOfficials];
 
 		for (const entity of draggableEntities) {
@@ -501,10 +502,12 @@ export class PlayerManager {
 		event.preventDefault();
 		const rect = this.canvas.getBoundingClientRect();
 
-		// Handle each new touch
 		Array.from(event.changedTouches).forEach((touch) => {
-			const x = touch.clientX - rect.left;
-			const y = touch.clientY - rect.top;
+			const screenX = touch.clientX - rect.left;
+			const screenY = touch.clientY - rect.top;
+			const worldCoords = this.game.scalingManager.screenToWorld(screenX, screenY);
+			const x = worldCoords.x * this.canvas.width;
+			const y = worldCoords.y * this.canvas.height;
 
 			const draggableEntities = [...this.players, ...this.skatingOfficials];
 			for (const entity of draggableEntities) {
@@ -528,14 +531,14 @@ export class PlayerManager {
 			const activeTouch = this.activeTouches.get(touch.identifier);
 			if (activeTouch) {
 				const entity = activeTouch.player;
-				let x = touch.clientX - rect.left;
-				let y = touch.clientY - rect.top;
+				const screenX = touch.clientX - rect.left;
+				const screenY = touch.clientY - rect.top;
+				const worldCoords = this.game.scalingManager.screenToWorld(screenX, screenY);
+				const x = worldCoords.x * this.canvas.width;
+				const y = worldCoords.y * this.canvas.height;
 
-				x = Math.max(entity.radius, Math.min(this.canvas.width - entity.radius, x));
-				y = Math.max(entity.radius, Math.min(this.canvas.height - entity.radius, y));
-
-				entity.x = x;
-				entity.y = y;
+				entity.x = Math.max(entity.radius, Math.min(this.canvas.width - entity.radius, x));
+				entity.y = Math.max(entity.radius, Math.min(this.canvas.height - entity.radius, y));
 
 				// Handle collisions and updates
 				const allEntities = [...this.players, ...this.skatingOfficials];

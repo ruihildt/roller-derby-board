@@ -15,12 +15,10 @@
 	}
 </script>
 
-<div class="absolute bottom-4 left-4 z-50">
-	<Button class="bg-white !p-2 hover:bg-primary-200" onclick={toggleFullscreen}>
-		{#if isFullscreen}
-			<MinimizeOutline class="h-6 w-6" color="gray" />
-		{:else}
-			<ExpandOutline class="h-6 w-6" color="gray" />
-		{/if}
-	</Button>
-</div>
+<Button class="bg-white !p-2 hover:bg-primary-200" onclick={toggleFullscreen}>
+	{#if isFullscreen}
+		<MinimizeOutline class="h-6 w-6" color="gray" />
+	{:else}
+		<ExpandOutline class="h-6 w-6" color="gray" />
+	{/if}
+</Button>
