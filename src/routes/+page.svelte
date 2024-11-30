@@ -5,6 +5,7 @@
 	import Menu from '$lib/components/Menu.svelte';
 	import type { Game } from '$lib/classes/Game';
 	import Changelog from '$lib/components/Changelog.svelte';
+	import FullscreenButton from '$lib/components/FullscreenButton.svelte';
 
 	let showPreview = $state(false);
 	let recordedBlob = $state<Blob | null>(null);
@@ -49,4 +50,5 @@
 {#if !isDarkBackground}
 	<Menu {game} />
 	<Changelog />
+	<FullscreenButton />
 {/if}

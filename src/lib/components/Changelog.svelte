@@ -26,10 +26,11 @@
 				<CloseOutline class="h-5 w-5" />
 			</button>
 		</div>
-		<TimelineItem title="Multitude of touches" date="TBD" classLi="!mb-7">
+		<TimelineItem title="Touch and go" date="TBD" classLi="!mb-7">
 			<p>
-				If you have a big enough screen, you can now use multiple fingers to move multiple players
-				around simultaneously. If you just want the one, it's fine too.
+				If you have a big enough screen (maximize your chances by going fullscreen), you can now use
+				multiple fingers to move multiple players around simultaneously. If you just want the one,
+				it's fine too.
 			</p>
 		</TimelineItem>
 		<TimelineItem title="Holding on" date="2024 November 30th" classLi="!mb-7">
