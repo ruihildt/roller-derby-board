@@ -214,10 +214,12 @@ export class Renderer {
 		const centerX = this.canvas.width / 2;
 		const centerY = this.canvas.height / 2;
 
+		const sizeMultiplier = 0.5;
+		const baseScale = (this.PIXELS_PER_METER / 35) * sizeMultiplier;
+		const width = this.logoImage.width * baseScale;
+		const height = this.logoImage.height * baseScale;
+
 		ctx.save();
-		const scale = 0.5;
-		const width = this.logoImage.width * scale;
-		const height = this.logoImage.height * scale;
 		ctx.drawImage(this.logoImage, centerX - width / 2, centerY - height / 2, width, height);
 		ctx.restore();
 	}
