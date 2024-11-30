@@ -17,6 +17,7 @@ export class PlayerManager {
 	ctx: CanvasRenderingContext2D;
 	points: Record<string, Point>;
 	PIXELS_PER_METER: number;
+	private LINE_WIDTH: number;
 	players: TeamPlayer[];
 	skatingOfficials: SkatingOfficial[];
 	selectedPlayer: Player | null;
@@ -45,11 +46,12 @@ export class PlayerManager {
 		this.ctx = ctx;
 		this.points = points;
 		this.PIXELS_PER_METER = PIXELS_PER_METER;
+		this.LINE_WIDTH = renderer.LINE_WIDTH;
 		Player.setCanvasWidth(canvas.width);
 		this.players = [];
 		this.skatingOfficials = [];
 		this.selectedPlayer = null;
-		this.trackGeometry = new TrackGeometry(canvas, ctx, points, PIXELS_PER_METER);
+		this.trackGeometry = new TrackGeometry(canvas, ctx, points, PIXELS_PER_METER, this.LINE_WIDTH);
 		this.renderer = renderer;
 		this.straight1Area = renderer.straight1Area;
 		this.straight2Area = renderer.straight2Area;
@@ -144,7 +146,7 @@ export class PlayerManager {
 		});
 
 		// Update track geometry
-		this.trackGeometry = new TrackGeometry(canvas, ctx, points, PIXELS_PER_METER);
+		this.trackGeometry = new TrackGeometry(canvas, ctx, points, PIXELS_PER_METER, this.LINE_WIDTH);
 		// Update player coordinates after resize
 		for (const player of this.players) {
 			this.trackGeometry.updatePlayerCoordinates(player);

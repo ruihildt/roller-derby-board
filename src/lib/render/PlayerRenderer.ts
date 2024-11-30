@@ -240,8 +240,14 @@ export class PlayerRenderer {
 
 		// Draw pivot stripe
 		if (player.role === TeamPlayerRole.pivot) {
+			const stripeHeight = player.radius * 0.5;
 			ctx.beginPath();
-			ctx.rect(player.x - player.radius, player.y - 4, player.radius * 2, 7);
+			ctx.rect(
+				player.x - player.radius,
+				player.y - stripeHeight / 2,
+				player.radius * 2,
+				stripeHeight
+			);
 			ctx.fillStyle = player.team === 'A' ? colors.teamASecondary : colors.teamBSecondary;
 			ctx.fill();
 		}
