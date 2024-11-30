@@ -7,9 +7,12 @@ import type { Point } from '$lib/types';
 import { TrackGeometry } from './TrackGeometry';
 import { Player } from './Player';
 import { SkatingOfficial, SkatingOfficialRole } from './SkatingOfficial';
-import { persistedBoardState, updateBoardState, type BoardState } from '$lib/stores/boardState';
+import { boardState, type BoardState } from '$lib/stores/boardState';
+import type { Game } from './Game';
+import { saveBoardState } from '$lib/utils/boardStateService';
 
 export class PlayerManager {
+	private game: Game;
 	canvas: HTMLCanvasElement;
 	ctx: CanvasRenderingContext2D;
 	points: Record<string, Point>;
@@ -29,6 +32,7 @@ export class PlayerManager {
 	positions: Record<string, Point>;
 
 	constructor(
+		game: Game,
 		canvas: HTMLCanvasElement,
 		ctx: CanvasRenderingContext2D,
 		points: Record<string, Point>,
@@ -36,6 +40,7 @@ export class PlayerManager {
 		renderer: Renderer,
 		isInitialLoad: boolean
 	) {
+		this.game = game;
 		this.canvas = canvas;
 		this.ctx = ctx;
 		this.points = points;
@@ -65,20 +70,25 @@ export class PlayerManager {
 		};
 
 		if (isInitialLoad) {
-			const savedState: BoardState = get(persistedBoardState);
+			const savedState: BoardState = get(boardState);
 
-			if (savedState?.players?.length > 0) {
-				this.players = savedState.players.map((p) => {
-					const player = new TeamPlayer(p.x, p.y, p.team, p.role);
+			if (savedState?.teamPlayers?.length > 0) {
+				this.players = savedState.teamPlayers.map((p) => {
+					const absoluteX = p.absolute.x * this.canvas.width;
+					const absoluteY = p.absolute.y * this.canvas.height;
+					const player = new TeamPlayer(absoluteX, absoluteY, p.team!, p.role);
 					player.inBounds = this.trackGeometry.isPlayerInBounds(player);
 					this.trackGeometry.updatePlayerZone(player);
 					this.trackGeometry.updatePlayerCoordinates(player);
 					return player;
 				});
-				this.skatingOfficials = (savedState.skatingOfficials || []).map(
-					(o) => new SkatingOfficial(o.x, o.y, o.role)
-				);
-				this.positions = savedState.positions;
+
+				this.skatingOfficials = savedState.skatingOfficials.map((o) => {
+					const absoluteX = o.absolute.x * this.canvas.width;
+					const absoluteY = o.absolute.y * this.canvas.height;
+					return new SkatingOfficial(absoluteX, absoluteY, o.role);
+				});
+
 				this.packManager.updatePlayers(this.players);
 			} else {
 				this.initializeSkatingOfficials();
@@ -414,8 +424,7 @@ export class PlayerManager {
 		if (this.selectedPlayer) {
 			this.selectedPlayer.isDragging = false;
 			this.selectedPlayer = null;
-			// Save state when player is released
-			updateBoardState(this.players, this.skatingOfficials, this.positions);
+			saveBoardState(this.game);
 		}
 	}
 

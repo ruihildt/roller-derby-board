@@ -54,6 +54,7 @@ export class Game {
 		);
 
 		this.playerManager = new PlayerManager(
+			this,
 			this.canvas,
 			this.ctx,
 			this.points,

@@ -1,43 +1,35 @@
-import type { SkatingOfficial } from '$lib/classes/SkatingOfficial';
-import type { TeamPlayer } from '$lib/classes/TeamPlayer';
-import type { Point } from '$lib/types';
+import type { SkatingOfficialRole } from '$lib/classes/SkatingOfficial';
+import type { TeamPlayerRole } from '$lib/classes/TeamPlayer';
 import { persisted } from 'svelte-persisted-store';
 
+export interface TeamPlayerPosition {
+	absolute: {
+		x: number;
+		y: number;
+	};
+	role: TeamPlayerRole;
+	team: string;
+}
+
+export interface SkatingOfficialPosition {
+	absolute: {
+		x: number;
+		y: number;
+	};
+	role: SkatingOfficialRole;
+}
+
 export interface BoardState {
-	players: TeamPlayer[];
-	skatingOfficials: SkatingOfficial[];
-	lastUpdate: number;
-	positions: Record<string, Point>;
+	version: number;
+	createdAt: string;
+	name?: string;
+	teamPlayers: TeamPlayerPosition[];
+	skatingOfficials: SkatingOfficialPosition[];
 }
 
-const initialState: BoardState = {
-	players: [],
-	skatingOfficials: [],
-	lastUpdate: Date.now(),
-	positions: {}
-};
-
-export const persistedBoardState = persisted('derbyboard-state', initialState);
-
-let previousPositions: string = '';
-
-export function updateBoardState(
-	players: TeamPlayer[],
-	skatingOfficials: SkatingOfficial[],
-	positions: Record<string, Point>
-) {
-	const currentPositions = JSON.stringify([
-		...players.map((p) => ({ x: p.x, y: p.y })),
-		...skatingOfficials.map((o) => ({ x: o.x, y: o.y }))
-	]);
-
-	if (currentPositions !== previousPositions) {
-		persistedBoardState.set({
-			players,
-			skatingOfficials,
-			positions,
-			lastUpdate: Date.now()
-		});
-		previousPositions = currentPositions;
-	}
-}
+export const boardState = persisted<BoardState>('derbyboard-state', {
+	version: 1,
+	createdAt: new Date().toISOString(),
+	teamPlayers: [],
+	skatingOfficials: []
+});
