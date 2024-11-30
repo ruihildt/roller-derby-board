@@ -38,7 +38,7 @@ export function exportBoardToFile(game: Game, name?: string) {
 	URL.revokeObjectURL(url);
 }
 
-export async function loadBoardFromFile(game: Game, jsonFile: File) {
+export async function loadBoardFromFile(jsonFile: File) {
 	const text = await jsonFile.text();
 	const state = JSON.parse(text);
 	if (!hasRequiredBoardStateFields(state)) {

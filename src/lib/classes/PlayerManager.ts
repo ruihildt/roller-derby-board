@@ -1,6 +1,6 @@
 import { get } from 'svelte/store';
 
-import { TeamPlayer, TeamPlayerRole } from '$lib/classes/TeamPlayer';
+import { PlayerTeam, TeamPlayer, TeamPlayerRole } from '$lib/classes/TeamPlayer';
 import { PackManager } from '$lib/classes/PackManager';
 import { Renderer } from '$lib/render/Renderer';
 import type { Point } from '$lib/types';
@@ -225,8 +225,8 @@ export class PlayerManager {
 		);
 	}
 
-	resetPlayers(players?: TeamPlayer[]): void {
-		this.players = players || [];
+	resetPlayers(): void {
+		this.players = [];
 		this.skatingOfficials = [];
 		this.selectedPlayer = null;
 
@@ -237,6 +237,44 @@ export class PlayerManager {
 
 		this.initializeSkatingOfficials();
 		this.initializeTeamPlayers();
+	}
+
+	loadFromState(state: BoardState): void {
+		// Clear existing players
+		this.players = [];
+		this.skatingOfficials = [];
+
+		// Create new players from state
+		state.teamPlayers.forEach((teamPlayer) => {
+			const x = teamPlayer.absolute.x * this.canvas.width;
+			const y = teamPlayer.absolute.y * this.canvas.height;
+			const player = new TeamPlayer(
+				x,
+				y,
+				teamPlayer.team as PlayerTeam,
+				teamPlayer.role as TeamPlayerRole
+			);
+			this.trackGeometry.updatePlayerCoordinates(player);
+			player.inBounds = this.trackGeometry.isPlayerInBounds(player);
+			this.trackGeometry.updatePlayerZone(player);
+			this.players.push(player);
+		});
+
+		// Create new skating officials from state
+		state.skatingOfficials.forEach((skatingOfficial) => {
+			const x = skatingOfficial.absolute.x * this.canvas.width;
+			const y = skatingOfficial.absolute.y * this.canvas.height;
+			const official = new SkatingOfficial(x, y, skatingOfficial.role as SkatingOfficialRole);
+			this.skatingOfficials.push(official);
+		});
+
+		// Check track boundaries for each player
+		this.players.forEach((player) => {
+			player.inBounds = this.trackGeometry.isPlayerInBounds(player);
+		});
+
+		// Update pack status
+		this.packManager.updatePlayers(this.players);
 	}
 
 	getRandomBlockerPosition(role: TeamPlayerRole): Point {

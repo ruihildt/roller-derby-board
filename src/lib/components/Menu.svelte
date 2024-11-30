@@ -2,7 +2,7 @@
 	import type { Game } from '$lib/classes/Game';
 	import { exportBoardToFile, loadBoardFromFile } from '$lib/utils/boardStateService';
 
-	import { Dropdown, DropdownItem, Button, DropdownDivider } from 'flowbite-svelte';
+	import { Dropdown, DropdownItem, Button, DropdownDivider, Modal } from 'flowbite-svelte';
 	import {
 		BarsOutline,
 		ArrowDownToBracketOutline,
@@ -17,6 +17,8 @@
 	}>();
 
 	let dropdownOpen = $state(false);
+	let showErrorModal = $state(false);
+	let errorMessage = $state('');
 
 	function toggleMenu() {
 		dropdownOpen = !dropdownOpen;
@@ -27,7 +29,7 @@
 		dropdownOpen = false;
 	}
 
-	function handleOpen() {
+	async function handleOpen() {
 		const input = document.createElement('input');
 		input.type = 'file';
 		input.accept = '.json';
@@ -37,7 +39,12 @@
 		input.onchange = async (e) => {
 			const file = (e.target as HTMLInputElement).files?.[0];
 			if (file) {
-				await loadBoardFromFile(game, file);
+				try {
+					await loadBoardFromFile(file);
+				} catch (error) {
+					errorMessage = 'Invalid board file format. Please select a valid JSON file.';
+					showErrorModal = true;
+				}
 			}
 		};
 	}
@@ -98,3 +105,20 @@
 		</DropdownItem>
 	</Dropdown>
 </div>
+
+<Modal bind:open={showErrorModal} size="xs">
+	<div class="text-center">
+		<h3 class="mb-4 text-lg font-normal text-gray-500">
+			{errorMessage}
+		</h3>
+		<Button
+			class="mt-3 bg-primary-200 !p-2 text-sm text-gray-700 hover:bg-primary-300"
+			onclick={() => {
+				showErrorModal = false;
+				handleOpen();
+			}}
+		>
+			Select another file
+		</Button>
+	</div>
+</Modal>

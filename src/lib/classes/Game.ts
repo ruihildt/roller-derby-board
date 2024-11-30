@@ -5,6 +5,7 @@ import { PlayerRenderer } from '../render/PlayerRenderer';
 import { PackZoneRenderer } from '../render/PackZoneRenderer';
 import { Player } from './Player';
 import { ScalingManager } from './ScalingManager';
+import { boardState } from '$lib/stores/boardState';
 
 export class Game {
 	private static readonly CANVAS_WIDTH_DIVISOR = 250; // For LINE_WIDTH calculation
@@ -93,6 +94,13 @@ export class Game {
 			'mouseup',
 			this.playerManager.handleMouseUp.bind(this.playerManager)
 		);
+
+		boardState.subscribe((state) => {
+			if (state.teamPlayers.length > 0) {
+				this.playerManager.loadFromState(state);
+				this.renderer.draw();
+			}
+		});
 	}
 
 	resize(): void {
