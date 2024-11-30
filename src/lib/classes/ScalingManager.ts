@@ -158,12 +158,12 @@ export class ScalingManager {
 
 	zoomIn(): void {
 		const center = this.getCanvasCenter();
-		this.setZoom(this._zoomLevel + 0.5, center.x, center.y);
+		this.setZoom(this._zoomLevel + 0.1, center.x, center.y);
 	}
 
 	zoomOut(): void {
 		const center = this.getCanvasCenter();
-		this.setZoom(this._zoomLevel - 0.5, center.x, center.y);
+		this.setZoom(this._zoomLevel - 0.1, center.x, center.y);
 	}
 
 	resetZoom(): void {
