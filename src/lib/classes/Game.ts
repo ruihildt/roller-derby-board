@@ -70,7 +70,8 @@ export class Game {
 			this.highResCanvas,
 			this.highResCtx,
 			this.renderer.trackGeometry,
-			this.playerManager.packManager
+			this.playerManager.packManager,
+			this.LINE_WIDTH
 		);
 
 		this.packZoneRenderer = new PackZoneRenderer(
@@ -129,7 +130,8 @@ export class Game {
 			this.highResCanvas,
 			this.highResCtx,
 			this.renderer.trackGeometry,
-			this.playerManager.packManager
+			this.playerManager.packManager,
+			this.LINE_WIDTH
 		);
 
 		// Add this line to update player radius on resize

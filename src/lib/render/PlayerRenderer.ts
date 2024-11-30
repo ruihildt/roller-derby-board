@@ -33,6 +33,7 @@ export class PlayerRenderer {
 	trackGeometry: TrackGeometry;
 	packManager: PackManager;
 	colors: Colors;
+	LINE_WIDTH: number;
 
 	constructor(
 		canvas: HTMLCanvasElement,
@@ -40,7 +41,8 @@ export class PlayerRenderer {
 		highResCanvas: HTMLCanvasElement,
 		highResCtx: CanvasRenderingContext2D,
 		trackGeometry: TrackGeometry,
-		packManager: PackManager
+		packManager: PackManager,
+		LINE_WIDTH: number
 	) {
 		this.canvas = canvas;
 		this.ctx = ctx;
@@ -49,6 +51,7 @@ export class PlayerRenderer {
 		this.trackGeometry = trackGeometry;
 		this.packManager = packManager;
 		this.colors = colors;
+		this.LINE_WIDTH = LINE_WIDTH;
 	}
 
 	drawPlayers(players: TeamPlayer[]): void {
@@ -270,7 +273,7 @@ export class PlayerRenderer {
 					? colors.inBounds
 					: colors.outOfBounds;
 
-		ctx.lineWidth = 4;
+		ctx.lineWidth = this.LINE_WIDTH;
 		ctx.stroke();
 	}
 }
