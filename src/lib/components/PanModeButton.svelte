@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { panMode } from '$lib/stores/panMode';
-	import { Toolbar, ToolbarButton } from 'flowbite-svelte';
+	import { Toolbar, ToolbarButton, Tooltip } from 'flowbite-svelte';
 	import { LockOutline, LockOpenOutline } from 'flowbite-svelte-icons';
 </script>
 
@@ -15,4 +15,7 @@
 			<LockOutline />
 		{/if}
 	</ToolbarButton>
+	<Tooltip trigger="hover" arrow={false} color="primary" class="whitespace-nowrap">
+		Panning tool</Tooltip
+	>
 </Toolbar>
