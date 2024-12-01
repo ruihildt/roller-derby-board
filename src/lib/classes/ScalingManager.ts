@@ -8,6 +8,9 @@ export class ScalingManager {
 	private _panX: number;
 	private _panY: number;
 
+	private static readonly MIN_ZOOM = 0.5; // 50% minimum zoom
+	private static readonly MAX_ZOOM = 3; // 500% maximum zoom
+
 	private constructor() {
 		this._pixelsPerMeter = 0;
 		this._canvasWidth = 0;
@@ -52,7 +55,7 @@ export class ScalingManager {
 
 	setZoom(level: number, centerX: number, centerY: number) {
 		const oldZoom = this._zoomLevel;
-		this._zoomLevel = Math.max(0.5, Math.min(5, level));
+		this._zoomLevel = Math.max(ScalingManager.MIN_ZOOM, Math.min(ScalingManager.MAX_ZOOM, level));
 
 		// Calculate the world coordinates of the zoom center
 		const worldX = (centerX / oldZoom + this._panX) / this._canvasWidth;
