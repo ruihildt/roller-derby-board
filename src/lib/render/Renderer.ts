@@ -186,16 +186,32 @@ export class Renderer {
 	drawBranding(ctx: CanvasRenderingContext2D): void {
 		if (!this.logoImage.complete) return;
 
-		const centerX = this.canvas.width / 2;
-		const centerY = this.canvas.height / 2;
+		// Save the current context state
+		ctx.save();
+
+		// Reset any transformations to draw in screen coordinates
+		ctx.setTransform(1, 0, 0, 1, 0, 0);
 
 		const sizeMultiplier = 0.5;
 		const baseScale = (this.PIXELS_PER_METER / 35) * sizeMultiplier;
 		const width = this.logoImage.width * baseScale;
 		const height = this.logoImage.height * baseScale;
 
-		ctx.save();
-		ctx.drawImage(this.logoImage, centerX - width / 2, centerY - height / 2, width, height);
+		// Position at bottom right with padding
+		const padding = 40;
+		const scale = ctx === this.highResCtx ? 2 : 1;
+
+		// For highRes, we need to:
+		// 1. Scale the width and height
+		// 2. Position relative to the scaled canvas dimensions
+		const scaledWidth = width * scale;
+		const scaledHeight = height * scale;
+		const x = ctx.canvas.width - scaledWidth - padding * scale;
+		const y = ctx.canvas.height - scaledHeight - padding * scale;
+
+		ctx.drawImage(this.logoImage, x, y, scaledWidth, scaledHeight);
+
+		// Restore the context state
 		ctx.restore();
 	}
 }
