@@ -26,11 +26,11 @@
 				<CloseOutline class="h-5 w-5" />
 			</button>
 		</div>
-		<TimelineItem title="Gen Zoom" date="2024 December 2nd" classLi="!mb-7">
+		<TimelineItem title="Fingerplay" date="2024 December 2nd" classLi="!mb-7">
 			<p>
 				If you have multiple fingers you can now move multiple players around simultaneously. If you
-				just want to keep using the one, that's also fine. And zoom past your opponents and pan them
-				too.
+				just want to keep using the one, that's also fine. Feel free to zoom past your opponents and
+				pan them too.
 			</p>
 		</TimelineItem>
 		<TimelineItem title="Holding on" date="2024 November 30th" classLi="!mb-7">
