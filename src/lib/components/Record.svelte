@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Badge, Toolbar, ToolbarButton } from 'flowbite-svelte';
+	import { Toolbar, ToolbarButton } from 'flowbite-svelte';
 	import { StopSolid } from 'flowbite-svelte-icons';
 	import {
 		MicrophoneOutline,
@@ -146,9 +146,7 @@
 	}
 </script>
 
-<Toolbar
-	class="fixed left-1/2 top-4 z-[11] inline-flex -translate-x-1/2 rounded-lg !p-1  shadow-lg shadow-black/5"
->
+<Toolbar class="fixed right-4 top-4 inline-flex rounded-lg !p-1  shadow-lg shadow-black/5">
 	{#if !videoBlob}
 		<ToolbarButton
 			class={isRecording || countdown !== null

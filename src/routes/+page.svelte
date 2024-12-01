@@ -1,7 +1,7 @@
 <script lang="ts">
 	import Board from '$lib/components/Board.svelte';
 	import Video from '$lib/components/Video.svelte';
-	import Toolbar from '$lib/components/Toolbar.svelte';
+	import Record from '$lib/components/Record.svelte';
 	import Menu from '$lib/components/Menu.svelte';
 	import type { Game } from '$lib/classes/Game';
 	import Changelog from '$lib/components/Changelog.svelte';
@@ -41,7 +41,7 @@
 	</div>
 </main>
 
-<Toolbar
+<Record
 	bind:isRecording
 	bind:videoBlob={recordedBlob}
 	bind:isDarkBackground
@@ -51,9 +51,12 @@
 />
 {#if !isDarkBackground}
 	<Menu {game} />
-	<Changelog />
-	<div class="absolute bottom-4 left-4 flex gap-2">
+	<div class="fixed bottom-4 right-4 flex gap-2">
+		<Changelog />
 		<FullscreenButton />
+	</div>
+
+	<div class="fixed bottom-4 left-4 flex gap-2">
 		<ZoomControl />
 		<PanModeButton />
 	</div>

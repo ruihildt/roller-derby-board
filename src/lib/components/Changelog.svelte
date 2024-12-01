@@ -6,7 +6,7 @@
 
 <button
 	on:click={() => (hidden = false)}
-	class="fixed right-4 top-4 rounded-lg bg-white px-4 py-2 text-sm text-gray-700 hover:bg-primary-200"
+	class="rounded-lg bg-white px-4 py-2 text-sm text-gray-700 hover:bg-primary-200"
 >
 	Changelog
 </button>

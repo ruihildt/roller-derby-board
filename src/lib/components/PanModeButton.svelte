@@ -10,10 +10,9 @@
 		on:click={() => panMode.set(!$panMode)}
 	>
 		{#if $panMode}
-			<LockOpenOutline />
+			🤚
 		{:else}
 			<LockOutline />
 		{/if}
-		Drag board
 	</ToolbarButton>
 </Toolbar>
