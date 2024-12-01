@@ -8,7 +8,7 @@ export class ScalingManager {
 	private _panX: number;
 	private _panY: number;
 
-	private static readonly MIN_ZOOM = 0.5; // 50% minimum zoom
+	private static readonly MIN_ZOOM = 1; // 50% minimum zoom
 	private static readonly MAX_ZOOM = 3; // 500% maximum zoom
 
 	private constructor() {

@@ -34,8 +34,11 @@
 
 <Toolbar class="inline-flex rounded-lg !p-1 shadow-lg shadow-black/5">
 	<ToolbarButton
-		class="flex items-center gap-2 px-3 text-sm text-gray-700 hover:bg-primary-200"
+		class={zoomLevel <= 100
+			? 'flex cursor-not-allowed items-center gap-2 px-3 text-sm text-gray-700 opacity-50'
+			: 'flex items-center gap-2 px-3 text-sm text-gray-700 hover:bg-primary-200'}
 		on:click={zoomOut}
+		disabled={zoomLevel <= 100}
 	>
 		<MinusOutline />
 	</ToolbarButton>
@@ -51,8 +54,11 @@
 		>
 	</div>
 	<ToolbarButton
-		class="flex items-center gap-2 px-3 text-sm text-gray-700 hover:bg-primary-200"
+		class={zoomLevel >= 300
+			? 'flex cursor-not-allowed items-center gap-2 px-3 text-sm text-gray-700 opacity-50'
+			: 'flex items-center gap-2 px-3 text-sm text-gray-700 hover:bg-primary-200'}
 		on:click={zoomIn}
+		disabled={zoomLevel >= 300}
 	>
 		<PlusOutline />
 	</ToolbarButton>
