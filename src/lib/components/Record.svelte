@@ -1,13 +1,14 @@
 <script lang="ts">
 	import { Toolbar, ToolbarButton } from 'flowbite-svelte';
-	import { StopSolid } from 'flowbite-svelte-icons';
+	import fixWebmDuration from 'fix-webm-duration';
 	import {
 		MicrophoneOutline,
 		MicrophoneSlashOutline,
 		ArrowsRepeatOutline,
-		DownloadOutline
+		DownloadOutline,
+		StopSolid
 	} from 'flowbite-svelte-icons';
-	import fixWebmDuration from 'fix-webm-duration';
+	import { panMode } from '$lib/stores/panMode';
 
 	let {
 		recordingComplete,
@@ -35,6 +36,7 @@
 	let timeInterval = $state<number | null>(null);
 
 	async function startRecording(withAudio: boolean = true) {
+		panMode.set(false); // Lock panning when recording starts
 		isDarkBackground = true;
 		countdown = 3;
 		const countdownInterval = setInterval(() => {
