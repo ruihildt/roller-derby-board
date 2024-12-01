@@ -19,17 +19,29 @@ export interface SkatingOfficialPosition {
 	role: SkatingOfficialRole;
 }
 
+interface ViewSettings {
+	zoom: number;
+	panX: number;
+	panY: number;
+}
+
 export interface BoardState {
 	version: number;
 	createdAt: string;
 	name?: string;
 	teamPlayers: TeamPlayerPosition[];
 	skatingOfficials: SkatingOfficialPosition[];
+	viewSettings?: ViewSettings;
 }
 
 export const boardState = persisted<BoardState>('derbyboard-state', {
 	version: 1,
 	createdAt: new Date().toISOString(),
 	teamPlayers: [],
-	skatingOfficials: []
+	skatingOfficials: [],
+	viewSettings: {
+		zoom: 1,
+		panX: 0,
+		panY: 0
+	}
 });

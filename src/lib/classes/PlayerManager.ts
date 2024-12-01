@@ -1,4 +1,5 @@
 import { get } from 'svelte/store';
+import { panMode } from '$lib/stores/panMode';
 
 import { PlayerTeam, TeamPlayer, TeamPlayerRole } from '$lib/classes/TeamPlayer';
 import { PackManager } from '$lib/classes/PackManager';
@@ -466,6 +467,8 @@ export class PlayerManager {
 	}
 
 	handleMouseDown(event: MouseEvent): void {
+		if (get(panMode)) return;
+
 		const rect = this.canvas.getBoundingClientRect();
 		const screenX = event.clientX - rect.left;
 		const screenY = event.clientY - rect.top;
@@ -497,6 +500,8 @@ export class PlayerManager {
 	// Add these methods to the PlayerManager class
 
 	handleTouchStart(event: TouchEvent): void {
+		if (get(panMode)) return;
+
 		event.preventDefault();
 		const rect = this.canvas.getBoundingClientRect();
 

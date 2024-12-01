@@ -3,7 +3,7 @@ import { boardState, type BoardState } from '$lib/stores/boardState';
 
 export function saveBoardState(game: Game, name?: string): BoardState {
 	const state: BoardState = {
-		version: 1,
+		version: 2,
 		createdAt: new Date().toISOString(),
 		name,
 		teamPlayers: game.playerManager.players.map((player) => ({
@@ -20,7 +20,12 @@ export function saveBoardState(game: Game, name?: string): BoardState {
 				y: official.y / game.canvas.height
 			},
 			role: official.role
-		}))
+		})),
+		viewSettings: {
+			zoom: game.scalingManager.zoomLevel,
+			panX: game.scalingManager.panX,
+			panY: game.scalingManager.panY
+		}
 	};
 
 	boardState.set(state);

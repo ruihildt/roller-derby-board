@@ -7,6 +7,7 @@
 	import Changelog from '$lib/components/Changelog.svelte';
 	import FullscreenButton from '$lib/components/FullscreenButton.svelte';
 	import ZoomControl from '$lib/components/ZoomControl.svelte';
+	import PanModeButton from '$lib/components/PanModeButton.svelte';
 
 	let showPreview = $state(false);
 	let recordedBlob = $state<Blob | null>(null);
@@ -54,5 +55,6 @@
 	<div class="absolute bottom-4 left-4 flex gap-2">
 		<FullscreenButton />
 		<ZoomControl />
+		<PanModeButton />
 	</div>
 {/if}

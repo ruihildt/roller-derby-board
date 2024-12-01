@@ -172,4 +172,10 @@ export class ScalingManager {
 		this._panX = 0;
 		this._panY = 0;
 	}
+
+	setPan(deltaX: number, deltaY: number) {
+		this._panX += deltaX;
+		this._panY += deltaY;
+		window.dispatchEvent(new CustomEvent('scalingUpdate'));
+	}
 }
