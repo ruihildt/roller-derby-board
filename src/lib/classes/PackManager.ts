@@ -27,6 +27,9 @@ export class PackManager extends EventTarget {
 	}
 
 	determinePack() {
+		// Reset engagement zone first
+		this.engagementZone = null;
+
 		// Reset all players pack related properties
 		this.players.forEach((player) => {
 			player.isRearmost = false;
