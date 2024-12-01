@@ -26,6 +26,7 @@
 
 	function handleReset() {
 		game.playerManager.resetPlayers();
+		game.scalingManager.resetView();
 		dropdownOpen = false;
 	}
 

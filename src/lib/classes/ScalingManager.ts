@@ -179,6 +179,14 @@ export class ScalingManager {
 		this._panY = 0;
 	}
 
+	resetView() {
+		this._zoomLevel = 1;
+		this._panX = 0;
+		this._panY = 0;
+
+		window.dispatchEvent(new CustomEvent('scalingUpdate'));
+	}
+
 	setPan(deltaX: number, deltaY: number) {
 		this._panX += deltaX;
 		this._panY += deltaY;
