@@ -141,6 +141,12 @@ export class ScalingManager {
 		return this._zoomLevel;
 	}
 
+	setZoomAndPan(zoom: number, panX: number, panY: number) {
+		this._zoomLevel = zoom;
+		this._panX = panX;
+		this._panY = panY;
+	}
+
 	get panX(): number {
 		return this._panX;
 	}

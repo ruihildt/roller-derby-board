@@ -103,6 +103,15 @@ export class Game {
 		boardState.subscribe((state) => {
 			if (state.teamPlayers.length > 0) {
 				this.playerManager.loadFromState(state);
+
+				if (state.viewSettings) {
+					this.scalingManager.setZoomAndPan(
+						state.viewSettings.zoom,
+						state.viewSettings.panX,
+						state.viewSettings.panY
+					);
+				}
+
 				this.renderingPipeline.render();
 			}
 		});
