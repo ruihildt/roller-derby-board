@@ -8,7 +8,7 @@
 	on:click={() => (hidden = false)}
 	class="rounded-lg bg-white px-4 py-2 text-sm text-gray-700 hover:bg-primary-200"
 >
-	Changelog
+	News
 </button>
 
 <Drawer
@@ -21,16 +21,16 @@
 >
 	<Timeline>
 		<div class="mb-2 flex items-center justify-between">
-			<h5 class="pl-5 text-xl font-bold">Changelog</h5>
+			<h5 class="pl-5 text-xl font-bold">The latest</h5>
 			<button on:click={() => (hidden = true)} class="rounded-lg p-2 hover:bg-primary-200">
 				<CloseOutline class="h-5 w-5" />
 			</button>
 		</div>
-		<TimelineItem title="Touch and go" date="TBD" classLi="!mb-7">
+		<TimelineItem title="Gen Zoom" date="2024 December 2nd" classLi="!mb-7">
 			<p>
-				If you have a big enough screen (maximize your chances by going fullscreen), you can now use
-				multiple fingers to move multiple players around simultaneously. If you just want the one,
-				it's fine too.
+				If you have multiple fingers you can now move multiple players around simultaneously. If you
+				just want to keep using the one, that's also fine. And zoom past your opponents and pan them
+				too.
 			</p>
 		</TimelineItem>
 		<TimelineItem title="Holding on" date="2024 November 30th" classLi="!mb-7">
