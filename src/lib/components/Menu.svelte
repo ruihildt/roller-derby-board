@@ -64,7 +64,7 @@
 	}
 </script>
 
-<div class="absolute left-4 top-4 z-50">
+<div class="fixed left-4 top-4">
 	<Button class="bg-white !p-2 hover:bg-primary-200" onclick={() => toggleMenu}>
 		<BarsOutline class="h-6 w-6" color="gray" />
 	</Button>
