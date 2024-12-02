@@ -49,7 +49,7 @@
 		>
 			{zoomLevel}%
 		</ToolbarButton>
-		<Tooltip trigger="hover" arrow={false} color="primary" class="whitespace-nowrap"
+		<Tooltip trigger="hover" arrow={false} color="primary" class="hidden whitespace-nowrap md:block"
 			>Reset zoom</Tooltip
 		>
 	</div>

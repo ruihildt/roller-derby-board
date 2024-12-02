@@ -24,7 +24,7 @@
 			<LockOutline />
 		{/if}
 	</ToolbarButton>
-	<Tooltip trigger="hover" arrow={false} color="primary" class="whitespace-nowrap">
+	<Tooltip trigger="hover" arrow={false} color="primary" class="hidden whitespace-nowrap md:block">
 		Panning tool</Tooltip
 	>
 </Toolbar>
