@@ -1,22 +1,17 @@
+import { BASE_ZOOM, colors, MAX_ZOOM, MIN_ZOOM, ZOOM_INCREMENT } from '$lib/constants';
+
 export class ScalingManager {
 	private static instance: ScalingManager;
-	private _pixelsPerMeter: number;
 	private _canvasWidth: number;
 	private _canvasHeight: number;
-	private _trackWidthMeters: number;
 	private _zoomLevel: number;
 	private _panX: number;
 	private _panY: number;
 
-	private static readonly MIN_ZOOM = 1; // 50% minimum zoom
-	private static readonly MAX_ZOOM = 3; // 500% maximum zoom
-
 	private constructor() {
-		this._pixelsPerMeter = 0;
 		this._canvasWidth = 0;
 		this._canvasHeight = 0;
-		this._trackWidthMeters = 35.1;
-		this._zoomLevel = 1;
+		this._zoomLevel = BASE_ZOOM;
 		this._panX = 0;
 		this._panY = 0;
 	}
@@ -28,34 +23,9 @@ export class ScalingManager {
 		return ScalingManager.instance;
 	}
 
-	updateDimensions(canvas: HTMLCanvasElement, trackWidthMeters: number) {
-		// Store old dimensions and view parameters
-		const oldWidth = this._canvasWidth;
-		const oldHeight = this._canvasHeight;
-		const oldPanX = this._panX;
-		const oldPanY = this._panY;
-
-		// Update new dimensions
-		this._canvasWidth = canvas.width;
-		this._canvasHeight = canvas.height;
-		this._trackWidthMeters = trackWidthMeters;
-		this._pixelsPerMeter = this._canvasWidth / this._trackWidthMeters;
-
-		// Adjust pan values to maintain viewed area
-		if (oldWidth && oldHeight) {
-			const widthRatio = this._canvasWidth / oldWidth;
-			const heightRatio = this._canvasHeight / oldHeight;
-
-			this._panX = oldPanX * widthRatio;
-			this._panY = oldPanY * heightRatio;
-		}
-
-		window.dispatchEvent(new CustomEvent('scalingUpdate'));
-	}
-
 	setZoom(level: number, centerX: number, centerY: number) {
 		const oldZoom = this._zoomLevel;
-		this._zoomLevel = Math.max(ScalingManager.MIN_ZOOM, Math.min(ScalingManager.MAX_ZOOM, level));
+		this._zoomLevel = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, level));
 
 		// Calculate the world coordinates of the zoom center
 		const worldX = (centerX / oldZoom + this._panX) / this._canvasWidth;
@@ -87,23 +57,23 @@ export class ScalingManager {
 	clearAndResetCanvas(canvas: HTMLCanvasElement) {
 		const ctx = canvas.getContext('2d')!;
 		ctx.clearRect(0, 0, canvas.width, canvas.height);
-		ctx.fillStyle = '#f0f0f0';
+		ctx.fillStyle = colors.canvasBackground;
 		ctx.fillRect(0, 0, canvas.width, canvas.height);
 	}
 
 	// Convert screen coordinates to world coordinates
 	screenToWorld(screenX: number, screenY: number): { x: number; y: number } {
 		return {
-			x: (screenX / this._zoomLevel + this._panX) / this._canvasWidth,
-			y: (screenY / this._zoomLevel + this._panY) / this._canvasHeight
+			x: screenX / this._zoomLevel + this._panX,
+			y: screenY / this._zoomLevel + this._panY
 		};
 	}
 
 	// Convert world coordinates to screen coordinates
 	worldToScreen(worldX: number, worldY: number): { x: number; y: number } {
 		return {
-			x: (worldX * this._canvasWidth - this._panX) * this._zoomLevel,
-			y: (worldY * this._canvasHeight - this._panY) * this._zoomLevel
+			x: (worldX - this._panX) * this._zoomLevel,
+			y: (worldY - this._panY) * this._zoomLevel
 		};
 	}
 
@@ -111,10 +81,8 @@ export class ScalingManager {
 		const rect = (event.target as HTMLElement).getBoundingClientRect();
 		const touch = event.touches[0];
 		if (touch) {
-			const x = (touch.clientX - rect.left) / this._zoomLevel + this._panX;
-			const y = (touch.clientY - rect.top) / this._zoomLevel + this._panY;
+			const { x, y } = this.screenToWorld(touch.clientX - rect.left, touch.clientY - rect.top);
 
-			// Create a new touch with transformed coordinates
 			const transformedTouch = new Touch({
 				identifier: touch.identifier,
 				target: touch.target,
@@ -167,23 +135,23 @@ export class ScalingManager {
 
 	zoomIn(): void {
 		const center = this.getCanvasCenter();
-		this.setZoom(this._zoomLevel + 0.1, center.x, center.y);
+		this.setZoom(this._zoomLevel + ZOOM_INCREMENT, center.x, center.y);
 	}
 
 	zoomOut(): void {
 		const center = this.getCanvasCenter();
-		this.setZoom(this._zoomLevel - 0.1, center.x, center.y);
+		this.setZoom(this._zoomLevel - ZOOM_INCREMENT, center.x, center.y);
 	}
 
 	resetZoom(): void {
 		const center = this.getCanvasCenter();
-		this.setZoom(1, center.x, center.y);
+		this.setZoom(BASE_ZOOM, center.x, center.y);
 		this._panX = 0;
 		this._panY = 0;
 	}
 
 	resetView() {
-		this._zoomLevel = 1;
+		this._zoomLevel = BASE_ZOOM;
 		this._panX = 0;
 		this._panY = 0;
 
@@ -191,8 +159,8 @@ export class ScalingManager {
 	}
 
 	setPan(deltaX: number, deltaY: number) {
-		this._panX += deltaX;
-		this._panY += deltaY;
+		this._panX += deltaX * this._zoomLevel;
+		this._panY += deltaY * this._zoomLevel;
 		window.dispatchEvent(new CustomEvent('scalingUpdate'));
 	}
 }

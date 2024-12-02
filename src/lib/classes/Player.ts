@@ -1,8 +1,9 @@
+import { TRACK_SCALE } from '$lib/constants';
 export class Player {
 	private static _playerRadius: number = 0;
 
-	static setCanvasWidth(width: number) {
-		this._playerRadius = Math.max(0, Math.floor(width / 84));
+	static setCanvasWidth() {
+		this._playerRadius = Math.max(0, TRACK_SCALE / 3);
 	}
 
 	static get playerRadius(): number {

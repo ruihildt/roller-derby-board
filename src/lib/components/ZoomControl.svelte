@@ -34,11 +34,11 @@
 
 <Toolbar class="inline-flex rounded-lg !p-1 shadow-lg shadow-black/5">
 	<ToolbarButton
-		class={zoomLevel <= 100
+		class={zoomLevel <= 10
 			? 'flex cursor-not-allowed items-center gap-2 px-3 text-sm text-gray-700 opacity-50'
 			: 'flex items-center gap-2 px-3 text-sm text-gray-700 hover:bg-primary-200'}
 		on:click={zoomOut}
-		disabled={zoomLevel <= 100}
+		disabled={zoomLevel <= 10}
 	>
 		<MinusOutline />
 	</ToolbarButton>

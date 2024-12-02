@@ -3,20 +3,18 @@ import { Renderer } from '$lib/render/Renderer';
 import { PlayerManager } from '$lib/classes/PlayerManager';
 import { PlayerRenderer } from '../render/PlayerRenderer';
 import { PackZoneRenderer } from '../render/PackZoneRenderer';
-import { Player } from './Player';
 import { ScalingManager } from './ScalingManager';
 import { boardState } from '$lib/stores/boardState';
 import { RenderingPipeline } from '$lib/render/RenderingPipeline';
+import {
+	CENTER_POINT_OFFSET,
+	OUTER_VERTICAL_OFFSET_1,
+	OUTER_VERTICAL_OFFSET_2,
+	VERTICAL_OFFSET_1,
+	VERTICAL_OFFSET_2
+} from '$lib/constants';
 
 export class Game {
-	private static readonly CANVAS_WIDTH_DIVISOR = 250; // For LINE_WIDTH calculation
-	private static readonly TRACK_WIDTH_METERS = 35.1; // Track width in meters
-	private static readonly CENTER_POINT_OFFSET = 5.33; // Distance from center in meters
-	private static readonly VERTICAL_OFFSET_1 = 3.81; // First vertical offset in meters
-	private static readonly VERTICAL_OFFSET_2 = 0.3; // Second vertical offset in meters
-	private static readonly OUTER_VERTICAL_OFFSET_1 = 8.38; // First outer vertical offset in meters
-	private static readonly OUTER_VERTICAL_OFFSET_2 = 7.78; // Second outer vertical offset in meters
-
 	private renderingPipeline: RenderingPipeline;
 
 	canvas: HTMLCanvasElement;
@@ -24,8 +22,6 @@ export class Game {
 	ctx: CanvasRenderingContext2D;
 	highResCtx: CanvasRenderingContext2D;
 	isRecording: boolean;
-	LINE_WIDTH: number;
-	PIXELS_PER_METER: number;
 	points: Record<string, Point>;
 	scalingManager: ScalingManager;
 	renderer: Renderer;
@@ -35,15 +31,11 @@ export class Game {
 
 	constructor(canvas: HTMLCanvasElement, highResCanvas: HTMLCanvasElement, isRecording: boolean) {
 		this.scalingManager = ScalingManager.getInstance();
-		this.scalingManager.updateDimensions(canvas, Game.TRACK_WIDTH_METERS);
 		this.canvas = canvas;
 		this.ctx = canvas.getContext('2d')!;
 		this.highResCanvas = highResCanvas;
 		this.highResCtx = highResCanvas.getContext('2d')!;
 		this.isRecording = isRecording;
-
-		this.LINE_WIDTH = Math.max(1, Math.floor(this.canvas.width / Game.CANVAS_WIDTH_DIVISOR));
-		this.PIXELS_PER_METER = this.canvas.width / Game.TRACK_WIDTH_METERS;
 
 		this.points = this.initializePoints();
 
@@ -52,9 +44,7 @@ export class Game {
 			this.ctx,
 			this.highResCanvas,
 			this.highResCtx,
-			this.points,
-			this.LINE_WIDTH,
-			this.PIXELS_PER_METER
+			this.points
 		);
 
 		this.playerManager = new PlayerManager(
@@ -62,7 +52,6 @@ export class Game {
 			this.canvas,
 			this.ctx,
 			this.points,
-			this.PIXELS_PER_METER,
 			this.renderer,
 			true
 		);
@@ -73,8 +62,7 @@ export class Game {
 			this.highResCanvas,
 			this.highResCtx,
 			this.renderer.trackGeometry,
-			this.playerManager.packManager,
-			this.LINE_WIDTH
+			this.playerManager.packManager
 		);
 
 		this.packZoneRenderer = new PackZoneRenderer(
@@ -117,121 +105,52 @@ export class Game {
 		});
 	}
 
-	resize(): void {
-		this.scalingManager.updateDimensions(this.canvas, Game.TRACK_WIDTH_METERS);
-		this.LINE_WIDTH = Math.max(1, this.canvas.width / Game.CANVAS_WIDTH_DIVISOR);
-		this.PIXELS_PER_METER = this.canvas.width / Game.TRACK_WIDTH_METERS;
-
-		const newPoints = this.initializePoints();
-		this.points = newPoints;
-
-		// Update renderer with new dimensions
-		this.renderer = new Renderer(
-			this.canvas,
-			this.ctx,
-			this.highResCanvas,
-			this.highResCtx,
-			this.points,
-			this.LINE_WIDTH,
-			this.PIXELS_PER_METER
-		);
-
-		// Update player renderer with new dimensions
-		this.playerRenderer = new PlayerRenderer(
-			this.canvas,
-			this.ctx,
-			this.highResCanvas,
-			this.highResCtx,
-			this.renderer.trackGeometry,
-			this.playerManager.packManager,
-			this.LINE_WIDTH
-		);
-
-		// Add this line to update player radius on resize
-		Player.setCanvasWidth(this.canvas.width);
-
-		// Update player manager and maintain existing players
-		this.playerManager.resize(
-			this.canvas,
-			this.ctx,
-			this.points,
-			this.PIXELS_PER_METER,
-			this.renderer
-		);
-
-		// Draw the players in their new positions
-		this.playerRenderer.drawPlayers(this.playerManager.players);
-		this.playerRenderer.drawSkatingOfficials(this.playerManager.skatingOfficials);
-
-		// Update pack zone renderer with new dimensions
-		this.packZoneRenderer = new PackZoneRenderer(
-			this.canvas,
-			this.ctx,
-			this.highResCanvas,
-			this.highResCtx,
-			this.playerManager.packManager
-		);
-
-		// Create new rendering pipeline with updated components
-		this.renderingPipeline = new RenderingPipeline(
-			this.renderer,
-			this.playerRenderer,
-			this.packZoneRenderer,
-			this.scalingManager,
-			this.playerManager
-		);
-
-		// Trigger a render with new dimensions
-		this.renderingPipeline.render();
-	}
-
 	initializePoints(): Record<string, Point> {
 		const centerX = this.canvas.width / 2;
 		const centerY = this.canvas.height / 2;
-		const scale = this.PIXELS_PER_METER;
 
 		return {
-			A: { x: centerX + Game.CENTER_POINT_OFFSET * scale, y: centerY },
-			B: { x: centerX - Game.CENTER_POINT_OFFSET * scale, y: centerY },
+			A: { x: centerX + CENTER_POINT_OFFSET, y: centerY },
+			B: { x: centerX - CENTER_POINT_OFFSET, y: centerY },
 			C: {
-				x: centerX + Game.CENTER_POINT_OFFSET * scale,
-				y: centerY - Game.VERTICAL_OFFSET_1 * scale
+				x: centerX + CENTER_POINT_OFFSET,
+				y: centerY - VERTICAL_OFFSET_1
 			},
 			D: {
-				x: centerX + Game.CENTER_POINT_OFFSET * scale,
-				y: centerY + Game.VERTICAL_OFFSET_1 * scale
+				x: centerX + CENTER_POINT_OFFSET,
+				y: centerY + VERTICAL_OFFSET_1
 			},
 			E: {
-				x: centerX - Game.CENTER_POINT_OFFSET * scale,
-				y: centerY - Game.VERTICAL_OFFSET_1 * scale
+				x: centerX - CENTER_POINT_OFFSET,
+				y: centerY - VERTICAL_OFFSET_1
 			},
 			F: {
-				x: centerX - Game.CENTER_POINT_OFFSET * scale,
-				y: centerY + Game.VERTICAL_OFFSET_1 * scale
+				x: centerX - CENTER_POINT_OFFSET,
+				y: centerY + VERTICAL_OFFSET_1
 			},
 			G: {
-				x: centerX + Game.CENTER_POINT_OFFSET * scale,
-				y: centerY - Game.VERTICAL_OFFSET_2 * scale
+				x: centerX + CENTER_POINT_OFFSET,
+				y: centerY - VERTICAL_OFFSET_2
 			},
 			H: {
-				x: centerX - Game.CENTER_POINT_OFFSET * scale,
-				y: centerY + Game.VERTICAL_OFFSET_2 * scale
+				x: centerX - CENTER_POINT_OFFSET,
+				y: centerY + VERTICAL_OFFSET_2
 			},
 			I: {
-				x: centerX + Game.CENTER_POINT_OFFSET * scale,
-				y: centerY - Game.OUTER_VERTICAL_OFFSET_1 * scale
+				x: centerX + CENTER_POINT_OFFSET,
+				y: centerY - OUTER_VERTICAL_OFFSET_1
 			},
 			J: {
-				x: centerX + Game.CENTER_POINT_OFFSET * scale,
-				y: centerY + Game.OUTER_VERTICAL_OFFSET_2 * scale
+				x: centerX + CENTER_POINT_OFFSET,
+				y: centerY + OUTER_VERTICAL_OFFSET_2
 			},
 			K: {
-				x: centerX - Game.CENTER_POINT_OFFSET * scale,
-				y: centerY - Game.OUTER_VERTICAL_OFFSET_2 * scale
+				x: centerX - CENTER_POINT_OFFSET,
+				y: centerY - OUTER_VERTICAL_OFFSET_2
 			},
 			L: {
-				x: centerX - Game.CENTER_POINT_OFFSET * scale,
-				y: centerY + Game.OUTER_VERTICAL_OFFSET_1 * scale
+				x: centerX - CENTER_POINT_OFFSET,
+				y: centerY + OUTER_VERTICAL_OFFSET_1
 			}
 		};
 	}

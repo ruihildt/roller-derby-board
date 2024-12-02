@@ -2,19 +2,18 @@ import { TeamPlayer, TeamPlayerRole } from './TeamPlayer';
 import { TrackGeometry } from './TrackGeometry';
 import type { Point } from '../types';
 import { distance } from '../utils/utils';
+import { TENFEET } from '$lib/constants';
 
 export class PackManager extends EventTarget {
 	players: TeamPlayer[];
-	PACK_DISTANCE: number;
 	points: Record<string, Point>;
 	zones: number[];
 	trackGeometry: TrackGeometry;
 	engagementZone: Path2D | null;
 
-	constructor(pixelsPerMeter: number, points: Record<string, Point>, trackGeometry: TrackGeometry) {
+	constructor(points: Record<string, Point>, trackGeometry: TrackGeometry) {
 		super();
 		this.players = [];
-		this.PACK_DISTANCE = 3.05 * pixelsPerMeter;
 		this.points = points;
 		this.zones = [];
 		this.trackGeometry = trackGeometry;
@@ -74,7 +73,7 @@ export class PackManager extends EventTarget {
 			while (i < group.length) {
 				const current = group[i];
 				for (let j = ungrouped.length - 1; j >= 0; j--) {
-					if (distance(current, ungrouped[j]) <= this.PACK_DISTANCE) {
+					if (distance(current, ungrouped[j]) <= TENFEET) {
 						group.push(ungrouped.splice(j, 1)[0]);
 					}
 				}

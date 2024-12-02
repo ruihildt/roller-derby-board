@@ -22,17 +22,20 @@ export class RenderingPipeline {
 	private renderNormal() {
 		// Clear and reset canvas
 		this.scalingManager.clearAndResetCanvas(this.renderer.canvas);
+
+		// Start transform
 		this.scalingManager.applyTransformToCanvas(this.renderer.canvas);
 
-		// Draw static track elements first
+		// Draw game elements
 		this.renderer.drawTrack(this.renderer.ctx);
-
-		// Draw dynamic elements after transform
 		this.packZoneRenderer.drawEngagementZone(this.renderer.ctx);
+		this.renderer.drawTrackBoundaries(this.renderer.ctx);
+
 		this.playerRenderer.drawPlayers(this.playerManager.players);
 		this.playerRenderer.drawSkatingOfficials(this.playerManager.skatingOfficials);
 		this.renderer.drawBranding(this.renderer.ctx);
 
+		// End transform
 		this.scalingManager.restoreTransform(this.renderer.ctx);
 	}
 

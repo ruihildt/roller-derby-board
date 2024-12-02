@@ -1,4 +1,4 @@
-import { ScalingManager } from '$lib/classes/ScalingManager';
+import { colors, LINE_WIDTH } from '$lib/constants';
 import type { Point } from '$lib/types';
 import { TrackGeometry } from '../classes/TrackGeometry';
 
@@ -8,11 +8,8 @@ export class Renderer {
 	highResCanvas: HTMLCanvasElement;
 	highResCtx: CanvasRenderingContext2D;
 	points: Record<string, Point>;
-	LINE_WIDTH: number;
-	PIXELS_PER_METER: number;
 	trackGeometry: TrackGeometry;
 	private logoImage: HTMLImageElement;
-	scalingManager: ScalingManager;
 
 	innerTrackPath: Path2D;
 	outerTrackPath: Path2D;
@@ -31,19 +28,14 @@ export class Renderer {
 		ctx: CanvasRenderingContext2D,
 		highResCanvas: HTMLCanvasElement,
 		highResCtx: CanvasRenderingContext2D,
-		points: Record<string, Point>,
-		LINE_WIDTH: number,
-		PIXELS_PER_METER: number
+		points: Record<string, Point>
 	) {
 		this.canvas = canvas;
 		this.ctx = ctx;
 		this.highResCanvas = highResCanvas;
 		this.highResCtx = highResCtx;
 		this.points = points;
-		this.LINE_WIDTH = LINE_WIDTH;
-		this.PIXELS_PER_METER = PIXELS_PER_METER;
-		this.trackGeometry = new TrackGeometry(canvas, ctx, points, PIXELS_PER_METER);
-		this.scalingManager = ScalingManager.getInstance();
+		this.trackGeometry = new TrackGeometry(canvas, ctx, points);
 
 		this.logoImage = new Image();
 		this.logoImage.src = '/derbyboard-logo.svg';
@@ -64,20 +56,20 @@ export class Renderer {
 
 	drawTrack(ctx: CanvasRenderingContext2D): void {
 		// Fill only the area between outer and inner tracks
-		ctx.fillStyle = '#D3D3D3';
+		ctx.fillStyle = colors.trackSurface;
 		ctx.fill(this.trackSurface, 'evenodd');
 
 		// Draw the inner and outer track lines
-		ctx.strokeStyle = 'blue';
-		ctx.lineWidth = this.LINE_WIDTH;
+		ctx.strokeStyle = colors.trackBoundaries;
+		ctx.lineWidth = LINE_WIDTH;
 		ctx.stroke(this.innerTrackPath);
 		ctx.stroke(this.outerTrackPath);
 
 		// Draw official lane dotted line
 		ctx.save();
 		ctx.setLineDash([1, 10]);
-		ctx.lineWidth = 1;
-		ctx.strokeStyle = '#000000';
+		ctx.lineWidth = LINE_WIDTH / 3;
+		ctx.strokeStyle = colors.officialLane;
 		ctx.stroke(this.outerOfficialLanePath);
 		ctx.setLineDash([]);
 		ctx.restore();
@@ -86,34 +78,25 @@ export class Renderer {
 		this.drawPivotLine(ctx);
 		this.drawJammerLine(ctx);
 
-		// Draw the 10-foot lines
-		ctx.strokeStyle = 'black';
-		ctx.lineWidth = this.LINE_WIDTH / 2;
+		// Draw the 10-feet lines
+		ctx.strokeStyle = colors.tenFeetLines;
+		ctx.lineWidth = LINE_WIDTH / 2;
 		ctx.stroke(this.tenFeetLines);
 	}
 	drawTrackBoundaries(ctx: CanvasRenderingContext2D): void {
 		// Draw the inner and outer track lines
-		ctx.strokeStyle = 'blue';
-		ctx.lineWidth = this.LINE_WIDTH;
+		ctx.strokeStyle = colors.trackBoundaries;
+		ctx.lineWidth = LINE_WIDTH;
 		ctx.stroke(this.innerTrackPath);
 		ctx.stroke(this.outerTrackPath);
-
-		// Draw official lane dotted line
-		ctx.save();
-		ctx.setLineDash([1, 10]);
-		ctx.lineWidth = 1;
-		ctx.strokeStyle = '#000000';
-		ctx.stroke(this.outerOfficialLanePath);
-		ctx.setLineDash([]);
-		ctx.restore();
 
 		// Draw pivot and jammer lines
 		this.drawPivotLine(ctx);
 		this.drawJammerLine(ctx);
 
 		// Draw the 10-foot lines
-		ctx.strokeStyle = 'black';
-		ctx.lineWidth = this.LINE_WIDTH / 2;
+		ctx.strokeStyle = colors.tenFeetLines;
+		ctx.lineWidth = LINE_WIDTH / 2;
 		ctx.stroke(this.tenFeetLines);
 	}
 
@@ -122,37 +105,28 @@ export class Renderer {
 		const ctx = this.highResCtx;
 
 		// Draw the inner and outer track lines
-		ctx.strokeStyle = 'blue';
-		ctx.lineWidth = this.LINE_WIDTH;
+		ctx.strokeStyle = colors.trackBoundaries;
+		ctx.lineWidth = LINE_WIDTH;
 		ctx.stroke(this.innerTrackPath);
 		ctx.stroke(this.outerTrackPath);
-
-		// Draw official lane dotted line
-		ctx.save();
-		ctx.setLineDash([1, 10]);
-		ctx.lineWidth = 1;
-		ctx.strokeStyle = '#000000';
-		ctx.stroke(this.outerOfficialLanePath);
-		ctx.setLineDash([]);
-		ctx.restore();
 
 		// Draw pivot and jammer lines
 		this.drawPivotLine(ctx);
 		this.drawJammerLine(ctx);
 
 		// Draw the 10-foot lines
-		ctx.strokeStyle = 'black';
-		ctx.lineWidth = this.LINE_WIDTH / 2;
+		ctx.strokeStyle = colors.tenFeetLines;
+		ctx.lineWidth = LINE_WIDTH / 2;
 		ctx.stroke(this.tenFeetLines);
 	}
 
 	drawPivotLine(ctx: CanvasRenderingContext2D): void {
-		ctx.lineWidth = this.LINE_WIDTH;
+		ctx.lineWidth = LINE_WIDTH;
 		ctx.stroke(this.pivotLinePath);
 	}
 
 	drawJammerLine(ctx: CanvasRenderingContext2D): void {
-		ctx.lineWidth = this.LINE_WIDTH;
+		ctx.lineWidth = LINE_WIDTH;
 		ctx.stroke(this.jammerLinePath);
 	}
 
@@ -193,9 +167,8 @@ export class Renderer {
 		ctx.setTransform(1, 0, 0, 1, 0, 0);
 
 		const sizeMultiplier = 0.5;
-		const baseScale = (this.PIXELS_PER_METER / 35) * sizeMultiplier;
-		const width = this.logoImage.width * baseScale;
-		const height = this.logoImage.height * baseScale;
+		const width = this.logoImage.width * sizeMultiplier;
+		const height = this.logoImage.height * sizeMultiplier;
 
 		// Position at bottom right with padding
 		const padding = 40;

@@ -2,28 +2,7 @@ import type { PackManager } from '../classes/PackManager';
 import { TeamPlayerRole, type TeamPlayer } from '../classes/TeamPlayer';
 import { SkatingOfficial, SkatingOfficialRole } from '../classes/SkatingOfficial';
 import { TrackGeometry } from '../classes/TrackGeometry';
-
-export interface Colors {
-	teamAPrimary: string;
-	teamASecondary: string;
-	teamBPrimary: string;
-	teamBSecondary: string;
-	outOfBounds: string;
-	inBounds: string;
-	inEngagementZone: string;
-	inPack: string;
-}
-
-export const colors: Colors = {
-	teamAPrimary: 'yellow',
-	teamASecondary: 'black',
-	teamBPrimary: 'deepskyblue',
-	teamBSecondary: 'rebeccapurple',
-	outOfBounds: 'red',
-	inBounds: 'black',
-	inEngagementZone: 'orange',
-	inPack: 'green'
-};
+import { colors, LINE_WIDTH } from '$lib/constants';
 
 export class PlayerRenderer {
 	canvas: HTMLCanvasElement;
@@ -32,8 +11,6 @@ export class PlayerRenderer {
 	highResCtx: CanvasRenderingContext2D;
 	trackGeometry: TrackGeometry;
 	packManager: PackManager;
-	colors: Colors;
-	LINE_WIDTH: number;
 
 	constructor(
 		canvas: HTMLCanvasElement,
@@ -41,8 +18,7 @@ export class PlayerRenderer {
 		highResCanvas: HTMLCanvasElement,
 		highResCtx: CanvasRenderingContext2D,
 		trackGeometry: TrackGeometry,
-		packManager: PackManager,
-		LINE_WIDTH: number
+		packManager: PackManager
 	) {
 		this.canvas = canvas;
 		this.ctx = ctx;
@@ -50,8 +26,6 @@ export class PlayerRenderer {
 		this.highResCtx = highResCtx;
 		this.trackGeometry = trackGeometry;
 		this.packManager = packManager;
-		this.colors = colors;
-		this.LINE_WIDTH = LINE_WIDTH;
 	}
 
 	drawPlayers(players: TeamPlayer[]): void {
@@ -66,7 +40,7 @@ export class PlayerRenderer {
 			// Base white circle
 			ctx.beginPath();
 			ctx.arc(skatingOfficial.x, skatingOfficial.y, skatingOfficial.radius, 0, Math.PI * 2);
-			ctx.fillStyle = 'white';
+			ctx.fillStyle = colors.officialPrimary;
 			ctx.fill();
 
 			// Draw 7 vertical stripes
@@ -80,7 +54,7 @@ export class PlayerRenderer {
 
 			for (let i = 0; i < stripeCount; i++) {
 				if (i % 2 === 0) {
-					ctx.fillStyle = 'black';
+					ctx.fillStyle = colors.officialSecondary;
 					ctx.fillRect(
 						skatingOfficial.x - skatingOfficial.radius + i * stripeWidth,
 						skatingOfficial.y - skatingOfficial.radius,
@@ -109,7 +83,7 @@ export class PlayerRenderer {
 					else ctx.lineTo(x, y);
 				}
 				ctx.closePath();
-				ctx.fillStyle = 'black';
+				ctx.fillStyle = colors.officialSecondary;
 				ctx.fill();
 
 				// Draw main star
@@ -124,15 +98,15 @@ export class PlayerRenderer {
 				ctx.closePath();
 				ctx.fillStyle =
 					skatingOfficial.role === SkatingOfficialRole.jamRefA
-						? this.colors.teamAPrimary
-						: this.colors.teamBPrimary;
+						? colors.teamAPrimary
+						: colors.teamBPrimary;
 				ctx.fill();
 			}
 
 			// Circle border
 			ctx.beginPath();
 			ctx.arc(skatingOfficial.x, skatingOfficial.y, skatingOfficial.radius, 0, Math.PI * 2);
-			ctx.strokeStyle = 'black';
+			ctx.strokeStyle = colors.officialSecondary;
 			ctx.lineWidth = 2;
 			ctx.stroke();
 		}
@@ -146,7 +120,7 @@ export class PlayerRenderer {
 			// Base white circle
 			ctx.beginPath();
 			ctx.arc(skatingOfficial.x, skatingOfficial.y, skatingOfficial.radius, 0, Math.PI * 2);
-			ctx.fillStyle = 'white';
+			ctx.fillStyle = colors.officialPrimary;
 			ctx.fill();
 
 			// Draw 7 vertical stripes
@@ -160,7 +134,7 @@ export class PlayerRenderer {
 
 			for (let i = 0; i < stripeCount; i++) {
 				if (i % 2 === 0) {
-					ctx.fillStyle = 'black';
+					ctx.fillStyle = colors.officialSecondary;
 					ctx.fillRect(
 						skatingOfficial.x - skatingOfficial.radius + i * stripeWidth,
 						skatingOfficial.y - skatingOfficial.radius,
@@ -189,7 +163,7 @@ export class PlayerRenderer {
 					else ctx.lineTo(x, y);
 				}
 				ctx.closePath();
-				ctx.fillStyle = 'black';
+				ctx.fillStyle = 'colors.officialSecondary';
 				ctx.fill();
 
 				// Draw main star
@@ -204,15 +178,15 @@ export class PlayerRenderer {
 				ctx.closePath();
 				ctx.fillStyle =
 					skatingOfficial.role === SkatingOfficialRole.jamRefA
-						? this.colors.teamAPrimary
-						: this.colors.teamBPrimary;
+						? colors.teamAPrimary
+						: colors.teamBPrimary;
 				ctx.fill();
 			}
 
 			// Circle border
 			ctx.beginPath();
 			ctx.arc(skatingOfficial.x, skatingOfficial.y, skatingOfficial.radius, 0, Math.PI * 2);
-			ctx.strokeStyle = 'black';
+			ctx.strokeStyle = colors.officialSecondary;
 			ctx.lineWidth = 2;
 			ctx.stroke();
 		}
@@ -228,17 +202,15 @@ export class PlayerRenderer {
 	}
 
 	drawPlayer(player: TeamPlayer, ctx: CanvasRenderingContext2D): void {
-		const colors = this.colors;
-
 		const teamColor = player.team === 'A' ? colors.teamAPrimary : colors.teamBPrimary;
 
-		// Base circle
+		// Base circle with correct scaling
 		ctx.beginPath();
 		ctx.arc(player.x, player.y, player.radius, 0, Math.PI * 2);
 		ctx.fillStyle = teamColor;
 		ctx.fill();
 
-		// Draw pivot stripe
+		// Draw pivot stripe with scaled dimensions
 		if (player.role === TeamPlayerRole.pivot) {
 			const stripeHeight = player.radius * 0.5;
 			ctx.beginPath();
@@ -252,7 +224,7 @@ export class PlayerRenderer {
 			ctx.fill();
 		}
 
-		// Draw jammer star
+		// Draw jammer star with scaled dimensions
 		if (player.role === TeamPlayerRole.jammer) {
 			const starSize = player.radius * 0.8;
 			ctx.beginPath();
@@ -268,7 +240,7 @@ export class PlayerRenderer {
 			ctx.fill();
 		}
 
-		// Border drawn last
+		// Border with scaled line width
 		ctx.beginPath();
 		ctx.arc(player.x, player.y, player.radius, 0, Math.PI * 2);
 		ctx.strokeStyle = player.isInPack
@@ -279,7 +251,7 @@ export class PlayerRenderer {
 					? colors.inBounds
 					: colors.outOfBounds;
 
-		ctx.lineWidth = this.LINE_WIDTH;
+		ctx.lineWidth = LINE_WIDTH;
 		ctx.stroke();
 	}
 }

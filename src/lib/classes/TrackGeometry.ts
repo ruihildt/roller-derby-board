@@ -2,6 +2,18 @@ import type { Point } from '../types';
 import { Player } from './Player';
 import type { TeamPlayer } from './TeamPlayer';
 
+import {
+	CLOCKWISE,
+	COUNTER_CLOCKWISE,
+	HALF_PI,
+	TENFEET,
+	TENFEETLINE,
+	THIRTYFEET,
+	TRACK_SCALE,
+	TURNSEGMENT,
+	TWENTYFEET
+} from '$lib/constants';
+
 type StraightKey = 1 | 3;
 type TurnKey = 2 | 4;
 type Straight = {
@@ -27,21 +39,12 @@ type Zones = {
 	4: Turn;
 };
 
-// Track Constants
-const ENGAGEMENT_ZONE_METERS = 6.1;
-const HALF_PI = Math.PI / 2;
-
-// Angles
-const CLOCKWISE = true;
-const COUNTER_CLOCKWISE = false;
-
 export class TrackGeometry {
 	canvas: HTMLCanvasElement;
 	ctx: CanvasRenderingContext2D;
 	points: Record<string, Point>;
 	zones: Zones;
 	jammerLinePoints: Record<string, Point>;
-	PIXELS_PER_METER: number;
 
 	straight1Area: Path2D;
 	straight2Area: Path2D;
@@ -60,12 +63,10 @@ export class TrackGeometry {
 	constructor(
 		canvas: HTMLCanvasElement,
 		ctx: CanvasRenderingContext2D,
-		points: Record<string, Point>,
-		PIXELS_PER_METER: number
+		points: Record<string, Point>
 	) {
 		this.canvas = canvas;
 		this.ctx = ctx;
-		this.PIXELS_PER_METER = PIXELS_PER_METER;
 
 		this.points = points;
 		this.zones = {
@@ -181,7 +182,7 @@ export class TrackGeometry {
 	createOuterOfficialLanePath(): Path2D {
 		const path = new Path2D();
 		const zones = this.zones;
-		const officialLaneDistance = 3.05 * this.PIXELS_PER_METER;
+		const officialLaneDistance = TENFEET;
 
 		// Calculate angle for straight 1
 		const angle1 = Math.atan2(
@@ -279,7 +280,7 @@ export class TrackGeometry {
 		const { innerPoint: jammerInner, outerPoint: jammerOuter } = this.jammerLinePoints;
 
 		// Calculate points 3 meters behind jammer line
-		const backDistance = 3 * this.PIXELS_PER_METER;
+		const backDistance = 3 * TRACK_SCALE;
 		const angle =
 			Math.atan2(jammerOuter.y - jammerInner.y, jammerOuter.x - jammerInner.x) + Math.PI / 2;
 
@@ -318,9 +319,6 @@ export class TrackGeometry {
 	createJammerLinePoints(): { innerPoint: Point; outerPoint: Point } {
 		const p = this.points;
 
-		// Calculate thirty feet in pixels
-		const thirtyFeet = 9.15 * this.PIXELS_PER_METER;
-
 		// Create a dummy player at the pivot line
 		const dummyPlayer = {
 			x: p.K.x,
@@ -330,7 +328,7 @@ export class TrackGeometry {
 		} as Player;
 
 		// Move dummy player thirty feet forward
-		dummyPlayer.x = p.K.x + thirtyFeet;
+		dummyPlayer.x = p.K.x + THIRTYFEET;
 		this.updatePlayerCoordinates(dummyPlayer);
 
 		return {
@@ -364,12 +362,6 @@ export class TrackGeometry {
 		const path = new Path2D();
 		const p = this.points;
 
-		// Calculate distances in pixels
-		const tenFeet = 3.05 * this.PIXELS_PER_METER;
-		const twentyFeet = 6.1 * this.PIXELS_PER_METER;
-		const thirtyFeet = 9.15 * this.PIXELS_PER_METER;
-		const lineLength = 0.8 * this.PIXELS_PER_METER;
-
 		// Create a dummy player to use updatePlayerCoordinates
 		const dummyPlayer = {
 			x: p.D.x,
@@ -378,7 +370,7 @@ export class TrackGeometry {
 			outerPoint: { x: 0, y: 0 }
 		} as Player;
 
-		[0, tenFeet, twentyFeet, thirtyFeet].forEach((distance) => {
+		[0, TENFEET, TWENTYFEET, THIRTYFEET].forEach((distance) => {
 			dummyPlayer.x = p.D.x - distance;
 			this.updatePlayerCoordinates(dummyPlayer);
 
@@ -393,8 +385,8 @@ export class TrackGeometry {
 			);
 
 			// Draw line centered on midpoint
-			path.moveTo(midX - lineLength * Math.cos(angle), midY - lineLength * Math.sin(angle));
-			path.lineTo(midX + lineLength * Math.cos(angle), midY + lineLength * Math.sin(angle));
+			path.moveTo(midX - TENFEETLINE * Math.cos(angle), midY - TENFEETLINE * Math.sin(angle));
+			path.lineTo(midX + TENFEETLINE * Math.cos(angle), midY + TENFEETLINE * Math.sin(angle));
 		});
 
 		return path;
@@ -404,11 +396,6 @@ export class TrackGeometry {
 		const path = new Path2D();
 		const p = this.points;
 
-		// Calculate distances in pixels
-		const tenFeet = 3.05 * this.PIXELS_PER_METER;
-		const twentyFeet = 6.1 * this.PIXELS_PER_METER;
-		const lineLength = 0.8 * this.PIXELS_PER_METER;
-
 		// Create a dummy player to use updatePlayerCoordinates
 		const dummyPlayer = {
 			x: p.E.x,
@@ -417,7 +404,7 @@ export class TrackGeometry {
 			outerPoint: { x: 0, y: 0 }
 		} as Player;
 
-		[tenFeet, twentyFeet].forEach((distance) => {
+		[TENFEET, TWENTYFEET].forEach((distance) => {
 			dummyPlayer.x = p.E.x + distance;
 			this.updatePlayerCoordinates(dummyPlayer);
 
@@ -432,8 +419,8 @@ export class TrackGeometry {
 			);
 
 			// Draw line centered on midpoint
-			path.moveTo(midX - lineLength * Math.cos(angle), midY - lineLength * Math.sin(angle));
-			path.lineTo(midX + lineLength * Math.cos(angle), midY + lineLength * Math.sin(angle));
+			path.moveTo(midX - TENFEETLINE * Math.cos(angle), midY - TENFEETLINE * Math.sin(angle));
+			path.lineTo(midX + TENFEETLINE * Math.cos(angle), midY + TENFEETLINE * Math.sin(angle));
 		});
 
 		return path;
@@ -443,10 +430,6 @@ export class TrackGeometry {
 		const path = new Path2D();
 		const p = this.points;
 
-		// Convert measurements to pixels
-		const segmentLength = 2.15 * this.PIXELS_PER_METER; // 7 feet ½ inch = 2.15 meters
-		const lineLength = 0.8 * this.PIXELS_PER_METER;
-
 		// Calculate and draw E1 through E5 points and their circles
 		const radiusEF = Math.hypot(p.E.x - p.B.x, p.E.y - p.B.y);
 		let currentAngle = Math.atan2(p.E.y - p.B.y, p.E.x - p.B.x);
@@ -454,8 +437,8 @@ export class TrackGeometry {
 		const points = [];
 		for (let i = 1; i <= 5; i++) {
 			const point = {
-				x: p.B.x + radiusEF * Math.cos(currentAngle - segmentLength / radiusEF),
-				y: p.B.y + radiusEF * Math.sin(currentAngle - segmentLength / radiusEF)
+				x: p.B.x + radiusEF * Math.cos(currentAngle - TURNSEGMENT / radiusEF),
+				y: p.B.y + radiusEF * Math.sin(currentAngle - TURNSEGMENT / radiusEF)
 			};
 			points.push(point);
 
@@ -477,8 +460,8 @@ export class TrackGeometry {
 				dummyPlayer.outerPoint.y - dummyPlayer.innerPoint.y,
 				dummyPlayer.outerPoint.x - dummyPlayer.innerPoint.x
 			);
-			path.moveTo(midX - lineLength * Math.cos(angle), midY - lineLength * Math.sin(angle));
-			path.lineTo(midX + lineLength * Math.cos(angle), midY + lineLength * Math.sin(angle));
+			path.moveTo(midX - TENFEETLINE * Math.cos(angle), midY - TENFEETLINE * Math.sin(angle));
+			path.lineTo(midX + TENFEETLINE * Math.cos(angle), midY + TENFEETLINE * Math.sin(angle));
 
 			currentAngle = Math.atan2(point.y - p.B.y, point.x - p.B.x);
 		}
@@ -492,10 +475,6 @@ export class TrackGeometry {
 		const path = new Path2D();
 		const p = this.points;
 
-		// Convert measurements to pixels
-		const segmentLength = 2.15 * this.PIXELS_PER_METER; // 7 feet ½ inch = 2.15 meters
-		const lineLength = 0.8 * this.PIXELS_PER_METER;
-
 		// Calculate and draw E1 through E5 points and their circles
 		const radiusDC = Math.hypot(p.D.x - p.A.x, p.D.y - p.A.y);
 		let currentAngle = Math.atan2(p.D.y - p.A.y, p.D.x - p.A.x);
@@ -503,8 +482,8 @@ export class TrackGeometry {
 		const points = [];
 		for (let i = 1; i <= 5; i++) {
 			const point = {
-				x: p.A.x + radiusDC * Math.cos(currentAngle - segmentLength / radiusDC),
-				y: p.A.y + radiusDC * Math.sin(currentAngle - segmentLength / radiusDC)
+				x: p.A.x + radiusDC * Math.cos(currentAngle - TURNSEGMENT / radiusDC),
+				y: p.A.y + radiusDC * Math.sin(currentAngle - TURNSEGMENT / radiusDC)
 			};
 			points.push(point);
 
@@ -526,8 +505,8 @@ export class TrackGeometry {
 				dummyPlayer.outerPoint.y - dummyPlayer.innerPoint.y,
 				dummyPlayer.outerPoint.x - dummyPlayer.innerPoint.x
 			);
-			path.moveTo(midX - lineLength * Math.cos(angle), midY - lineLength * Math.sin(angle));
-			path.lineTo(midX + lineLength * Math.cos(angle), midY + lineLength * Math.sin(angle));
+			path.moveTo(midX - TENFEETLINE * Math.cos(angle), midY - TENFEETLINE * Math.sin(angle));
+			path.lineTo(midX + TENFEETLINE * Math.cos(angle), midY + TENFEETLINE * Math.sin(angle));
 
 			currentAngle = Math.atan2(point.y - p.A.y, point.x - p.A.x);
 		}
@@ -650,13 +629,12 @@ export class TrackGeometry {
 
 	private calculateEngagementZonePoints(rearmost: TeamPlayer, foremost: TeamPlayer) {
 		return {
-			forward: this.getPointAheadOnMidtrack(foremost, ENGAGEMENT_ZONE_METERS),
-			backward: this.getPointBehindOnMidtrack(rearmost, ENGAGEMENT_ZONE_METERS)
+			forward: this.getPointAheadOnMidtrack(foremost),
+			backward: this.getPointBehindOnMidtrack(rearmost)
 		};
 	}
 
-	getPointBehindOnMidtrack(startPoint: TeamPlayer, distanceInMeters: number): Point {
-		const distanceInPixels = distanceInMeters * this.PIXELS_PER_METER;
+	getPointBehindOnMidtrack(startPoint: TeamPlayer): Point {
 		const zone = this.determineZone(startPoint.x, startPoint.y);
 
 		if (zone === 1 || zone === 3) {
@@ -665,8 +643,8 @@ export class TrackGeometry {
 			const straightStart = isZone1 ? innerStart.x : innerStart.x;
 			const distanceToStart = Math.abs(startPoint.x - straightStart);
 
-			if (distanceInPixels > distanceToStart) {
-				const remainingDistance = distanceInPixels - distanceToStart;
+			if (TWENTYFEET > distanceToStart) {
+				const remainingDistance = TWENTYFEET - distanceToStart;
 				const centerPoint = isZone1
 					? {
 							x: this.zones[4].centerOuter.x,
@@ -706,7 +684,7 @@ export class TrackGeometry {
 					((innerEnd.y + outerEnd.y) / 2 - (innerStart.y + outerStart.y) / 2) *
 						((startPoint.x - innerStart.x) / (innerEnd.x - innerStart.x));
 
-			const newX = isZone1 ? startPoint.x + distanceInPixels : startPoint.x - distanceInPixels;
+			const newX = isZone1 ? startPoint.x + TWENTYFEET : startPoint.x - TWENTYFEET;
 
 			return { x: newX, y: midY };
 		}
@@ -736,9 +714,9 @@ export class TrackGeometry {
 		const angleDiff = zone === 2 ? currentAngle - turnStartAngle : turnStartAngle - currentAngle;
 		const distanceToTurnStart = Math.abs(angleDiff * radius);
 
-		if (distanceToTurnStart < distanceInPixels) {
+		if (distanceToTurnStart < TWENTYFEET) {
 			// Project on the previous straight
-			const remainingDistance = distanceInPixels - distanceToTurnStart;
+			const remainingDistance = TWENTYFEET - distanceToTurnStart;
 			const straightZone = this.zones[prevZone];
 			const midY = (straightZone.innerEnd.y + straightZone.outerEnd.y) / 2;
 			const newX =
@@ -749,7 +727,7 @@ export class TrackGeometry {
 			return { x: newX, y: midY };
 		}
 
-		const angleChange = distanceInPixels / radius;
+		const angleChange = TWENTYFEET / radius;
 		const newAngle = currentAngle + angleChange;
 
 		return {
@@ -758,8 +736,7 @@ export class TrackGeometry {
 		};
 	}
 
-	getPointAheadOnMidtrack(startPoint: TeamPlayer, distanceInMeters: number): Point {
-		const distanceInPixels = distanceInMeters * this.PIXELS_PER_METER;
+	getPointAheadOnMidtrack(startPoint: TeamPlayer): Point {
 		const zone = this.determineZone(startPoint.x, startPoint.y);
 
 		if (zone === 1 || zone === 3) {
@@ -768,8 +745,8 @@ export class TrackGeometry {
 			const straightEnd = isZone1 ? innerEnd.x : innerEnd.x;
 			const distanceToEnd = Math.abs(straightEnd - startPoint.x);
 
-			if (distanceInPixels > distanceToEnd) {
-				const remainingDistance = distanceInPixels - distanceToEnd;
+			if (TWENTYFEET > distanceToEnd) {
+				const remainingDistance = TWENTYFEET - distanceToEnd;
 				const centerPoint = isZone1
 					? {
 							x: this.zones[2].centerOuter.x,
@@ -804,7 +781,7 @@ export class TrackGeometry {
 					((innerEnd.y + outerEnd.y) / 2 - (innerStart.y + outerStart.y) / 2) *
 						((startPoint.x - innerStart.x) / (innerEnd.x - innerStart.x));
 
-			const newX = isZone1 ? startPoint.x - distanceInPixels : startPoint.x + distanceInPixels;
+			const newX = isZone1 ? startPoint.x - TWENTYFEET : startPoint.x + TWENTYFEET;
 
 			return { x: newX, y: midY };
 		}
@@ -838,8 +815,8 @@ export class TrackGeometry {
 		const distanceToTurnEnd = Math.abs(angleDiff * radius);
 
 		// If distance to end is greater than requested distance, stay in turn
-		if (distanceToTurnEnd >= distanceInPixels) {
-			const angleChange = distanceInPixels / radius;
+		if (distanceToTurnEnd >= TWENTYFEET) {
+			const angleChange = TWENTYFEET / radius;
 			const newAngle = currentAngle - angleChange;
 
 			return {
@@ -849,7 +826,7 @@ export class TrackGeometry {
 		}
 
 		// Project remaining distance into next straight
-		const remainingDistance = distanceInPixels - distanceToTurnEnd;
+		const remainingDistance = TWENTYFEET - distanceToTurnEnd;
 		const straightZone = this.zones[nextZone];
 		const midY = (straightZone.innerStart.y + straightZone.outerStart.y) / 2;
 		const newX =

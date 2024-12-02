@@ -17,7 +17,6 @@ export class PlayerManager {
 	canvas: HTMLCanvasElement;
 	ctx: CanvasRenderingContext2D;
 	points: Record<string, Point>;
-	PIXELS_PER_METER: number;
 	players: TeamPlayer[];
 	skatingOfficials: SkatingOfficial[];
 	selectedPlayer: Player | null;
@@ -38,7 +37,6 @@ export class PlayerManager {
 		canvas: HTMLCanvasElement,
 		ctx: CanvasRenderingContext2D,
 		points: Record<string, Point>,
-		PIXELS_PER_METER: number,
 		renderer: Renderer,
 		isInitialLoad: boolean
 	) {
@@ -46,12 +44,11 @@ export class PlayerManager {
 		this.canvas = canvas;
 		this.ctx = ctx;
 		this.points = points;
-		this.PIXELS_PER_METER = PIXELS_PER_METER;
-		Player.setCanvasWidth(canvas.width);
+		Player.setCanvasWidth();
 		this.players = [];
 		this.skatingOfficials = [];
 		this.selectedPlayer = null;
-		this.trackGeometry = new TrackGeometry(canvas, ctx, points, PIXELS_PER_METER);
+		this.trackGeometry = new TrackGeometry(canvas, ctx, points);
 		this.renderer = renderer;
 		this.straight1Area = renderer.straight1Area;
 		this.straight2Area = renderer.straight2Area;
@@ -60,7 +57,7 @@ export class PlayerManager {
 		this.startZone = this.trackGeometry.startZone;
 		this.jammerStartZone = this.trackGeometry.createJammerStartZone();
 
-		this.packManager = new PackManager(PIXELS_PER_METER, points, this.trackGeometry);
+		this.packManager = new PackManager(points, this.trackGeometry);
 		this.positions = {
 			OPR1: { x: 0.347, y: 0.115 },
 			OPR2: { x: 0.535, y: 0.11 },
@@ -100,63 +97,6 @@ export class PlayerManager {
 		}
 
 		this.activeTouches = new Map();
-	}
-
-	resize(
-		canvas: HTMLCanvasElement,
-		ctx: CanvasRenderingContext2D,
-		points: Record<string, Point>,
-		PIXELS_PER_METER: number,
-		renderer: Renderer
-	): void {
-		Player.setCanvasWidth(canvas.width);
-
-		// Update radius for all players
-		[...this.players, ...this.skatingOfficials].forEach((player) => {
-			player.radius = Player.playerRadius;
-		});
-
-		// Calculate scale factors based on track dimensions
-		const oldTrackWidth = this.points.A.x - this.points.B.x;
-		const newTrackWidth = points.A.x - points.B.x;
-		const scale = newTrackWidth / oldTrackWidth;
-
-		// Update core properties
-		this.canvas = canvas;
-		this.ctx = ctx;
-		this.points = points;
-		this.PIXELS_PER_METER = PIXELS_PER_METER;
-		Player.setCanvasWidth(canvas.width);
-
-		// Update track areas
-		this.straight1Area = renderer.straight1Area;
-		this.straight2Area = renderer.straight2Area;
-		this.turn1Area = renderer.turn1Area;
-		this.turn2Area = renderer.turn2Area;
-
-		// Scale player positions
-		this.players.forEach((player) => {
-			player.x = player.x * scale;
-			player.y = player.y * scale;
-		});
-
-		// Scale official positions
-		// Scale skating officials positions
-		this.skatingOfficials.forEach((official) => {
-			official.x = official.x * scale;
-			official.y = official.y * scale;
-		});
-
-		// Update track geometry
-		this.trackGeometry = new TrackGeometry(canvas, ctx, points, PIXELS_PER_METER);
-		// Update player coordinates after resize
-		for (const player of this.players) {
-			this.trackGeometry.updatePlayerCoordinates(player);
-		}
-
-		// Update packManager
-		this.packManager = new PackManager(PIXELS_PER_METER, points, this.trackGeometry);
-		this.packManager.updatePlayers(this.players);
 	}
 
 	addTeamPlayer(x: number, y: number, team: string, role: TeamPlayerRole) {
@@ -311,15 +251,13 @@ export class PlayerManager {
 	}
 
 	getRandomBlockerPosition(role: TeamPlayerRole): Point {
-		const ctx = this.ctx;
 		let attempts = 0;
-		const maxAttempts = 1000; // Adjust this value as needed
+		const maxAttempts = 1000;
 
 		while (attempts < maxAttempts) {
 			const x = Math.random() * this.canvas.width;
 			const y = Math.random() * this.canvas.height;
 
-			// Check the center and four points on the circumference
 			const pointsToCheck = [
 				{ x, y }, // Center
 				{ x: x + Player.playerRadius, y }, // Right
@@ -328,14 +266,12 @@ export class PlayerManager {
 				{ x, y: y - Player.playerRadius } // Top
 			];
 
-			// Check if all points are inside the straight1Area and in bounds
 			const allPointsValid = pointsToCheck.every(
 				(point) =>
-					ctx.isPointInPath(this.startZone, point.x, point.y) &&
+					this.ctx.isPointInPath(this.startZone, point.x, point.y) &&
 					this.trackGeometry.isPlayerInBounds(new TeamPlayer(point.x, point.y, 'A', role))
 			);
 
-			// Check for collisions with existing players
 			const noCollisions = this.players.every(
 				(player) => Math.hypot(player.x - x, player.y - y) > Player.playerRadius * 2
 			);
@@ -351,7 +287,6 @@ export class PlayerManager {
 	}
 
 	getRandomJammerPosition(): Point {
-		const ctx = this.ctx;
 		let attempts = 0;
 		const maxAttempts = 1000;
 
@@ -369,13 +304,12 @@ export class PlayerManager {
 
 			const allPointsValid = pointsToCheck.every(
 				(point) =>
-					ctx.isPointInPath(this.jammerStartZone, point.x, point.y) &&
+					this.ctx.isPointInPath(this.jammerStartZone, point.x, point.y) &&
 					this.trackGeometry.isPlayerInBounds(
 						new TeamPlayer(point.x, point.y, 'A', TeamPlayerRole.jammer)
 					)
 			);
 
-			// Check for collisions with existing players who are jammers
 			const noCollisions = this.players.every(
 				(player) => Math.hypot(player.x - x, player.y - y) > Player.playerRadius * 2
 			);
@@ -437,19 +371,10 @@ export class PlayerManager {
 			const screenX = event.clientX - rect.left;
 			const screenY = event.clientY - rect.top;
 			const worldCoords = this.game.scalingManager.screenToWorld(screenX, screenY);
-			const x = worldCoords.x * this.canvas.width;
-			const y = worldCoords.y * this.canvas.height;
 
-			entity.x = Math.max(
-				entity.radius,
-				Math.min(this.canvas.width - entity.radius, x - entity.dragOffsetX)
-			);
-			entity.y = Math.max(
-				entity.radius,
-				Math.min(this.canvas.height - entity.radius, y - entity.dragOffsetY)
-			);
+			entity.x = worldCoords.x;
+			entity.y = worldCoords.y;
 
-			// Check collisions with all entities
 			const allEntities = [...this.players, ...this.skatingOfficials];
 			allEntities.forEach((otherEntity) => {
 				if (otherEntity !== entity && this.checkCollision(entity, otherEntity)) {
@@ -473,17 +398,16 @@ export class PlayerManager {
 		const screenX = event.clientX - rect.left;
 		const screenY = event.clientY - rect.top;
 		const worldCoords = this.game.scalingManager.screenToWorld(screenX, screenY);
-		const x = worldCoords.x * this.canvas.width;
-		const y = worldCoords.y * this.canvas.height;
 
 		const draggableEntities = [...this.players, ...this.skatingOfficials];
 
 		for (const entity of draggableEntities) {
-			if (entity.containsPoint(x, y)) {
+			const dx = worldCoords.x - entity.x;
+			const dy = worldCoords.y - entity.y;
+			const distance = Math.sqrt(dx * dx + dy * dy);
+			if (distance < entity.radius) {
 				this.selectedPlayer = entity;
 				entity.isDragging = true;
-				entity.dragOffsetX = x - entity.x;
-				entity.dragOffsetY = y - entity.y;
 				break;
 			}
 		}
@@ -496,8 +420,6 @@ export class PlayerManager {
 			saveBoardState(this.game);
 		}
 	}
-
-	// Add these methods to the PlayerManager class
 
 	handleTouchStart(event: TouchEvent): void {
 		if (get(panMode)) return;

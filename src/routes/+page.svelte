@@ -28,17 +28,11 @@
 	}
 </script>
 
-<main
-	class={`bg-b flex min-h-screen items-center justify-center transition-colors duration-300 ${
-		isDarkBackground ? 'bg-black' : 'bg-[#f0f0f0]'
-	}`}
->
-	<div class="relative mx-auto aspect-[100/67] max-h-screen w-full max-w-[1200px]">
-		<Board bind:highResCanvas bind:game />
-		{#if showPreview && recordedBlob}
-			<Video bind:videoBlob={recordedBlob} close={handlePreviewClose} />
-		{/if}
-	</div>
+<main class="h-screen w-screen">
+	<Board bind:highResCanvas bind:game />
+	{#if showPreview && recordedBlob}
+		<Video bind:videoBlob={recordedBlob} close={handlePreviewClose} />
+	{/if}
 </main>
 
 <Record
