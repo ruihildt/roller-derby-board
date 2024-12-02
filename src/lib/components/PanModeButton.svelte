@@ -1,7 +1,16 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
 	import { panMode } from '$lib/stores/panMode';
 	import { Toolbar, ToolbarButton, Tooltip } from 'flowbite-svelte';
-	import { LockOutline, LockOpenOutline } from 'flowbite-svelte-icons';
+	import { LockOutline } from 'flowbite-svelte-icons';
+
+	onMount(() => {
+		const unsubscribe = panMode.subscribe((value) => {
+			document.body.classList.toggle('pan-mode', value);
+		});
+
+		return unsubscribe;
+	});
 </script>
 
 <Toolbar class="inline-flex rounded-lg !p-1 shadow-lg shadow-black/5">
@@ -19,3 +28,15 @@
 		Panning tool</Tooltip
 	>
 </Toolbar>
+
+<style>
+	:global(canvas) {
+		cursor: default;
+	}
+	:global(.pan-mode canvas) {
+		cursor: grab;
+	}
+	:global(.pan-mode canvas:active) {
+		cursor: grabbing;
+	}
+</style>
