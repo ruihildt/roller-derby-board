@@ -35,8 +35,8 @@
 		</TimelineItem>
 		<TimelineItem title="Holding on" date="2024 November 30th" classLi="!mb-7">
 			<p>
-				Players will now hold <span class="line-through">grudges</span> on to their positions, even when
-				you refresh the page or restart the browser. Good players!
+				Players will now hold on to their positions, even when you refresh the page or restart the
+				browser. Good players!
 			</p>
 		</TimelineItem>
 		<TimelineItem title="A bite for everyone" date="2024 November 29th" classLi="!mb-7">
