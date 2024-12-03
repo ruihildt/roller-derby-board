@@ -30,7 +30,7 @@ export class Game {
 	packZoneRenderer: PackZoneRenderer;
 
 	constructor(canvas: HTMLCanvasElement, highResCanvas: HTMLCanvasElement, isRecording: boolean) {
-		this.scalingManager = ScalingManager.getInstance();
+		this.scalingManager = new ScalingManager(canvas.width, canvas.height);
 		this.canvas = canvas;
 		this.ctx = canvas.getContext('2d')!;
 		this.highResCanvas = highResCanvas;

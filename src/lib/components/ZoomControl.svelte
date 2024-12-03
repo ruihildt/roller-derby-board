@@ -1,35 +1,40 @@
 <script lang="ts">
 	import { Toolbar, ToolbarButton, Tooltip } from 'flowbite-svelte';
-	import { ScalingManager } from '$lib/classes/ScalingManager';
 	import { MinusOutline, PlusOutline } from 'flowbite-svelte-icons';
-	import { onMount } from 'svelte';
+	import { viewport } from '$lib/stores/viewport';
+	import { BASE_ZOOM, MAX_ZOOM, MIN_ZOOM, ZOOM_INCREMENT } from '$lib/constants';
 
 	let zoomLevel = 100;
 
 	function updateZoomDisplay() {
-		zoomLevel = Math.round(ScalingManager.getInstance().zoomLevel * 100);
+		zoomLevel = Math.round($viewport.zoom * 100);
 	}
 
 	function zoomIn() {
-		ScalingManager.getInstance().zoomIn();
-		updateZoomDisplay();
+		viewport.update((state) => {
+			const newZoom = Math.min(state.zoom + ZOOM_INCREMENT, MAX_ZOOM);
+			return { ...state, zoom: newZoom };
+		});
 	}
 
 	function zoomOut() {
-		ScalingManager.getInstance().zoomOut();
-		updateZoomDisplay();
+		viewport.update((state) => {
+			const newZoom = Math.max(state.zoom - ZOOM_INCREMENT, MIN_ZOOM);
+			return { ...state, zoom: newZoom };
+		});
 	}
 
 	function resetZoom() {
-		ScalingManager.getInstance().resetZoom();
-		updateZoomDisplay();
+		viewport.set({
+			zoom: BASE_ZOOM,
+			panX: 0,
+			panY: 0
+		});
 	}
 
-	onMount(() => {
-		window.addEventListener('scalingUpdate', updateZoomDisplay);
+	$: {
 		updateZoomDisplay();
-		return () => window.removeEventListener('scalingUpdate', updateZoomDisplay);
-	});
+	}
 </script>
 
 <Toolbar class="inline-flex rounded-lg !p-1 shadow-lg shadow-black/5">
