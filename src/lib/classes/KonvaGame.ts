@@ -13,7 +13,6 @@ export class KonvaGame {
 	private stage: Konva.Stage;
 	private trackLayer: Konva.Layer;
 	private playersLayer: Konva.Layer;
-	private packLayer: Konva.Layer;
 	private width: number;
 	private height: number;
 
@@ -34,11 +33,9 @@ export class KonvaGame {
 		trackGeometry.addToLayer(this.trackLayer);
 
 		this.playersLayer = new Konva.Layer();
-		this.packLayer = new Konva.Layer();
 
 		this.stage.add(this.trackLayer);
 		this.stage.add(this.playersLayer);
-		this.stage.add(this.packLayer);
 
 		this.setupZoom();
 	}
