@@ -1,34 +1,45 @@
 <script lang="ts">
-	import Board from '$lib/components/Board.svelte';
-	import Video from '$lib/components/Video.svelte';
-	import Record from '$lib/components/Record.svelte';
-	import Menu from '$lib/components/Menu.svelte';
-	import type { Game } from '$lib/classes/Game';
-	import Changelog from '$lib/components/Changelog.svelte';
-	import FullscreenButton from '$lib/components/FullscreenButton.svelte';
-	import ZoomControl from '$lib/components/ZoomControl.svelte';
-	import PanModeButton from '$lib/components/PanModeButton.svelte';
+	import { onMount } from 'svelte';
+	import { KonvaGame } from '$lib/classes/KonvaGame';
 
-	let showPreview = $state(false);
-	let recordedBlob = $state<Blob | null>(null);
-	let highResCanvas = $state<HTMLCanvasElement>()!;
-	let game = $state<Game>()!;
-	let isRecording = $state(false);
-	let isDarkBackground = $state(false);
+	onMount(() => {
+		const game = new KonvaGame('container', window.innerWidth, window.innerHeight);
+	});
 
-	function handleRecordingComplete(blob: Blob) {
-		recordedBlob = blob;
-		showPreview = true;
-	}
+	// import Board from '$lib/components/Board.svelte';
+	// import Video from '$lib/components/Video.svelte';
+	// import Record from '$lib/components/Record.svelte';
+	// import Menu from '$lib/components/Menu.svelte';
+	// import type { Game } from '$lib/classes/Game';
+	// import Changelog from '$lib/components/Changelog.svelte';
+	// import FullscreenButton from '$lib/components/FullscreenButton.svelte';
+	// import ZoomControl from '$lib/components/ZoomControl.svelte';
+	// import PanModeButton from '$lib/components/PanModeButton.svelte';
 
-	function handlePreviewClose() {
-		showPreview = false;
-		recordedBlob = null;
-		isDarkBackground = false;
-	}
+	// let showPreview = $state(false);
+	// let recordedBlob = $state<Blob | null>(null);
+	// let highResCanvas = $state<HTMLCanvasElement>()!;
+	// let game = $state<Game>()!;
+	// let isRecording = $state(false);
+	// let isDarkBackground = $state(false);
+
+	// function handleRecordingComplete(blob: Blob) {
+	// 	recordedBlob = blob;
+	// 	showPreview = true;
+	// }
+
+	// function handlePreviewClose() {
+	// 	showPreview = false;
+	// 	recordedBlob = null;
+	// 	isDarkBackground = false;
+	// }
 </script>
 
 <main class="h-screen w-screen">
+	<div id="container" class="absolute left-0 top-0 h-screen w-screen"></div>
+</main>
+
+<!-- <main class="h-screen w-screen">
 	<Board bind:highResCanvas bind:game />
 	{#if showPreview && recordedBlob}
 		<Video bind:videoBlob={recordedBlob} close={handlePreviewClose} />
@@ -55,4 +66,4 @@
 		<Changelog />
 		<FullscreenButton />
 	</div>
-{/if}
+{/if} -->
