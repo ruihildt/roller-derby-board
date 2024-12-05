@@ -49,6 +49,12 @@ export class KonvaGame {
 		this.playerManager = new KonvaPlayerManager(this.playersLayer, trackGeometry);
 		this.playerManager.addInitialLineup();
 		this.playersLayer.batchDraw();
+
+		// Add window resize handler
+		window.addEventListener('resize', () => {
+			this.stage.width(window.innerWidth);
+			this.stage.height(window.innerHeight);
+		});
 	}
 
 	private initializePoints(): Record<string, Point> {
