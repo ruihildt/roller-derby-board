@@ -51,9 +51,35 @@ export class KonvaGame {
 		this.playersLayer.batchDraw();
 
 		// Add window resize handler
+		// We keep the center point before resize the center after resize
 		window.addEventListener('resize', () => {
+			// Get current center point
+			const centerX = this.stage.width() / 2;
+			const centerY = this.stage.height() / 2;
+
+			// Get current scale and position
+			const oldScale = this.stage.scaleX();
+			const oldPosition = this.stage.position();
+
+			// Calculate relative position of center in world coordinates
+			const worldX = (centerX - oldPosition.x) / oldScale;
+			const worldY = (centerY - oldPosition.y) / oldScale;
+
+			// Update stage size
 			this.stage.width(window.innerWidth);
 			this.stage.height(window.innerHeight);
+
+			// Calculate new center
+			const newCenterX = this.stage.width() / 2;
+			const newCenterY = this.stage.height() / 2;
+
+			// Set new position to maintain world point at center
+			this.stage.position({
+				x: newCenterX - worldX * oldScale,
+				y: newCenterY - worldY * oldScale
+			});
+
+			this.stage.batchDraw();
 		});
 	}
 
