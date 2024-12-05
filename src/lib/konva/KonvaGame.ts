@@ -5,10 +5,10 @@ import {
 	VERTICAL_OFFSET_1,
 	VERTICAL_OFFSET_2
 } from '$lib/constants';
-import type { Point } from '$lib/types';
+
 import Konva from 'konva';
-import { KonvaTrackGeometry } from './KonvaTrackGeometry';
 import { KonvaPlayerManager } from './KonvaPlayerManager';
+import { KonvaTrackGeometry, type Point } from './KonvaTrackGeometry';
 
 export class KonvaGame {
 	private stage: Konva.Stage;

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { KonvaGame } from '$lib/classes/KonvaGame';
+	import { KonvaGame } from '$lib/konva/KonvaGame';
 
 	onMount(() => {
 		const game = new KonvaGame('container', window.innerWidth, window.innerHeight);

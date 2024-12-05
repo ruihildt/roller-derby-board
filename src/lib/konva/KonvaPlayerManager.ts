@@ -23,7 +23,7 @@ export class KonvaPlayerManager {
 	}
 
 	addSkatingOfficial(x: number, y: number, role: SkatingOfficialRole) {
-		const official = new KonvaSkatingOfficial(x, y, this.layer, role);
+		const official = new KonvaSkatingOfficial(x, y, this.layer, role, this.trackGeometry);
 		this.skatingOfficials.push(official);
 		return official;
 	}

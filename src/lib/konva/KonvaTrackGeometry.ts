@@ -9,7 +9,11 @@ import {
 	TWENTYFEET,
 	colors
 } from '../constants';
-import type { Point } from '$lib/types';
+
+export type Point = {
+	x: number;
+	y: number;
+};
 
 type Zone = {
 	innerStart: Point;
