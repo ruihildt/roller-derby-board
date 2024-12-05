@@ -45,7 +45,6 @@ type Zones = {
 };
 
 export class KonvaTrackGeometry {
-	private zones: Zones;
 	private trackLinesGroup: Konva.Group;
 	private trackZoneGroup: Konva.Group;
 	private zonesGroup: Konva.Group;
@@ -53,6 +52,7 @@ export class KonvaTrackGeometry {
 	private straight2Shape: Konva.Path;
 	private turn1Shape: Konva.Path;
 	private turn2Shape: Konva.Path;
+	zones: Zones;
 
 	constructor(points: Record<string, Point>) {
 		this.zones = {

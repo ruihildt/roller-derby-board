@@ -8,6 +8,7 @@ import {
 import type { Point } from '$lib/types';
 import Konva from 'konva';
 import { KonvaTrackGeometry } from './KonvaTrackGeometry';
+import { KonvaPlayerManager } from './KonvaPlayerManager';
 
 export class KonvaGame {
 	private stage: Konva.Stage;
@@ -15,11 +16,14 @@ export class KonvaGame {
 	private playersLayer: Konva.Layer;
 	private width: number;
 	private height: number;
+	private playerManager: KonvaPlayerManager;
 
 	constructor(containerId: string, width: number, height: number) {
+		// Initialize basic properties first
 		this.width = width;
 		this.height = height;
 
+		// Create main stage
 		this.stage = new Konva.Stage({
 			container: containerId,
 			width: this.width,
@@ -28,16 +32,23 @@ export class KonvaGame {
 			pixelRatio: window.devicePixelRatio
 		});
 
-		this.trackLayer = new Konva.Layer();
+		// 3. Create track geometry (depends on points)
 		const trackGeometry = new KonvaTrackGeometry(this.initializePoints());
-		trackGeometry.addToLayer(this.trackLayer);
 
+		// 4. Create and setup layers
+		this.trackLayer = new Konva.Layer();
 		this.playersLayer = new Konva.Layer();
-
+		trackGeometry.addToLayer(this.trackLayer);
 		this.stage.add(this.trackLayer);
 		this.stage.add(this.playersLayer);
 
+		// 5. Setup interaction features
 		this.setupZoom();
+
+		// 6. Initialize player management (depends on layers and geometry)
+		this.playerManager = new KonvaPlayerManager(this.playersLayer, trackGeometry);
+		this.playerManager.addInitialLineup();
+		this.playersLayer.batchDraw();
 	}
 
 	private initializePoints(): Record<string, Point> {
