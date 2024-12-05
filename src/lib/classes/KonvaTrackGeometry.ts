@@ -3,8 +3,9 @@ import {
 	LINE_WIDTH,
 	TENFEET,
 	TENFEETLINE,
+	TEN_FEET_LINE_WIDTH,
 	THIRTYFEET,
-	TRACK_SCALE,
+	TURNSEGMENT,
 	TWENTYFEET,
 	colors
 } from '../constants';
@@ -115,13 +116,17 @@ export class KonvaTrackGeometry {
 		const jammerLine = this.createJammerLinePath();
 		const straight1TenFeetLines = this.drawStraight1TenFeetLines();
 		const straight2TenFeetLines = this.drawStraight2TenFeetLines();
+		const turn1TenFeetLines = this.drawTurn1TenFeetLines();
+		const turn2TenFeetLines = this.drawTurn2TenFeetLines();
 		this.trackLinesGroup.add(boundaries);
 		this.trackLinesGroup.add(pivotLine);
 		this.trackLinesGroup.add(straight1TenFeetLines);
 		this.trackLinesGroup.add(straight2TenFeetLines);
+		this.trackLinesGroup.add(turn1TenFeetLines);
+		this.trackLinesGroup.add(turn2TenFeetLines);
 		this.trackLinesGroup.add(jammerLine);
 
-		this.drawPoints(points);
+		// this.drawPoints(points);
 	}
 
 	addToLayer(layer: Konva.Layer) {
@@ -350,7 +355,7 @@ export class KonvaTrackGeometry {
 		return new Konva.Path({
 			data: pathData,
 			stroke: colors.tenFeetLines,
-			strokeWidth: TRACK_SCALE / 14,
+			strokeWidth: TEN_FEET_LINE_WIDTH,
 			listening: false
 		});
 	}
@@ -383,7 +388,96 @@ export class KonvaTrackGeometry {
 		return new Konva.Path({
 			data: pathData,
 			stroke: colors.tenFeetLines,
-			strokeWidth: TRACK_SCALE / 14,
+			strokeWidth: TEN_FEET_LINE_WIDTH,
+			listening: false
+		});
+	}
+
+	private drawTurn1TenFeetLines(): Konva.Path {
+		const zone = this.zones[2];
+		const radiusInner = Math.hypot(
+			zone.innerStart.x - zone.centerInner.x,
+			zone.innerStart.y - zone.centerInner.y
+		);
+
+		let currentAngle = Math.atan2(
+			zone.innerStart.y - zone.centerInner.y,
+			zone.innerStart.x - zone.centerInner.x
+		);
+
+		const pathSegments = [];
+
+		for (let i = 1; i <= 5; i++) {
+			const angleChange = TURNSEGMENT / radiusInner;
+			const point = {
+				x: zone.centerInner.x + radiusInner * Math.cos(currentAngle - angleChange),
+				y: zone.centerInner.y + radiusInner * Math.sin(currentAngle - angleChange)
+			};
+
+			const { innerProjection, outerProjection } = this.projectPointToBoundaries(point, 2);
+			const midX = (innerProjection.x + outerProjection.x) / 2;
+			const midY = (innerProjection.y + outerProjection.y) / 2;
+			const angle = Math.atan2(
+				outerProjection.y - innerProjection.y,
+				outerProjection.x - innerProjection.x
+			);
+
+			pathSegments.push(`
+            M ${midX - TENFEETLINE * Math.cos(angle)} ${midY - TENFEETLINE * Math.sin(angle)}
+            L ${midX + TENFEETLINE * Math.cos(angle)} ${midY + TENFEETLINE * Math.sin(angle)}
+        `);
+
+			currentAngle -= angleChange;
+		}
+
+		return new Konva.Path({
+			data: pathSegments.join(' '),
+			stroke: colors.tenFeetLines,
+			strokeWidth: TEN_FEET_LINE_WIDTH,
+			listening: false
+		});
+	}
+
+	private drawTurn2TenFeetLines(): Konva.Path {
+		const zone = this.zones[4];
+		const radiusDC = Math.hypot(
+			zone.innerStart.x - zone.centerInner.x,
+			zone.innerStart.y - zone.centerInner.y
+		);
+
+		let currentAngle = Math.atan2(
+			zone.innerStart.y - zone.centerInner.y,
+			zone.innerStart.x - zone.centerInner.x
+		);
+
+		const pathSegments = [];
+
+		for (let i = 1; i <= 5; i++) {
+			const point = {
+				x: zone.centerInner.x + radiusDC * Math.cos(currentAngle - TURNSEGMENT / radiusDC),
+				y: zone.centerInner.y + radiusDC * Math.sin(currentAngle - TURNSEGMENT / radiusDC)
+			};
+
+			const { innerProjection, outerProjection } = this.projectPointToBoundaries(point, 4);
+			const midX = (innerProjection.x + outerProjection.x) / 2;
+			const midY = (innerProjection.y + outerProjection.y) / 2;
+			const angle = Math.atan2(
+				outerProjection.y - innerProjection.y,
+				outerProjection.x - innerProjection.x
+			);
+
+			pathSegments.push(`
+            M ${midX - TENFEETLINE * Math.cos(angle)} ${midY - TENFEETLINE * Math.sin(angle)}
+            L ${midX + TENFEETLINE * Math.cos(angle)} ${midY + TENFEETLINE * Math.sin(angle)}
+        `);
+
+			currentAngle -= TURNSEGMENT / radiusDC;
+		}
+
+		return new Konva.Path({
+			data: pathSegments.join(' '),
+			stroke: colors.tenFeetLines,
+			strokeWidth: TEN_FEET_LINE_WIDTH,
 			listening: false
 		});
 	}
