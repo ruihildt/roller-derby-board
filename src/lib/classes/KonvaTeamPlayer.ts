@@ -1,7 +1,8 @@
 import type Konva from 'konva';
-import { colors } from '$lib/constants';
+import { colors, LINE_WIDTH } from '$lib/constants';
 
 import { KonvaPlayer } from './KonvaPlayer';
+import type { KonvaTrackGeometry } from './KonvaTrackGeometry';
 export enum TeamPlayerRole {
 	jammer = 'jammer',
 	blocker = 'blocker',
@@ -23,7 +24,7 @@ export class KonvaTeamPlayer extends KonvaPlayer {
 	team: TeamPlayerTeam;
 	role: TeamPlayerRole;
 	zone: number;
-	inBounds: boolean;
+	isInBounds: boolean;
 	isInEngagementZone: boolean;
 	isInPack: boolean;
 	isRearmost: boolean;
@@ -34,14 +35,16 @@ export class KonvaTeamPlayer extends KonvaPlayer {
 		y: number,
 		layer: Konva.Layer,
 		team: TeamPlayerTeam,
-		role: TeamPlayerRole
+		role: TeamPlayerRole,
+		trackGeometry: KonvaTrackGeometry
 	) {
-		super(x, y, layer);
+		super(x, y, layer, trackGeometry);
 		this.team = team;
 		this.role = role;
+		this.trackGeometry = trackGeometry;
 
 		this.zone = 0;
-		this.inBounds = false;
+		this.isInBounds = false;
 		this.isInPack = false;
 		this.isRearmost = false;
 		this.isForemost = false;
@@ -50,5 +53,28 @@ export class KonvaTeamPlayer extends KonvaPlayer {
 		// Set fill and stroke colors based on team
 		this.circle.fill(team === 'A' ? colors.teamAPrimary : colors.teamBPrimary);
 		this.circle.stroke(team === 'A' ? colors.teamASecondary : colors.teamBSecondary);
+	}
+
+	updateInBounds(trackGeometry: KonvaTrackGeometry): void {
+		const playerX = this.circle.x();
+		const playerY = this.circle.y();
+		const radius = this.circle.radius();
+		const strokeWidth = this.circle.strokeWidth();
+		const checkRadius = radius + strokeWidth - LINE_WIDTH * 0.9; // Adjust here for strictness
+
+		for (let angle = 0; angle < Math.PI * 2; angle += Math.PI / 16) {
+			const checkX = playerX + checkRadius * Math.cos(angle);
+			const checkY = playerY + checkRadius * Math.sin(angle);
+
+			const zoneKey = trackGeometry.determineZone({ x: checkX, y: checkY });
+			if (zoneKey === 0) {
+				this.isInBounds = false;
+				this.circle.stroke(colors.outOfBounds);
+				return;
+			}
+		}
+
+		this.isInBounds = true;
+		this.circle.stroke(this.team === 'A' ? colors.teamASecondary : colors.teamBSecondary);
 	}
 }

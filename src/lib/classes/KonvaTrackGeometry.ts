@@ -45,6 +45,13 @@ type Zones = {
 };
 
 export class KonvaTrackGeometry {
+	private canvas: HTMLCanvasElement;
+	private context: CanvasRenderingContext2D;
+	private straight1Path: Path2D;
+	private straight2Path: Path2D;
+	private turn1Path: Path2D;
+	private turn2Path: Path2D;
+
 	private trackLinesGroup: Konva.Group;
 	private trackZoneGroup: Konva.Group;
 	private zonesGroup: Konva.Group;
@@ -90,9 +97,19 @@ export class KonvaTrackGeometry {
 			}
 		};
 
+		// Initialize canvas and context once
+		this.canvas = document.createElement('canvas');
+		this.context = this.canvas.getContext('2d')!;
+
+		// Precompute Path2D objects
+		this.straight1Path = new Path2D(this.createStraightPath(1).data());
+		this.straight2Path = new Path2D(this.createStraightPath(3).data());
+		this.turn1Path = new Path2D(this.createTurnPath(2).data());
+		this.turn2Path = new Path2D(this.createTurnPath(4).data());
+
 		this.zonesGroup = new Konva.Group();
 
-		// First create and add zone paths
+		// Create and add zone paths
 		// Needed because paths need to be on the stage to do hit detection
 		this.straight1Shape = this.createStraightPath(1);
 		this.straight2Shape = this.createStraightPath(3);
@@ -597,24 +614,23 @@ export class KonvaTrackGeometry {
 		};
 	}
 
-	private determineZone(point: Point): ZoneKey | 0 {
-		if (this.straight1Shape.intersects({ x: point.x, y: point.y })) {
-			console.log('straight1');
+	determineZone(point: Point): ZoneKey | 0 {
+		if (this.isPointInPath(this.straight1Path, point)) {
 			return 1;
 		}
-		if (this.turn1Shape.intersects({ x: point.x, y: point.y })) {
-			console.log('turn1');
+		if (this.isPointInPath(this.turn1Path, point)) {
 			return 2;
 		}
-		if (this.straight2Shape.intersects({ x: point.x, y: point.y })) {
-			console.log('straight2');
+		if (this.isPointInPath(this.straight2Path, point)) {
 			return 3;
 		}
-		if (this.turn2Shape.intersects({ x: point.x, y: point.y })) {
-			console.log('turn2');
+		if (this.isPointInPath(this.turn2Path, point)) {
 			return 4;
 		}
-		console.log('no zone');
 		return 0;
+	}
+
+	private isPointInPath(path: Path2D, point: Point): boolean {
+		return this.context.isPointInPath(path, point.x, point.y);
 	}
 }

@@ -17,7 +17,7 @@ export class KonvaPlayerManager {
 	}
 
 	addTeamPlayer(x: number, y: number, team: TeamPlayerTeam, role: TeamPlayerRole) {
-		const player = new KonvaTeamPlayer(x, y, this.layer, team, role);
+		const player = new KonvaTeamPlayer(x, y, this.layer, team, role, this.trackGeometry);
 		this.teamPlayers.push(player);
 		return player;
 	}

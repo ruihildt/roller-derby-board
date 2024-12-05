@@ -1,12 +1,16 @@
 import Konva from 'konva';
 import { TRACK_SCALE } from '$lib/constants';
+import { KonvaTeamPlayer } from './KonvaTeamPlayer';
+import { KonvaTrackGeometry } from './KonvaTrackGeometry';
 
 export class KonvaPlayer {
 	static readonly PLAYER_RADIUS = TRACK_SCALE / 2.2;
 	static readonly STROKE_WIDTH = TRACK_SCALE / 10;
+	protected trackGeometry: KonvaTrackGeometry;
 	circle: Konva.Circle;
 
-	constructor(x: number, y: number, layer: Konva.Layer) {
+	constructor(x: number, y: number, layer: Konva.Layer, trackGeometry: KonvaTrackGeometry) {
+		this.trackGeometry = trackGeometry;
 		this.circle = new Konva.Circle({
 			x: x,
 			y: y,
@@ -39,6 +43,10 @@ export class KonvaPlayer {
 					otherPlayer.fire('dragmove');
 				}
 			});
+
+			if (this instanceof KonvaTeamPlayer) {
+				this.updateInBounds(this.trackGeometry);
+			}
 
 			layer.batchDraw();
 		});
