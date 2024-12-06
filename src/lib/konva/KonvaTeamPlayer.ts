@@ -82,6 +82,25 @@ export class KonvaTeamPlayer extends KonvaPlayer {
 
 	updatePackStatus(isInPack: boolean) {
 		this.isInPack = isInPack;
+
+		// Reset foremost/rearmost if not in pack
+		if (!isInPack) {
+			this.isRearmost = false;
+			this.isForemost = false;
+		}
+
+		// Set fill color based on player position in pack
+		this.circle.fill(
+			this.isRearmost
+				? 'blue'
+				: this.isForemost
+					? 'red'
+					: this.team === 'A'
+						? colors.teamAPrimary
+						: colors.teamBPrimary
+		);
+
+		// Set stroke color based on pack status
 		this.circle.stroke(
 			this.isInBounds
 				? isInPack
@@ -91,6 +110,7 @@ export class KonvaTeamPlayer extends KonvaPlayer {
 						: colors.teamBSecondary
 				: colors.outOfBounds
 		);
+
 		this.circle.draw();
 	}
 }

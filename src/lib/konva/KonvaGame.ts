@@ -1,3 +1,5 @@
+import Konva from 'konva';
+
 import {
 	CENTER_POINT_OFFSET,
 	OUTER_VERTICAL_OFFSET_1,
@@ -6,19 +8,22 @@ import {
 	VERTICAL_OFFSET_2
 } from '$lib/constants';
 
-import Konva from 'konva';
-import { KonvaPlayerManager } from './KonvaPlayerManager';
 import { KonvaTrackGeometry, type Point } from './KonvaTrackGeometry';
+import { KonvaPlayerManager } from './KonvaPlayerManager';
 import { KonvaPackManager } from './KonvaPackManager';
 
 export class KonvaGame {
-	private stage: Konva.Stage;
-	private trackLayer: Konva.Layer;
-	private playersLayer: Konva.Layer;
 	private width: number;
 	private height: number;
-	private playerManager: KonvaPlayerManager;
-	private packManager: KonvaPackManager;
+
+	private stage: Konva.Stage;
+	private trackSurfaceLayer: Konva.Layer;
+	private trackLinesLayer: Konva.Layer;
+	private playersLayer: Konva.Layer;
+	private engagementZoneLayer: Konva.Layer;
+
+	private playerManager!: KonvaPlayerManager;
+	private packManager!: KonvaPackManager;
 
 	constructor(containerId: string, width: number, height: number) {
 		// Initialize basic properties first
@@ -34,56 +39,55 @@ export class KonvaGame {
 			pixelRatio: window.devicePixelRatio
 		});
 
-		// 3. Create track geometry (depends on points)
+		// Create track geometry (depends on points)
 		const trackGeometry = new KonvaTrackGeometry(this.initializePoints());
 
-		// 4. Create and setup layers
-		this.trackLayer = new Konva.Layer();
+		// Create a separate layer for track lines
+		this.trackSurfaceLayer = new Konva.Layer();
+		this.trackLinesLayer = new Konva.Layer();
+		this.engagementZoneLayer = new Konva.Layer();
 		this.playersLayer = new Konva.Layer();
-		trackGeometry.addToLayer(this.trackLayer);
-		this.stage.add(this.trackLayer);
+
+		// Add in correct order:
+		// 1. Track surface (bottom)
+		trackGeometry.addTrackSurfaceToLayer(this.trackSurfaceLayer);
+		this.stage.add(this.trackSurfaceLayer);
+
+		// 2. Engagement zone (middle)
+		this.stage.add(this.engagementZoneLayer);
+
+		// 3. Track lines (over engagement zone)
+		trackGeometry.addTrackLinesToLayer(this.trackLinesLayer);
+		this.stage.add(this.trackLinesLayer);
+
+		// 4. Players (top)
 		this.stage.add(this.playersLayer);
 
-		// 5. Setup interaction features
+		// Setup interaction features
 		this.setupZoom();
 
 		this.playerManager = new KonvaPlayerManager(this.playersLayer, trackGeometry);
-		this.packManager = new KonvaPackManager(this.playerManager, this.playersLayer, trackGeometry);
+		this.packManager = new KonvaPackManager(
+			this.playerManager,
+			this.playersLayer,
+			this.engagementZoneLayer,
+			trackGeometry
+		);
 		this.playerManager.addInitialLineup();
 		this.packManager.determinePack();
 		this.playersLayer.batchDraw();
 
 		// Add window resize handler
-		// We keep the same canvas center point on resize
-		window.addEventListener('resize', () => {
-			// Get current center point
-			const centerX = this.stage.width() / 2;
-			const centerY = this.stage.height() / 2;
+		window.addEventListener('resize', this.handleResize);
+	}
 
-			// Get current scale and position
-			const oldScale = this.stage.scaleX();
-			const oldPosition = this.stage.position();
-
-			// Calculate relative position of center in world coordinates
-			const worldX = (centerX - oldPosition.x) / oldScale;
-			const worldY = (centerY - oldPosition.y) / oldScale;
-
-			// Update stage size
-			this.stage.width(window.innerWidth);
-			this.stage.height(window.innerHeight);
-
-			// Calculate new center
-			const newCenterX = this.stage.width() / 2;
-			const newCenterY = this.stage.height() / 2;
-
-			// Set new position to maintain world point at center
-			this.stage.position({
-				x: newCenterX - worldX * oldScale,
-				y: newCenterY - worldY * oldScale
-			});
-
-			this.stage.batchDraw();
-		});
+	destroy() {
+		window.removeEventListener('resize', this.handleResize);
+		this.trackSurfaceLayer.destroy();
+		this.trackLinesLayer.destroy();
+		this.engagementZoneLayer.destroy();
+		this.playersLayer.destroy();
+		this.stage.destroy();
 	}
 
 	private initializePoints(): Record<string, Point> {
@@ -135,6 +139,36 @@ export class KonvaGame {
 			}
 		};
 	}
+
+	private handleResize = () => {
+		// Get current center point
+		const centerX = this.stage.width() / 2;
+		const centerY = this.stage.height() / 2;
+
+		// Get current scale and position
+		const oldScale = this.stage.scaleX();
+		const oldPosition = this.stage.position();
+
+		// Calculate relative position of center in world coordinates
+		const worldX = (centerX - oldPosition.x) / oldScale;
+		const worldY = (centerY - oldPosition.y) / oldScale;
+
+		// Update stage size
+		this.stage.width(window.innerWidth);
+		this.stage.height(window.innerHeight);
+
+		// Calculate new center
+		const newCenterX = this.stage.width() / 2;
+		const newCenterY = this.stage.height() / 2;
+
+		// Set new position to maintain world point at center
+		this.stage.position({
+			x: newCenterX - worldX * oldScale,
+			y: newCenterY - worldY * oldScale
+		});
+
+		this.stage.batchDraw();
+	};
 
 	private setupZoom() {
 		this.stage.on('wheel', (e) => {

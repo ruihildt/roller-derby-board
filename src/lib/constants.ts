@@ -31,7 +31,7 @@ export interface Colors {
 	officialSecondary: string;
 	outOfBounds: string;
 	inBounds: string;
-	inEngagementZone: string;
+	engagementZone: string;
 	inPack: string;
 	canvasBackground: string;
 	trackSurface: string;
@@ -48,7 +48,7 @@ export const colors: Colors = {
 	officialSecondary: 'black',
 	outOfBounds: 'red',
 	inBounds: 'black',
-	inEngagementZone: 'orange',
+	engagementZone: '#b8deb8',
 	inPack: 'green',
 	canvasBackground: '#f0f0f0',
 	trackSurface: '#D3D3D3',

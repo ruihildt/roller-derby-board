@@ -48,6 +48,10 @@ export class KonvaPlayer {
 				this.updateInBounds(this.trackGeometry);
 			}
 
+			// Draw new projections points and clear them
+			layer.find('.projectionPoint').forEach((node) => node.destroy());
+			this.drawProjections(this.trackGeometry, layer);
+
 			layer.batchDraw();
 		});
 
@@ -63,5 +67,43 @@ export class KonvaPlayer {
 
 	getNode(): Konva.Circle {
 		return this.circle;
+	}
+
+	drawProjections(trackGeometry: KonvaTrackGeometry, layer: Konva.Layer) {
+		const position = {
+			x: this.circle.x(),
+			y: this.circle.y()
+		};
+
+		const currentZone = trackGeometry.determineZone(position);
+
+		if (currentZone !== 0) {
+			const { innerProjection, outerProjection } = trackGeometry.projectPointToBoundaries(
+				position,
+				currentZone
+			);
+
+			// Draw inner projection point
+			const innerPoint = new Konva.Circle({
+				x: innerProjection.x,
+				y: innerProjection.y,
+				radius: 5,
+				fill: 'purple',
+				name: 'projectionPoint'
+			});
+
+			// Draw outer projection point
+			const outerPoint = new Konva.Circle({
+				x: outerProjection.x,
+				y: outerProjection.y,
+				radius: 5,
+				fill: 'purple',
+				name: 'projectionPoint'
+			});
+
+			layer.add(innerPoint);
+			layer.add(outerPoint);
+			layer.batchDraw();
+		}
 	}
 }
