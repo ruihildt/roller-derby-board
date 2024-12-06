@@ -54,4 +54,14 @@ export class KonvaPlayer {
 		layer.add(this.circle);
 		layer.batchDraw();
 	}
+
+	distanceTo(other: KonvaPlayer): number {
+		const dx = this.circle.x() - other.circle.x();
+		const dy = this.circle.y() - other.circle.y();
+		return Math.sqrt(dx * dx + dy * dy);
+	}
+
+	getNode(): Konva.Circle {
+		return this.circle;
+	}
 }

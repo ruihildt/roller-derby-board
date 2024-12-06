@@ -9,6 +9,7 @@ import {
 import Konva from 'konva';
 import { KonvaPlayerManager } from './KonvaPlayerManager';
 import { KonvaTrackGeometry, type Point } from './KonvaTrackGeometry';
+import { KonvaPackManager } from './KonvaPackManager';
 
 export class KonvaGame {
 	private stage: Konva.Stage;
@@ -17,6 +18,7 @@ export class KonvaGame {
 	private width: number;
 	private height: number;
 	private playerManager: KonvaPlayerManager;
+	private packManager: KonvaPackManager;
 
 	constructor(containerId: string, width: number, height: number) {
 		// Initialize basic properties first
@@ -45,13 +47,14 @@ export class KonvaGame {
 		// 5. Setup interaction features
 		this.setupZoom();
 
-		// 6. Initialize player management (depends on layers and geometry)
 		this.playerManager = new KonvaPlayerManager(this.playersLayer, trackGeometry);
+		this.packManager = new KonvaPackManager(this.playerManager, this.playersLayer, trackGeometry);
 		this.playerManager.addInitialLineup();
+		this.packManager.determinePack();
 		this.playersLayer.batchDraw();
 
 		// Add window resize handler
-		// We keep the center point before resize the center after resize
+		// We keep the same canvas center point on resize
 		window.addEventListener('resize', () => {
 			// Get current center point
 			const centerX = this.stage.width() / 2;

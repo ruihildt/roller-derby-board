@@ -52,7 +52,7 @@ export class KonvaTeamPlayer extends KonvaPlayer {
 
 		// Set fill and stroke colors based on team
 		this.circle.fill(team === 'A' ? colors.teamAPrimary : colors.teamBPrimary);
-		this.circle.stroke(team === 'A' ? colors.teamASecondary : colors.teamBSecondary);
+		this.circle.stroke(colors.outOfBounds);
 	}
 
 	updateInBounds(trackGeometry: KonvaTrackGeometry): void {
@@ -62,6 +62,7 @@ export class KonvaTeamPlayer extends KonvaPlayer {
 		const strokeWidth = this.circle.strokeWidth();
 		const checkRadius = radius + strokeWidth - LINE_WIDTH * 0.9; // Adjust here for strictness
 
+		// Check multiple points around the circle's circumference
 		for (let angle = 0; angle < Math.PI * 2; angle += Math.PI / 16) {
 			const checkX = playerX + checkRadius * Math.cos(angle);
 			const checkY = playerY + checkRadius * Math.sin(angle);
@@ -74,7 +75,22 @@ export class KonvaTeamPlayer extends KonvaPlayer {
 			}
 		}
 
+		// If we get here, player is in bounds
 		this.isInBounds = true;
-		this.circle.stroke(this.team === 'A' ? colors.teamASecondary : colors.teamBSecondary);
+		this.circle.stroke(colors.inBounds);
+	}
+
+	updatePackStatus(isInPack: boolean) {
+		this.isInPack = isInPack;
+		this.circle.stroke(
+			this.isInBounds
+				? isInPack
+					? colors.inPack
+					: this.team === 'A'
+						? colors.teamASecondary
+						: colors.teamBSecondary
+				: colors.outOfBounds
+		);
+		this.circle.draw();
 	}
 }

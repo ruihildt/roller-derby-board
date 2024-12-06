@@ -28,8 +28,10 @@ export class KonvaPlayerManager {
 		return official;
 	}
 
-	getAllPlayers() {
-		return [...this.skatingOfficials, ...this.teamPlayers];
+	getBlockers() {
+		return this.teamPlayers.filter(
+			(player) => player.role === TeamPlayerRole.blocker || player.role === TeamPlayerRole.pivot
+		);
 	}
 
 	addInitialLineup() {
@@ -57,5 +59,10 @@ export class KonvaPlayerManager {
 
 		this.addTeamPlayer(jammersX, jammersY, TeamPlayerTeam.A, TeamPlayerRole.jammer);
 		this.addTeamPlayer(jammersX + 30, jammersY, TeamPlayerTeam.B, TeamPlayerRole.jammer);
+
+		// Update inBounds status for all players
+		this.teamPlayers.forEach((player) => {
+			player.updateInBounds(this.trackGeometry);
+		});
 	}
 }
