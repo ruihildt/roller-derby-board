@@ -15,7 +15,7 @@ export type Point = {
 	y: number;
 };
 
-type Zone = {
+export type Zone = {
 	innerStart: Point;
 	outerStart: Point;
 	innerEnd: Point;
@@ -55,6 +55,7 @@ export class KonvaTrackGeometry {
 	private straight2Path: Path2D;
 	private turn1Path: Path2D;
 	private turn2Path: Path2D;
+	startZonePath: Path2D;
 
 	private trackLinesGroup: Konva.Group;
 	private trackZoneGroup: Konva.Group;
@@ -110,6 +111,7 @@ export class KonvaTrackGeometry {
 		this.straight2Path = new Path2D(this.createStraightPath(3).data());
 		this.turn1Path = new Path2D(this.createTurnPath(2).data());
 		this.turn2Path = new Path2D(this.createTurnPath(4).data());
+		this.startZonePath = new Path2D(this.createStartZonePath());
 
 		this.zonesGroup = new Konva.Group();
 
@@ -340,6 +342,42 @@ export class KonvaTrackGeometry {
 			strokeWidth: LINE_WIDTH,
 			listening: false
 		});
+	}
+
+	createStartZonePath(): Path2D {
+		// 1. Get pivot line points (already exists in zone 1)
+		const zone = this.zones[1];
+		const pivotInner = zone.innerEnd;
+		const pivotOuter = zone.outerEnd;
+
+		// 2. Calculate jammer line position (30 feet from pivot line)
+		const midPivot = {
+			x: (pivotOuter.x + pivotInner.x) / 2,
+			y: (pivotOuter.y + pivotInner.y) / 2
+		};
+		const midStart = {
+			x: (zone.outerStart.x + zone.innerStart.x) / 2,
+			y: (zone.outerStart.y + zone.innerStart.y) / 2
+		};
+		const directionToStart = Math.atan2(midStart.y - midPivot.y, midStart.x - midPivot.x);
+		const jammerPoint = {
+			x: midPivot.x + THIRTYFEET * Math.cos(directionToStart),
+			y: midPivot.y + THIRTYFEET * Math.sin(directionToStart)
+		};
+
+		// 3. Project jammer point to track boundaries
+		const { innerProjection: jammerInner, outerProjection: jammerOuter } =
+			this.projectPointToBoundaries(jammerPoint, 1);
+
+		// 4. Create and return the path
+		const path = new Path2D();
+		path.moveTo(pivotInner.x, pivotInner.y);
+		path.lineTo(pivotOuter.x, pivotOuter.y);
+		path.lineTo(jammerOuter.x, jammerOuter.y);
+		path.lineTo(jammerInner.x, jammerInner.y);
+		path.closePath();
+
+		return path;
 	}
 
 	private createBoundariesPath(): Konva.Path {
