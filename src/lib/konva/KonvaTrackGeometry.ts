@@ -822,7 +822,7 @@ export class KonvaTrackGeometry {
 		return { x: newX, y: midY };
 	}
 
-	private isPointInPath(path: Path2D, point: Point): boolean {
+	isPointInPath(path: Path2D, point: Point): boolean {
 		return this.context.isPointInPath(path, point.x, point.y);
 	}
 }

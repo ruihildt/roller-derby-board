@@ -80,37 +80,19 @@ export class KonvaTeamPlayer extends KonvaPlayer {
 		this.circle.stroke(colors.inBounds);
 	}
 
-	updatePackStatus(isInPack: boolean) {
-		this.isInPack = isInPack;
+	updateEngagementZoneStatus(isInEngagementZone: boolean) {
+		this.isInEngagementZone = isInEngagementZone;
 
-		// Reset foremost/rearmost if not in pack
-		if (!isInPack) {
-			this.isRearmost = false;
-			this.isForemost = false;
+		if (this.isInBounds) {
+			if (this.isInPack) {
+				this.circle.stroke(colors.inPack);
+			} else if (isInEngagementZone) {
+				this.circle.stroke(colors.inEngagementZone);
+			} else {
+				this.circle.stroke(this.team === 'A' ? colors.teamASecondary : colors.teamBSecondary);
+			}
+		} else {
+			this.circle.stroke(colors.outOfBounds);
 		}
-
-		// Set fill color based on player position in pack
-		this.circle.fill(
-			this.isRearmost
-				? 'blue'
-				: this.isForemost
-					? 'red'
-					: this.team === 'A'
-						? colors.teamAPrimary
-						: colors.teamBPrimary
-		);
-
-		// Set stroke color based on pack status
-		this.circle.stroke(
-			this.isInBounds
-				? isInPack
-					? colors.inPack
-					: this.team === 'A'
-						? colors.teamASecondary
-						: colors.teamBSecondary
-				: colors.outOfBounds
-		);
-
-		this.circle.draw();
 	}
 }

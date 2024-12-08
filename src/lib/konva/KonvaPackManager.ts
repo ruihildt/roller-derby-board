@@ -1,11 +1,11 @@
 import Konva from 'konva';
 import { colors, TENFEET } from '$lib/constants';
 import { KonvaTeamPlayer, TeamPlayerRole } from './KonvaTeamPlayer';
-import { KonvaTrackGeometry, ZoneType } from './KonvaTrackGeometry';
+import { KonvaTrackGeometry, ZoneType, type Point } from './KonvaTrackGeometry';
 import type { KonvaPlayerManager } from './KonvaPlayerManager';
 
 export class KonvaPackManager {
-	private engagementZoneShape: Konva.Shape;
+	private engagementZonePath: Konva.Path;
 	private backwardPoint: Konva.Circle;
 	private forwardPoint: Konva.Circle;
 	private zones: number[] = [];
@@ -23,11 +23,11 @@ export class KonvaPackManager {
 		});
 
 		// Initialize engagement zone shape
-		this.engagementZoneShape = new Konva.Shape({
+		this.engagementZonePath = new Konva.Path({
 			fill: colors.engagementZone,
 			listening: false
 		});
-		this.engagementZoneLayer.add(this.engagementZoneShape);
+		this.engagementZoneLayer.add(this.engagementZonePath);
 
 		// Initialize debug point markers
 		this.backwardPoint = new Konva.Circle({
@@ -65,8 +65,8 @@ export class KonvaPackManager {
 			this.updateRearAndForemostPlayers(packGroup);
 			this.updateEngagementZone(packGroup);
 		} else {
-			blockers.forEach((p) => p.updatePackStatus(false));
-			this.engagementZoneShape.hide();
+			blockers.forEach((p) => p.updateEngagementZoneStatus(false));
+			this.engagementZonePath.hide();
 		}
 
 		this.engagementZoneLayer.batchDraw();
@@ -105,7 +105,8 @@ export class KonvaPackManager {
 
 	private updatePackStatus(teamPlayers: KonvaTeamPlayer[], packGroup: KonvaTeamPlayer[]) {
 		teamPlayers.forEach((player) => {
-			player.updatePackStatus(packGroup.includes(player));
+			player.isInPack = packGroup.includes(player);
+			player.updateEngagementZoneStatus(player.isInEngagementZone);
 		});
 	}
 
@@ -114,26 +115,11 @@ export class KonvaPackManager {
 		const foremost = packGroup.find((p) => p.isForemost);
 
 		if (!rearmost || !foremost) {
-			this.engagementZoneShape.hide();
+			this.engagementZonePath.hide();
 			this.backwardPoint.hide();
 			this.forwardPoint.hide();
 			return;
 		}
-
-		// Get extended engagement zone points
-		const { backward, forward } = this.calculateEngagementZonePoints(rearmost, foremost);
-
-		// Update debug point markers
-		this.backwardPoint.position({
-			x: backward.x,
-			y: backward.y
-		});
-		this.forwardPoint.position({
-			x: forward.x,
-			y: forward.y
-		});
-		this.backwardPoint.show();
-		this.forwardPoint.show();
 
 		// Get extended engagement zone points
 		const { backward: rearPoint, forward: forePoint } = this.calculateEngagementZonePoints(
@@ -141,154 +127,101 @@ export class KonvaPackManager {
 			foremost
 		);
 
-		// Update sceneFunc to use extended points instead of player positions
-		this.engagementZoneShape.sceneFunc((context, shape) => {
-			const rearZone = this.trackGeometry.determineZone(rearPoint);
-			const foreZone = this.trackGeometry.determineZone(forePoint);
+		// Update debug point markers
+		this.backwardPoint.position({
+			x: rearPoint.x,
+			y: rearPoint.y
+		});
+		this.forwardPoint.position({
+			x: forePoint.x,
+			y: forePoint.y
+		});
+		this.backwardPoint.show();
+		this.forwardPoint.show();
 
-			if (!rearZone || !foreZone) return;
+		const rearZone = this.trackGeometry.determineZone(rearPoint);
+		const foreZone = this.trackGeometry.determineZone(forePoint);
 
-			// Store zones for pack definition
-			this.zones = this.getZonesBetween(rearZone, foreZone);
+		if (!rearZone || !foreZone) return;
 
-			// Project points to track boundaries
-			const rear = this.trackGeometry.projectPointToBoundaries(rearPoint, rearZone);
-			const fore = this.trackGeometry.projectPointToBoundaries(forePoint, foreZone);
+		// Store zones for pack definition
+		this.zones = this.getZonesBetween(rearZone, foreZone);
 
-			// Draw the engagement zone path
-			context.beginPath();
-			context.moveTo(rear.innerProjection.x, rear.innerProjection.y);
+		// Project points to track boundaries
+		const rear = this.trackGeometry.projectPointToBoundaries(rearPoint, rearZone);
+		const fore = this.trackGeometry.projectPointToBoundaries(forePoint, foreZone);
 
-			// Draw inner boundary path
-			if (rearZone === foreZone) {
-				const zone = this.trackGeometry.zones[rearZone as keyof typeof this.trackGeometry.zones];
+		let pathData = `M ${rear.innerProjection.x} ${rear.innerProjection.y}`;
+
+		if (rearZone === foreZone) {
+			const zone = this.trackGeometry.zones[rearZone as keyof typeof this.trackGeometry.zones];
+			if (zone.type === ZoneType.TURN) {
+				const innerRadius = Math.hypot(
+					zone.innerStart.x - zone.centerInner.x,
+					zone.innerStart.y - zone.centerInner.y
+				);
+				const outerRadius = Math.hypot(
+					zone.outerStart.x - zone.centerOuter.x,
+					zone.outerStart.y - zone.centerOuter.y
+				);
+
+				pathData += ` A ${innerRadius} ${innerRadius} 1 0 0 ${fore.innerProjection.x} ${fore.innerProjection.y}`;
+				pathData += ` L ${fore.outerProjection.x} ${fore.outerProjection.y}`;
+				pathData += ` A ${outerRadius} ${outerRadius} 1 0 1 ${rear.outerProjection.x} ${rear.outerProjection.y}`;
+			} else {
+				pathData += ` L ${fore.innerProjection.x} ${fore.innerProjection.y}`;
+				pathData += ` L ${fore.outerProjection.x} ${fore.outerProjection.y}`;
+				pathData += ` L ${rear.outerProjection.x} ${rear.outerProjection.y}`;
+			}
+		} else {
+			this.zones.forEach((zoneNumber, index) => {
+				const zone = this.trackGeometry.zones[zoneNumber as keyof typeof this.trackGeometry.zones];
 				if (zone.type === ZoneType.TURN) {
-					// Handle turn zone
 					const innerRadius = Math.hypot(
 						zone.innerStart.x - zone.centerInner.x,
 						zone.innerStart.y - zone.centerInner.y
 					);
+					pathData += ` A ${innerRadius} ${innerRadius} 1 0 0 ${
+						index === this.zones.length - 1 ? fore.innerProjection.x : zone.innerEnd.x
+					} ${index === this.zones.length - 1 ? fore.innerProjection.y : zone.innerEnd.y}`;
+				} else {
+					pathData += ` L ${
+						index === this.zones.length - 1 ? fore.innerProjection.x : zone.innerEnd.x
+					} ${index === this.zones.length - 1 ? fore.innerProjection.y : zone.innerEnd.y}`;
+				}
+			});
+
+			pathData += ` L ${fore.outerProjection.x} ${fore.outerProjection.y}`;
+
+			[...this.zones].reverse().forEach((zoneNumber, index) => {
+				const zone = this.trackGeometry.zones[zoneNumber as keyof typeof this.trackGeometry.zones];
+				if (zone.type === ZoneType.TURN) {
 					const outerRadius = Math.hypot(
 						zone.outerStart.x - zone.centerOuter.x,
 						zone.outerStart.y - zone.centerOuter.y
 					);
-
-					const startAngle = Math.atan2(
-						rear.innerProjection.y - zone.centerInner.y,
-						rear.innerProjection.x - zone.centerInner.x
-					);
-					const endAngle = Math.atan2(
-						fore.innerProjection.y - zone.centerInner.y,
-						fore.innerProjection.x - zone.centerInner.x
-					);
-
-					// Draw inner arc
-					context.arc(
-						zone.centerInner.x,
-						zone.centerInner.y,
-						innerRadius,
-						startAngle,
-						endAngle,
-						true
-					);
-
-					// Draw to outer boundary
-					context.lineTo(fore.outerProjection.x, fore.outerProjection.y);
-
-					// Draw outer arc
-					context.arc(
-						zone.centerOuter.x,
-						zone.centerOuter.y,
-						outerRadius,
-						endAngle,
-						startAngle,
-						false
-					);
+					pathData += ` A ${outerRadius} ${outerRadius} 1 0 1 ${
+						index === this.zones.length - 1 ? rear.outerProjection.x : zone.outerStart.x
+					} ${index === this.zones.length - 1 ? rear.outerProjection.y : zone.outerStart.y}`;
 				} else {
-					// Straight zone
-					context.lineTo(fore.innerProjection.x, fore.innerProjection.y);
-					context.lineTo(fore.outerProjection.x, fore.outerProjection.y);
-					context.lineTo(rear.outerProjection.x, rear.outerProjection.y);
+					pathData += ` L ${
+						index === this.zones.length - 1 ? rear.outerProjection.x : zone.outerStart.x
+					} ${index === this.zones.length - 1 ? rear.outerProjection.y : zone.outerStart.y}`;
 				}
-			} else {
-				// Multi-zone logic
-				this.zones.forEach((zoneNumber, index) => {
-					const zone =
-						this.trackGeometry.zones[zoneNumber as keyof typeof this.trackGeometry.zones];
-					if (zone.type === ZoneType.TURN) {
-						const innerRadius = Math.hypot(
-							zone.innerStart.x - zone.centerInner.x,
-							zone.innerStart.y - zone.centerInner.y
-						);
-						const startAngle = Math.atan2(
-							(index === 0 ? rear.innerProjection.y : zone.innerStart.y) - zone.centerInner.y,
-							(index === 0 ? rear.innerProjection.x : zone.innerStart.x) - zone.centerInner.x
-						);
-						const endAngle = Math.atan2(
-							(index === this.zones.length - 1 ? fore.innerProjection.y : zone.innerEnd.y) -
-								zone.centerInner.y,
-							(index === this.zones.length - 1 ? fore.innerProjection.x : zone.innerEnd.x) -
-								zone.centerInner.x
-						);
-						context.arc(
-							zone.centerInner.x,
-							zone.centerInner.y,
-							innerRadius,
-							startAngle,
-							endAngle,
-							true
-						);
-					} else {
-						context.lineTo(
-							index === this.zones.length - 1 ? fore.innerProjection.x : zone.innerEnd.x,
-							index === this.zones.length - 1 ? fore.innerProjection.y : zone.innerEnd.y
-						);
-					}
-				});
+			});
+		}
 
-				context.lineTo(fore.outerProjection.x, fore.outerProjection.y);
+		pathData += ' Z';
+		this.engagementZonePath.data(pathData);
+		this.engagementZonePath.show();
 
-				// Draw outer boundary path in reverse
-				this.zones.reverse().forEach((zoneNumber, index) => {
-					const zone =
-						this.trackGeometry.zones[zoneNumber as keyof typeof this.trackGeometry.zones];
-					if (zone.type === ZoneType.TURN) {
-						const outerRadius = Math.hypot(
-							zone.outerStart.x - zone.centerOuter.x,
-							zone.outerStart.y - zone.centerOuter.y
-						);
-						const startAngle = Math.atan2(
-							(index === 0 ? fore.outerProjection.y : zone.outerEnd.y) - zone.centerOuter.y,
-							(index === 0 ? fore.outerProjection.x : zone.outerEnd.x) - zone.centerOuter.x
-						);
-						const endAngle = Math.atan2(
-							(index === this.zones.length - 1 ? rear.outerProjection.y : zone.outerStart.y) -
-								zone.centerOuter.y,
-							(index === this.zones.length - 1 ? rear.outerProjection.x : zone.outerStart.x) -
-								zone.centerOuter.x
-						);
-						context.arc(
-							zone.centerOuter.x,
-							zone.centerOuter.y,
-							outerRadius,
-							startAngle,
-							endAngle,
-							false
-						);
-					} else {
-						context.lineTo(
-							index === this.zones.length - 1 ? rear.outerProjection.x : zone.outerStart.x,
-							index === this.zones.length - 1 ? rear.outerProjection.y : zone.outerStart.y
-						);
-					}
-				});
-			}
-
-			context.closePath();
-			context.fillStrokeShape(shape);
+		// After drawing engagement zone, check which players are in it
+		this.playerManager.getBlockers().forEach((player) => {
+			const point = { x: player.getNode().x(), y: player.getNode().y() };
+			const isInEngagementZone = this.isPointInEngagementZone(point);
+			player.updateEngagementZoneStatus(isInEngagementZone);
 		});
 
-		this.engagementZoneShape.show();
 		this.engagementZoneLayer.batchDraw();
 	}
 
@@ -422,6 +355,13 @@ export class KonvaPackManager {
 			backward: backwardPoint,
 			forward: forwardPoint
 		};
+	}
+
+	private isPointInEngagementZone(point: Point): boolean {
+		return (
+			this.engagementZonePath.isVisible() &&
+			this.trackGeometry.isPointInPath(new Path2D(this.engagementZonePath.data()), point)
+		);
 	}
 
 	private getPlayerByAngle(
