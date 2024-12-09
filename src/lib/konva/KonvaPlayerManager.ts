@@ -55,9 +55,8 @@ export class KonvaPlayerManager {
 		this.addTeamPlayer(pivotPosB.x, pivotPosB.y, TeamPlayerTeam.B, TeamPlayerRole.pivot);
 
 		// Zone 4 - Jammers starting positions
-		const zone4 = this.trackGeometry.zones[4];
-		const jammersX = (zone4.innerStart.x + zone4.outerStart.x) / 2;
-		const jammersY = (zone4.innerStart.y + zone4.outerStart.y) / 2;
+		const jammersX = (zone1.innerStart.x + zone1.outerStart.x) / 2;
+		const jammersY = (zone1.innerStart.y + zone1.outerStart.y) / 2;
 
 		this.addTeamPlayer(jammersX, jammersY, TeamPlayerTeam.A, TeamPlayerRole.jammer);
 		this.addTeamPlayer(jammersX + 30, jammersY, TeamPlayerTeam.B, TeamPlayerRole.jammer);
