@@ -3,6 +3,7 @@ import { colors, LINE_WIDTH } from '$lib/constants';
 
 import { KonvaPlayer } from './KonvaPlayer';
 import type { KonvaTrackGeometry } from './KonvaTrackGeometry';
+
 export enum TeamPlayerRole {
 	jammer = 'jammer',
 	blocker = 'blocker',
@@ -22,6 +23,7 @@ export type TeamPlayerPosition = {
 
 export class KonvaTeamPlayer extends KonvaPlayer {
 	public starShape?: Konva.Star;
+	public pivotStripeGroup?: Konva.Group;
 	team: TeamPlayerTeam;
 	role: TeamPlayerRole;
 	zone: number;
@@ -80,7 +82,7 @@ export class KonvaTeamPlayer extends KonvaPlayer {
 		// Add stripe for pivots
 		if (this.role === TeamPlayerRole.pivot) {
 			// Create clipping group
-			const clipGroup = new Konva.Group({
+			this.pivotStripeGroup = new Konva.Group({
 				clipFunc: (ctx) => {
 					ctx.beginPath();
 					ctx.arc(0, 0, this.circle.radius() * 0.890027, 0, Math.PI * 2);
@@ -103,12 +105,12 @@ export class KonvaTeamPlayer extends KonvaPlayer {
 			});
 
 			// Add stripe to group and group to layer
-			clipGroup.add(stripe);
-			layer.add(clipGroup);
+			this.pivotStripeGroup.add(stripe);
+			layer.add(this.pivotStripeGroup);
 
 			// Update group position on drag
 			this.circle.on('dragmove', () => {
-				clipGroup.position({
+				this.pivotStripeGroup?.position({
 					x: this.circle.x(),
 					y: this.circle.y()
 				});
@@ -155,5 +157,11 @@ export class KonvaTeamPlayer extends KonvaPlayer {
 		} else {
 			this.circle.stroke(colors.outOfBounds);
 		}
+	}
+
+	destroy() {
+		super.destroy();
+		this.starShape?.destroy();
+		this.pivotStripeGroup?.destroy();
 	}
 }

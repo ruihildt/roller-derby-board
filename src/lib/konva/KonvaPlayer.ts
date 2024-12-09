@@ -72,6 +72,15 @@ export class KonvaPlayer {
 		return this.circle;
 	}
 
+	destroy() {
+		this.circle.destroy();
+		// Clean up any debug elements
+		const layer = this.circle.getLayer();
+		if (layer) {
+			layer.find('.debug-projection').forEach((node) => node.destroy());
+		}
+	}
+
 	// DEBUGGING
 	toggleDebugMode(enabled: boolean) {
 		this.debugMode = enabled;

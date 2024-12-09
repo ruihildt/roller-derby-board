@@ -35,6 +35,18 @@ export class KonvaPlayerManager {
 		);
 	}
 
+	resetPlayers() {
+		// Remove all existing players
+		this.teamPlayers.forEach((player) => player.destroy());
+		this.teamPlayers = [];
+
+		// Add back initial lineup
+		this.addInitialLineup();
+
+		// Redraw the layer
+		this.layer.batchDraw();
+	}
+
 	addInitialLineup() {
 		const zone1 = this.trackGeometry.zones[1];
 
