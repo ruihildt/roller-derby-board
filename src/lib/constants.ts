@@ -23,6 +23,7 @@ export const CLOCKWISE = true;
 export const COUNTER_CLOCKWISE = false;
 
 export interface Colors {
+	playerDefault: string;
 	teamAPrimary: string;
 	teamASecondary: string;
 	teamBPrimary: string;
@@ -41,6 +42,7 @@ export interface Colors {
 	tenFeetLines: string;
 }
 export const colors: Colors = {
+	playerDefault: 'black',
 	teamAPrimary: 'yellow',
 	teamASecondary: 'black',
 	teamBPrimary: 'deepskyblue',

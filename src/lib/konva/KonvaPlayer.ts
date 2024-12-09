@@ -4,7 +4,7 @@ import { KonvaTeamPlayer } from './KonvaTeamPlayer';
 import { KonvaTrackGeometry } from './KonvaTrackGeometry';
 
 export class KonvaPlayer {
-	static readonly PLAYER_RADIUS = TRACK_SCALE / 2.2;
+	static readonly PLAYER_RADIUS = TRACK_SCALE / 2.4;
 	static readonly STROKE_WIDTH = TRACK_SCALE / 10;
 	protected trackGeometry: KonvaTrackGeometry;
 	protected debugMode: boolean = false;
