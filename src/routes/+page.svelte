@@ -8,14 +8,15 @@
 		game = new KonvaGame('container', window.innerWidth, window.innerHeight);
 	});
 
+	import Menu from '$lib/components/Menu.svelte';
+	import ZoomControl from '$lib/components/ZoomControl.svelte';
+	import Changelog from '$lib/components/Changelog.svelte';
+	import FullscreenButton from '$lib/components/FullscreenButton.svelte';
+
 	// import Board from '$lib/components/Board.svelte';
 	// import Video from '$lib/components/Video.svelte';
 	// import Record from '$lib/components/Record.svelte';
-	import Menu from '$lib/components/Menu.svelte';
 	// import type { Game } from '$lib/classes/Game';
-	// import Changelog from '$lib/components/Changelog.svelte';
-	// import FullscreenButton from '$lib/components/FullscreenButton.svelte';
-	import ZoomControl from '$lib/components/ZoomControl.svelte';
 	// import PanModeButton from '$lib/components/PanModeButton.svelte';
 
 	// let showPreview = $state(false);
@@ -46,6 +47,11 @@
 <div class="fixed bottom-4 left-4 flex gap-2">
 	<ZoomControl {game} />
 	<!-- <PanModeButton /> -->
+</div>
+
+<div class="fixed bottom-4 right-4 flex gap-2">
+	<Changelog />
+	<FullscreenButton />
 </div>
 
 <!-- <main class="h-screen w-screen">
