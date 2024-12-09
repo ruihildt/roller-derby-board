@@ -138,6 +138,7 @@ export class KonvaTrackGeometry {
 
 		// Now create all track paths
 		const boundaries = this.createBoundariesPath();
+		const officialLane = this.createOuterOfficialLanePath();
 		const pivotLine = this.createPivotLinePath();
 		const jammerLine = this.createJammerLinePath();
 		const straight1TenFeetLines = this.drawStraight1TenFeetLines();
@@ -145,6 +146,7 @@ export class KonvaTrackGeometry {
 		const turn1TenFeetLines = this.drawTurn1TenFeetLines();
 		const turn2TenFeetLines = this.drawTurn2TenFeetLines();
 		this.trackLinesGroup.add(boundaries);
+		this.trackLinesGroup.add(officialLane);
 		this.trackLinesGroup.add(pivotLine);
 		this.trackLinesGroup.add(straight1TenFeetLines);
 		this.trackLinesGroup.add(straight2TenFeetLines);
@@ -321,6 +323,41 @@ export class KonvaTrackGeometry {
 			data: this.createOuterTrackPath().data() + ' ' + this.createInnerTrackPath().data(),
 			stroke: colors.trackBoundaries,
 			strokeWidth: LINE_WIDTH,
+			listening: false
+		});
+	}
+
+	private createOuterOfficialLanePath(): Konva.Path {
+		const zones = this.zones;
+		const officialLaneDistance = TENFEET;
+
+		// Calculate angle for straight 1
+		const angle1 = Math.atan2(
+			zones[1].outerEnd.y - zones[1].outerStart.y,
+			zones[1].outerEnd.x - zones[1].outerStart.x
+		);
+
+		// Calculate parallel offset points for zone 1
+		const start1X = zones[1].outerStart.x - officialLaneDistance * Math.sin(angle1);
+		const start1Y = zones[1].outerStart.y + officialLaneDistance * Math.cos(angle1);
+		const end1X = zones[1].outerEnd.x - officialLaneDistance * Math.sin(angle1);
+		const end1Y = zones[1].outerEnd.y + officialLaneDistance * Math.cos(angle1);
+
+		return new Konva.Path({
+			data: `
+            M ${start1X} ${start1Y}
+            L ${end1X} ${end1Y}
+            A ${Math.abs(zones[2].outerStart.y - zones[2].centerOuter.y) + officialLaneDistance} ${
+							Math.abs(zones[2].outerStart.y - zones[2].centerOuter.y) + officialLaneDistance
+						} 0 0 0 ${zones[2].outerEnd.x} ${zones[2].outerEnd.y + officialLaneDistance}
+            L ${zones[3].outerEnd.x} ${zones[3].outerEnd.y + officialLaneDistance}
+            A ${Math.abs(zones[4].outerStart.y - zones[4].centerOuter.y) + officialLaneDistance} ${
+							Math.abs(zones[4].outerStart.y - zones[4].centerOuter.y) + officialLaneDistance
+						} 0 0 0 ${start1X} ${start1Y}
+        `,
+			stroke: colors.officialLane,
+			strokeWidth: LINE_WIDTH / 7,
+			dash: [2, 8],
 			listening: false
 		});
 	}
