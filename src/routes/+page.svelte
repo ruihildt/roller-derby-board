@@ -15,7 +15,7 @@
 	// import type { Game } from '$lib/classes/Game';
 	// import Changelog from '$lib/components/Changelog.svelte';
 	// import FullscreenButton from '$lib/components/FullscreenButton.svelte';
-	// import ZoomControl from '$lib/components/ZoomControl.svelte';
+	import ZoomControl from '$lib/components/ZoomControl.svelte';
 	// import PanModeButton from '$lib/components/PanModeButton.svelte';
 
 	// let showPreview = $state(false);
@@ -42,6 +42,11 @@
 </main>
 
 <Menu {game} />
+
+<div class="fixed bottom-4 left-4 flex gap-2">
+	<ZoomControl {game} />
+	<!-- <PanModeButton /> -->
+</div>
 
 <!-- <main class="h-screen w-screen">
 	<Board bind:highResCanvas bind:game />

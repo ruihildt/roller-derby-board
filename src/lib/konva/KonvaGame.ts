@@ -1,12 +1,17 @@
 import Konva from 'konva';
 
 import {
+	BASE_ZOOM,
 	CENTER_POINT_OFFSET,
+	MAX_ZOOM,
+	MIN_ZOOM,
 	OUTER_VERTICAL_OFFSET_1,
 	OUTER_VERTICAL_OFFSET_2,
 	VERTICAL_OFFSET_1,
-	VERTICAL_OFFSET_2
+	VERTICAL_OFFSET_2,
+	ZOOM_INCREMENT
 } from '$lib/constants';
+import { konvaViewport } from '$lib/stores/konvaViewport';
 
 import { KonvaTrackGeometry, type Point } from './KonvaTrackGeometry';
 import { KonvaPlayerManager } from './KonvaPlayerManager';
@@ -36,7 +41,9 @@ export class KonvaGame {
 			width: this.width,
 			height: this.height,
 			draggable: true,
-			pixelRatio: window.devicePixelRatio
+			pixelRatio: window.devicePixelRatio,
+			x: this.width / 2,
+			y: this.height / 2
 		});
 
 		// Create track geometry (depends on points)
@@ -171,31 +178,50 @@ export class KonvaGame {
 	};
 
 	private setupZoom() {
-		this.stage.on('wheel', (e) => {
-			e.evt.preventDefault();
-
-			const oldScale = this.stage.scaleX();
-			const pointer = this.stage.getPointerPosition();
-
-			if (!pointer) return;
-
-			const mousePointTo = {
-				x: (pointer.x - this.stage.x()) / oldScale,
-				y: (pointer.y - this.stage.y()) / oldScale
-			};
-
-			const direction = e.evt.deltaY > 0 ? -1 : 1;
-			const newScale = direction > 0 ? oldScale * 1.1 : oldScale / 1.1;
-
-			this.stage.scale({ x: newScale, y: newScale });
-
-			const newPos = {
-				x: pointer.x - mousePointTo.x * newScale,
-				y: pointer.y - mousePointTo.y * newScale
-			};
-
-			this.stage.position(newPos);
+		konvaViewport.subscribe((state) => {
+			this.stage.scale({ x: state.zoom, y: state.zoom });
+			this.stage.position({ x: state.x, y: state.y });
 			this.stage.batchDraw();
+		});
+	}
+
+	zoomIn() {
+		const newScale = Math.min(this.stage.scaleX() + ZOOM_INCREMENT, MAX_ZOOM);
+		this.updateZoom(newScale);
+	}
+
+	zoomOut() {
+		const newScale = Math.max(this.stage.scaleX() - ZOOM_INCREMENT, MIN_ZOOM);
+		this.updateZoom(newScale);
+	}
+
+	resetZoom() {
+		konvaViewport.set({
+			zoom: BASE_ZOOM,
+			x: 0,
+			y: 0
+		});
+	}
+
+	private updateZoom(newScale: number) {
+		const oldScale = this.stage.scaleX();
+
+		// Get current center point
+		const centerX = this.stage.width() / 2;
+		const centerY = this.stage.height() / 2;
+
+		// Get current position relative to center
+		const relativeX = (centerX - this.stage.x()) / oldScale;
+		const relativeY = (centerY - this.stage.y()) / oldScale;
+
+		// Calculate new position to maintain the same center point
+		const newX = centerX - relativeX * newScale;
+		const newY = centerY - relativeY * newScale;
+
+		konvaViewport.set({
+			zoom: newScale,
+			x: newX,
+			y: newY
 		});
 	}
 }

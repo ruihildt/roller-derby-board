@@ -1,39 +1,26 @@
 <script lang="ts">
 	import { Toolbar, ToolbarButton, Tooltip } from 'flowbite-svelte';
 	import { MinusOutline, PlusOutline } from 'flowbite-svelte-icons';
-	import { viewport } from '$lib/stores/viewport';
-	import { BASE_ZOOM, MAX_ZOOM, MIN_ZOOM, ZOOM_INCREMENT } from '$lib/constants';
 
-	let zoomLevel = 100;
+	import type { KonvaGame } from '$lib/konva/KonvaGame';
+	import { konvaViewport } from '$lib/stores/konvaViewport';
 
-	function updateZoomDisplay() {
-		zoomLevel = Math.round($viewport.zoom * 100);
-	}
+	let { game } = $props<{
+		game: KonvaGame;
+	}>();
+
+	let zoomLevel = $derived(Math.round($konvaViewport.zoom * 100));
 
 	function zoomIn() {
-		viewport.update((state) => {
-			const newZoom = Math.min(state.zoom + ZOOM_INCREMENT, MAX_ZOOM);
-			return { ...state, zoom: newZoom };
-		});
+		game.zoomIn();
 	}
 
 	function zoomOut() {
-		viewport.update((state) => {
-			const newZoom = Math.max(state.zoom - ZOOM_INCREMENT, MIN_ZOOM);
-			return { ...state, zoom: newZoom };
-		});
+		game.zoomOut();
 	}
 
 	function resetZoom() {
-		viewport.set({
-			zoom: BASE_ZOOM,
-			panX: 0,
-			panY: 0
-		});
-	}
-
-	$: {
-		updateZoomDisplay();
+		game.resetZoom();
 	}
 </script>
 
