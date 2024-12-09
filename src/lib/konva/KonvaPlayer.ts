@@ -7,6 +7,7 @@ export class KonvaPlayer {
 	static readonly PLAYER_RADIUS = TRACK_SCALE / 2.2;
 	static readonly STROKE_WIDTH = TRACK_SCALE / 10;
 	protected trackGeometry: KonvaTrackGeometry;
+	protected debugMode: boolean = false;
 	circle: Konva.Circle;
 
 	constructor(x: number, y: number, layer: Konva.Layer, trackGeometry: KonvaTrackGeometry) {
@@ -48,14 +49,16 @@ export class KonvaPlayer {
 				this.updateInBounds(this.trackGeometry);
 			}
 
-			// Draw new projections points and clear them
-			layer.find('.projectionPoint').forEach((node) => node.destroy());
-			this.drawProjections(this.trackGeometry, layer);
+			// Draw projections for current player if debug mode is on
+			if (this.debugMode) {
+				this.drawProjections(this.trackGeometry, layer);
+			}
 
 			layer.batchDraw();
 		});
 
 		layer.add(this.circle);
+		this.toggleDebugMode(false);
 		layer.batchDraw();
 	}
 
@@ -69,7 +72,27 @@ export class KonvaPlayer {
 		return this.circle;
 	}
 
+	// DEBUGGING
+	toggleDebugMode(enabled: boolean) {
+		this.debugMode = enabled;
+		const layer = this.circle.getLayer();
+
+		if (!layer) return;
+
+		if (enabled) {
+			this.drawProjections(this.trackGeometry, layer);
+		} else {
+			layer.find('.debug-projection').forEach((node) => node.destroy());
+			layer.batchDraw();
+		}
+	}
+
 	drawProjections(trackGeometry: KonvaTrackGeometry, layer: Konva.Layer) {
+		if (!this.debugMode) return;
+
+		// Clear existing projections
+		layer.find('.debug-projection').forEach((node) => node.destroy());
+
 		const position = {
 			x: this.circle.x(),
 			y: this.circle.y()
@@ -83,27 +106,24 @@ export class KonvaPlayer {
 				currentZone
 			);
 
-			// Draw inner projection point
 			const innerPoint = new Konva.Circle({
 				x: innerProjection.x,
 				y: innerProjection.y,
 				radius: 5,
 				fill: 'purple',
-				name: 'projectionPoint'
+				name: 'debug-projection'
 			});
 
-			// Draw outer projection point
 			const outerPoint = new Konva.Circle({
 				x: outerProjection.x,
 				y: outerProjection.y,
 				radius: 5,
 				fill: 'purple',
-				name: 'projectionPoint'
+				name: 'debug-projection'
 			});
 
 			layer.add(innerPoint);
 			layer.add(outerPoint);
-			layer.batchDraw();
 		}
 	}
 }

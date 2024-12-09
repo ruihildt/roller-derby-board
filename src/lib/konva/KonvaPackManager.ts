@@ -6,22 +6,15 @@ import type { KonvaPlayerManager } from './KonvaPlayerManager';
 
 export class KonvaPackManager {
 	private engagementZonePath: Konva.Path;
-	private backwardPoint: Konva.Circle;
-	private forwardPoint: Konva.Circle;
 	private zones: number[] = [];
+	private debugMode: boolean = false;
+
 	constructor(
 		private playerManager: KonvaPlayerManager,
 		private playersLayer: Konva.Layer,
 		private engagementZoneLayer: Konva.Layer,
 		private trackGeometry: KonvaTrackGeometry
 	) {
-		playersLayer.on('dragmove dragend touchmove touchend', () => {
-			this.playerManager.getBlockers().forEach((player) => {
-				player.updateInBounds(this.trackGeometry);
-			});
-			this.determinePack();
-		});
-
 		// Initialize engagement zone shape
 		this.engagementZonePath = new Konva.Path({
 			fill: colors.engagementZone,
@@ -29,21 +22,15 @@ export class KonvaPackManager {
 		});
 		this.engagementZoneLayer.add(this.engagementZonePath);
 
-		// Initialize debug point markers
-		this.backwardPoint = new Konva.Circle({
-			radius: 5,
-			fill: 'red',
-			listening: false
+		playersLayer.on('dragmove dragend touchmove touchend', () => {
+			this.playerManager.getBlockers().forEach((player) => {
+				player.updateInBounds(this.trackGeometry);
+			});
+			this.determinePack();
 		});
 
-		this.forwardPoint = new Konva.Circle({
-			radius: 5,
-			fill: 'blue',
-			listening: false
-		});
-
-		this.engagementZoneLayer.add(this.backwardPoint);
-		this.engagementZoneLayer.add(this.forwardPoint);
+		// Enable/disable debug mode
+		this.toggleDebugMode(false);
 	}
 
 	determinePack() {
@@ -116,28 +103,14 @@ export class KonvaPackManager {
 
 		if (!rearmost || !foremost) {
 			this.engagementZonePath.hide();
-			this.backwardPoint.hide();
-			this.forwardPoint.hide();
 			return;
 		}
 
 		// Get extended engagement zone points
-		const { backward: rearPoint, forward: forePoint } = this.calculateEngagementZonePoints(
-			rearmost,
-			foremost
-		);
+		const { rearPoint, forePoint } = this.calculateEngagementZonePoints(rearmost, foremost);
 
 		// Update debug point markers
-		this.backwardPoint.position({
-			x: rearPoint.x,
-			y: rearPoint.y
-		});
-		this.forwardPoint.position({
-			x: forePoint.x,
-			y: forePoint.y
-		});
-		this.backwardPoint.show();
-		this.forwardPoint.show();
+		this.updateDebugPoints(rearPoint, forePoint);
 
 		const rearZone = this.trackGeometry.determineZone(rearPoint);
 		const foreZone = this.trackGeometry.determineZone(forePoint);
@@ -342,18 +315,12 @@ export class KonvaPackManager {
 	}
 
 	private calculateEngagementZonePoints(rearmost: KonvaTeamPlayer, foremost: KonvaTeamPlayer) {
-		const rearPoint = { x: rearmost.getNode().x(), y: rearmost.getNode().y() };
-		const forePoint = { x: foremost.getNode().x(), y: foremost.getNode().y() };
-
-		// Get 20ft behind rearmost player
-		const backwardPoint = this.trackGeometry.getPointBehindOnMidtrack(rearPoint);
-
-		// Get 20ft ahead of foremost player
-		const forwardPoint = this.trackGeometry.getPointAheadOnMidtrack(forePoint);
+		const rearmostPosition = { x: rearmost.getNode().x(), y: rearmost.getNode().y() };
+		const foremostPosition = { x: foremost.getNode().x(), y: foremost.getNode().y() };
 
 		return {
-			backward: backwardPoint,
-			forward: forwardPoint
+			rearPoint: this.trackGeometry.getPointBehindOnMidtrack(rearmostPosition),
+			forePoint: this.trackGeometry.getPointAheadOnMidtrack(foremostPosition)
 		};
 	}
 
@@ -390,5 +357,61 @@ export class KonvaPackManager {
 					? player
 					: selected;
 		});
+	}
+
+	// DEBUGGING
+	private initializeDebugPoints() {
+		// Remove existing debug points if any
+		this.engagementZoneLayer.findOne('.debug-backward')?.destroy();
+		this.engagementZoneLayer.findOne('.debug-forward')?.destroy();
+
+		// Create new debug points
+		const backwardPoint = new Konva.Circle({
+			radius: 5,
+			fill: 'red',
+			listening: false,
+			name: 'debug-backward'
+		});
+
+		const forwardPoint = new Konva.Circle({
+			radius: 5,
+			fill: 'blue',
+			listening: false,
+			name: 'debug-forward'
+		});
+
+		this.engagementZoneLayer.add(backwardPoint);
+		this.engagementZoneLayer.add(forwardPoint);
+	}
+
+	private updateDebugPoints(rearPoint: Point, forePoint: Point) {
+		if (!this.debugMode) {
+			return;
+		}
+
+		const backwardPoint = this.engagementZoneLayer.findOne('.debug-backward') as Konva.Circle;
+		const forwardPoint = this.engagementZoneLayer.findOne('.debug-forward') as Konva.Circle;
+
+		if (backwardPoint) {
+			backwardPoint.position({
+				x: rearPoint.x,
+				y: rearPoint.y
+			});
+		}
+
+		if (forwardPoint) {
+			forwardPoint.position({
+				x: forePoint.x,
+				y: forePoint.y
+			});
+		}
+	}
+
+	public toggleDebugMode(enabled: boolean) {
+		this.debugMode = enabled;
+		if (enabled) {
+			this.initializeDebugPoints();
+		}
+		this.determinePack();
 	}
 }

@@ -49,8 +49,10 @@ type Zones = {
 };
 
 export class KonvaTrackGeometry {
+	private debugMode: boolean = false;
 	private canvas: HTMLCanvasElement;
 	private context: CanvasRenderingContext2D;
+	private points: Record<string, Point>;
 	private straight1Path: Path2D;
 	private straight2Path: Path2D;
 	private turn1Path: Path2D;
@@ -67,6 +69,7 @@ export class KonvaTrackGeometry {
 	zones: Zones;
 
 	constructor(points: Record<string, Point>) {
+		this.points = points;
 		this.zones = {
 			1: {
 				type: ZoneType.STRAIGHT,
@@ -149,7 +152,7 @@ export class KonvaTrackGeometry {
 		this.trackLinesGroup.add(turn2TenFeetLines);
 		this.trackLinesGroup.add(jammerLine);
 
-		this.drawPoints(points);
+		this.toggleDebugMode(false);
 	}
 
 	addTrackSurfaceToLayer(layer: Konva.Layer) {
@@ -159,57 +162,6 @@ export class KonvaTrackGeometry {
 	addTrackLinesToLayer(layer: Konva.Layer) {
 		layer.add(this.trackLinesGroup);
 	}
-
-	private drawPoints(points: Record<string, Point>) {
-		Object.entries(points).forEach(([label, point]) => {
-			// Point marker
-			const circle = new Konva.Circle({
-				x: point.x,
-				y: point.y,
-				radius: 5,
-				fill: 'red',
-				stroke: 'black',
-				strokeWidth: 1
-			});
-
-			// Point label
-			const text = new Konva.Text({
-				x: point.x + 10,
-				y: point.y + 10,
-				text: label,
-				fontSize: 16,
-				fill: 'black'
-			});
-
-			this.trackLinesGroup.add(circle);
-			this.trackLinesGroup.add(text);
-		});
-	}
-
-	// private drawJammerLinePoint() {
-	// 	const point = this.createJammerLinePoint();
-	// 	// Point marker
-	// 	const circle = new Konva.Circle({
-	// 		x: point.x,
-	// 		y: point.y,
-	// 		radius: 5,
-	// 		fill: 'red',
-	// 		stroke: 'black',
-	// 		strokeWidth: 1
-	// 	});
-
-	// 	// Point label
-	// 	const text = new Konva.Text({
-	// 		x: point.x + 10,
-	// 		y: point.y + 10,
-	// 		text: 'JLP',
-	// 		fontSize: 16,
-	// 		fill: 'black'
-	// 	});
-
-	// 	this.trackLinesGroup.add(circle);
-	// 	this.trackLinesGroup.add(text);
-	// }
 
 	createStraightPath(straightKey: StraightKey): Konva.Path {
 		const zone = this.zones[straightKey];
@@ -303,22 +255,6 @@ export class KonvaTrackGeometry {
 			strokeWidth: LINE_WIDTH,
 			listening: false
 		});
-	}
-
-	private createJammerLinePoint(): Point {
-		const zone = this.zones[1];
-		const midW = {
-			x: (zone.outerEnd.x + zone.innerEnd.x) / 2,
-			y: (zone.outerEnd.y + zone.innerEnd.y) / 2
-		};
-		const midX = {
-			x: (zone.outerStart.x + zone.innerStart.x) / 2,
-			y: (zone.outerStart.y + zone.innerStart.y) / 2
-		};
-		const directionWX = Math.atan2(midX.y - midW.y, midX.x - midW.x);
-		const x = midW.x + THIRTYFEET * Math.cos(directionWX);
-		const y = midW.y + THIRTYFEET * Math.sin(directionWX);
-		return { x, y };
 	}
 
 	private createJammerLinePath(): Konva.Path {
@@ -862,5 +798,48 @@ export class KonvaTrackGeometry {
 
 	isPointInPath(path: Path2D, point: Point): boolean {
 		return this.context.isPointInPath(path, point.x, point.y);
+	}
+
+	// DEBUGGING
+
+	public toggleDebugMode(enabled: boolean) {
+		this.debugMode = enabled;
+
+		// Clear existing debug elements
+		this.trackLinesGroup.find('.debug-point').forEach((node) => node.destroy());
+
+		if (enabled) {
+			// Draw debug points when enabled
+			this.drawPoints(this.points);
+		}
+
+		// Redraw the layer
+		this.trackLinesGroup.getLayer()?.batchDraw();
+	}
+
+	private drawPoints(points: Record<string, Point>) {
+		Object.entries(points).forEach(([label, point]) => {
+			const circle = new Konva.Circle({
+				x: point.x,
+				y: point.y,
+				radius: 5,
+				fill: 'red',
+				stroke: 'black',
+				strokeWidth: 1,
+				name: 'debug-point' // Add class name
+			});
+
+			const text = new Konva.Text({
+				x: point.x + 10,
+				y: point.y + 10,
+				text: label,
+				fontSize: 16,
+				fill: 'black',
+				name: 'debug-point' // Add class name
+			});
+
+			this.trackLinesGroup.add(circle);
+			this.trackLinesGroup.add(text);
+		});
 	}
 }
