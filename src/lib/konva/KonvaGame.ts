@@ -1,5 +1,7 @@
+import { get } from 'svelte/store';
 import Konva from 'konva';
 
+import { boardState } from '$lib/stores/konvaBoardState';
 import {
 	BASE_ZOOM,
 	CENTER_POINT_OFFSET,
@@ -11,7 +13,6 @@ import {
 	VERTICAL_OFFSET_2,
 	ZOOM_INCREMENT
 } from '$lib/constants';
-import { konvaViewport } from '$lib/stores/konvaViewport';
 
 import { KonvaTrackGeometry, type Point } from './KonvaTrackGeometry';
 import { KonvaPlayerManager } from './KonvaPlayerManager';
@@ -27,6 +28,7 @@ export class KonvaGame {
 	private playersLayer: Konva.Layer;
 	private engagementZoneLayer: Konva.Layer;
 
+	private trackGeometry: KonvaTrackGeometry;
 	private playerManager!: KonvaPlayerManager;
 	private packManager!: KonvaPackManager;
 
@@ -41,13 +43,14 @@ export class KonvaGame {
 			width: this.width,
 			height: this.height,
 			draggable: true,
-			pixelRatio: window.devicePixelRatio,
-			x: this.width / 2,
-			y: this.height / 2
+			pixelRatio: window.devicePixelRatio
 		});
 
+		// Apply persisted view settings
+		this.loadViewSettings();
+
 		// Create track geometry (depends on points)
-		const trackGeometry = new KonvaTrackGeometry(this.initializePoints());
+		this.trackGeometry = new KonvaTrackGeometry(this.initializePoints());
 
 		// Create a separate layer for track lines
 		this.trackSurfaceLayer = new Konva.Layer();
@@ -57,32 +60,31 @@ export class KonvaGame {
 
 		// Add in correct order:
 		// 1. Track surface (bottom)
-		trackGeometry.addTrackSurfaceToLayer(this.trackSurfaceLayer);
+		this.trackGeometry.addTrackSurfaceToLayer(this.trackSurfaceLayer);
 		this.stage.add(this.trackSurfaceLayer);
 
 		// 2. Engagement zone (middle)
 		this.stage.add(this.engagementZoneLayer);
 
 		// 3. Track lines (over engagement zone)
-		trackGeometry.addTrackLinesToLayer(this.trackLinesLayer);
+		this.trackGeometry.addTrackLinesToLayer(this.trackLinesLayer);
 		this.stage.add(this.trackLinesLayer);
 
 		// 4. Players (top)
 		this.stage.add(this.playersLayer);
 
-		// Setup interaction features
-		this.setupZoom();
-
-		this.playerManager = new KonvaPlayerManager(this.playersLayer, trackGeometry);
+		this.playerManager = new KonvaPlayerManager(this.playersLayer, this.trackGeometry);
 		this.packManager = new KonvaPackManager(
 			this.playerManager,
 			this.playersLayer,
 			this.engagementZoneLayer,
-			trackGeometry
+			this.trackGeometry
 		);
-		this.playerManager.addInitialLineup();
+
+		this.playerManager.initialLoad();
 		this.packManager.determinePack();
 		this.playersLayer.batchDraw();
+		this.updatePersistedState();
 
 		// Add window resize handler
 		window.addEventListener('resize', this.handleResize);
@@ -175,34 +177,38 @@ export class KonvaGame {
 		});
 
 		this.stage.batchDraw();
+		this.updatePersistedState();
 	};
 
-	private setupZoom() {
-		konvaViewport.subscribe((state) => {
-			this.stage.scale({ x: state.zoom, y: state.zoom });
-			this.stage.position({ x: state.x, y: state.y });
-			this.stage.batchDraw();
-		});
-	}
-
+	// Increase zoom level within MAX_ZOOM limit
 	zoomIn() {
 		const newScale = Math.min(this.stage.scaleX() + ZOOM_INCREMENT, MAX_ZOOM);
 		this.updateZoom(newScale);
 	}
 
 	zoomOut() {
+		// Decrease zoom level within MIN_ZOOM limit
 		const newScale = Math.max(this.stage.scaleX() - ZOOM_INCREMENT, MIN_ZOOM);
 		this.updateZoom(newScale);
 	}
 
+	// Reset zoom and position to default values
 	resetZoom() {
-		konvaViewport.set({
-			zoom: BASE_ZOOM,
-			x: 0,
-			y: 0
+		const state = get(boardState);
+		boardState.set({
+			...state,
+			viewSettings: {
+				zoom: BASE_ZOOM,
+				x: 0,
+				y: 0
+			}
 		});
+		this.stage.scale({ x: BASE_ZOOM, y: BASE_ZOOM });
+		this.stage.position({ x: 0, y: 0 });
+		this.stage.batchDraw();
 	}
 
+	// Update zoom while maintaining the center point
 	private updateZoom(newScale: number) {
 		const oldScale = this.stage.scaleX();
 
@@ -218,10 +224,108 @@ export class KonvaGame {
 		const newX = centerX - relativeX * newScale;
 		const newY = centerY - relativeY * newScale;
 
-		konvaViewport.set({
-			zoom: newScale,
-			x: newX,
-			y: newY
+		const state = get(boardState);
+		boardState.set({
+			...state,
+			viewSettings: {
+				zoom: newScale,
+				x: newX,
+				y: newY
+			}
 		});
+
+		this.stage.scale({ x: newScale, y: newScale });
+		this.stage.position({ x: newX, y: newY });
+		this.stage.batchDraw();
+	}
+
+	private updatePersistedState() {
+		const teamPlayers = this.playerManager.getTeamPlayers().map((player) => ({
+			absolute: {
+				x: player.circle.x(),
+				y: player.circle.y()
+			},
+			role: player.role,
+			team: player.team
+		}));
+
+		const skatingOfficials = this.playerManager.getSkatingOfficials().map((official) => ({
+			absolute: {
+				x: official.circle.x(),
+				y: official.circle.y()
+			},
+			role: official.role
+		}));
+
+		boardState.set({
+			version: 3,
+			createdAt: new Date().toISOString(),
+			teamPlayers,
+			skatingOfficials,
+			viewSettings: {
+				zoom: this.stage.scaleX(),
+				x: this.stage.x(),
+				y: this.stage.y()
+			}
+		});
+	}
+
+	private loadViewSettings() {
+		const state = get(boardState);
+		if (state.viewSettings) {
+			this.stage.scale({
+				x: state.viewSettings.zoom,
+				y: state.viewSettings.zoom
+			});
+			this.stage.position({
+				x: state.viewSettings.x,
+				y: state.viewSettings.y
+			});
+			this.stage.batchDraw();
+		}
+	}
+
+	resetBoard() {
+		// Clear existing players and layers
+		this.playersLayer.destroyChildren();
+		this.engagementZoneLayer.destroyChildren();
+
+		// Clear internal arrays in PlayerManager
+		this.playerManager = new KonvaPlayerManager(this.playersLayer, this.trackGeometry);
+
+		// Reset persisted state
+		boardState.set({
+			version: 3,
+			createdAt: new Date().toISOString(),
+			teamPlayers: [],
+			skatingOfficials: [],
+			viewSettings: {
+				zoom: BASE_ZOOM,
+				x: 0,
+				y: 0
+			}
+		});
+
+		// Add fresh lineup
+		this.playerManager.initialLoad();
+
+		// Update pack manager with new player manager
+		this.packManager = new KonvaPackManager(
+			this.playerManager,
+			this.playersLayer,
+			this.engagementZoneLayer,
+			this.trackGeometry
+		);
+
+		// Recalculate pack and engagement zone
+		this.packManager.determinePack();
+
+		// Redraw all layers
+		this.trackSurfaceLayer.batchDraw();
+		this.trackLinesLayer.batchDraw();
+		this.engagementZoneLayer.batchDraw();
+		this.playersLayer.batchDraw();
+
+		this.updatePersistedState();
 	}
 }

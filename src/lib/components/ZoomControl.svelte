@@ -1,15 +1,14 @@
 <script lang="ts">
 	import { Toolbar, ToolbarButton, Tooltip } from 'flowbite-svelte';
 	import { MinusOutline, PlusOutline } from 'flowbite-svelte-icons';
-
+	import { boardState } from '$lib/stores/konvaBoardState';
 	import type { KonvaGame } from '$lib/konva/KonvaGame';
-	import { konvaViewport } from '$lib/stores/konvaViewport';
 
 	let { game } = $props<{
 		game: KonvaGame;
 	}>();
 
-	let zoomLevel = $derived(Math.round($konvaViewport.zoom * 100));
+	let zoomLevel = $derived(Math.round(($boardState.viewSettings?.zoom || 1) * 100));
 
 	function zoomIn() {
 		game.zoomIn();

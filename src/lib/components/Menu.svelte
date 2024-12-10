@@ -25,7 +25,7 @@
 	}
 
 	function handleReset() {
-		game.playerManager.resetPlayers();
+		game.resetBoard();
 		dropdownOpen = false;
 	}
 

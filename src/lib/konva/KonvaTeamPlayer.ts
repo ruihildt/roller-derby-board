@@ -116,6 +116,14 @@ export class KonvaTeamPlayer extends KonvaPlayer {
 				});
 			});
 		}
+
+		// Add dragmove handler to update bounds
+		this.circle.on('dragmove', () => {
+			this.updateInBounds(trackGeometry);
+		});
+
+		// Initial bounds check
+		this.updateInBounds(trackGeometry);
 	}
 
 	updateInBounds(trackGeometry: KonvaTrackGeometry): void {

@@ -4,6 +4,8 @@ import { KonvaTeamPlayer, TeamPlayerRole, TeamPlayerTeam } from './KonvaTeamPlay
 import { KonvaSkatingOfficial, SkatingOfficialRole } from './KonvaSkatingOfficial';
 import type { KonvaTrackGeometry, Point, Zone } from './KonvaTrackGeometry';
 import { KonvaPlayer } from './KonvaPlayer';
+import { get } from 'svelte/store';
+import { boardState } from '$lib/stores/konvaBoardState';
 
 export class KonvaPlayerManager {
 	private layer: Konva.Layer;
@@ -35,16 +37,33 @@ export class KonvaPlayerManager {
 		);
 	}
 
-	resetPlayers() {
-		// Remove all existing players
-		this.teamPlayers.forEach((player) => player.destroy());
-		this.teamPlayers = [];
+	getTeamPlayers() {
+		return this.teamPlayers;
+	}
 
-		// Add back initial lineup
-		this.addInitialLineup();
+	getSkatingOfficials() {
+		return this.skatingOfficials;
+	}
 
-		// Redraw the layer
-		this.layer.batchDraw();
+	initialLoad() {
+		const state = get(boardState);
+
+		if (state.teamPlayers.length > 0) {
+			state.teamPlayers.forEach((player) => {
+				this.addTeamPlayer(
+					player.absolute.x,
+					player.absolute.y,
+					player.team as TeamPlayerTeam,
+					player.role
+				);
+			});
+
+			state.skatingOfficials.forEach((official) => {
+				this.addSkatingOfficial(official.absolute.x, official.absolute.y, official.role);
+			});
+		} else {
+			this.addInitialLineup();
+		}
 	}
 
 	addInitialLineup() {
@@ -72,11 +91,6 @@ export class KonvaPlayerManager {
 
 		this.addTeamPlayer(jammersX, jammersY, TeamPlayerTeam.A, TeamPlayerRole.jammer);
 		this.addTeamPlayer(jammersX + 30, jammersY, TeamPlayerTeam.B, TeamPlayerRole.jammer);
-
-		// Update inBounds status for all players
-		this.teamPlayers.forEach((player) => {
-			player.updateInBounds(this.trackGeometry);
-		});
 	}
 
 	private isPositionValid(x: number, y: number): boolean {
