@@ -1,6 +1,5 @@
 import Konva from 'konva';
 import { colors, LINE_WIDTH } from '$lib/constants';
-
 import { KonvaPlayer } from './KonvaPlayer';
 import type { KonvaTrackGeometry } from './KonvaTrackGeometry';
 
@@ -33,6 +32,10 @@ export class KonvaTeamPlayer extends KonvaPlayer {
 	isRearmost: boolean;
 	isForemost: boolean;
 
+	protected get circle(): Konva.Circle {
+		return this.getBaseCircle();
+	}
+
 	constructor(
 		x: number,
 		y: number,
@@ -42,10 +45,9 @@ export class KonvaTeamPlayer extends KonvaPlayer {
 		trackGeometry: KonvaTrackGeometry
 	) {
 		super(x, y, layer, trackGeometry);
+
 		this.team = team;
 		this.role = role;
-		this.trackGeometry = trackGeometry;
-
 		this.zone = 0;
 		this.isInBounds = false;
 		this.isInPack = false;
@@ -53,48 +55,36 @@ export class KonvaTeamPlayer extends KonvaPlayer {
 		this.isForemost = false;
 		this.isInEngagementZone = false;
 
-		// Set fill and stroke colors based on team
-		this.circle.fill(team === 'A' ? colors.teamAPrimary : colors.teamBPrimary);
-		this.circle.stroke(colors.outOfBounds);
+		const circle = this.circle;
+		circle.fill(team === 'A' ? colors.teamAPrimary : colors.teamBPrimary);
+		circle.stroke(colors.outOfBounds);
 
-		// Add star for jammers
 		if (this.role === TeamPlayerRole.jammer) {
 			this.starShape = new Konva.Star({
-				x: x,
-				y: y,
+				x,
+				y,
 				numPoints: 5,
-				innerRadius: this.circle.radius() * 0.33,
-				outerRadius: this.circle.radius() * 0.9,
+				innerRadius: circle.radius() * 0.33,
+				outerRadius: circle.radius() * 0.9,
 				fill: team === TeamPlayerTeam.A ? colors.teamASecondary : colors.teamBSecondary,
 				listening: false
 			});
-
 			layer.add(this.starShape);
-
-			this.circle.on('dragmove', () => {
-				this.starShape?.position({
-					x: this.circle.x(),
-					y: this.circle.y()
-				});
-			});
 		}
 
-		// Add stripe for pivots
 		if (this.role === TeamPlayerRole.pivot) {
-			// Create clipping group
 			this.pivotStripeGroup = new Konva.Group({
 				clipFunc: (ctx) => {
 					ctx.beginPath();
-					ctx.arc(0, 0, this.circle.radius() * 0.890027, 0, Math.PI * 2);
+					ctx.arc(0, 0, circle.radius() * 0.890027, 0, Math.PI * 2);
 					ctx.closePath();
 				},
-				x: x,
-				y: y
+				x,
+				y
 			});
 
-			// Add stripe inside group with relative positioning
-			const stripeWidth = this.circle.radius() * 1.8;
-			const stripeHeight = this.circle.radius() * 0.47;
+			const stripeWidth = circle.radius() * 1.8;
+			const stripeHeight = circle.radius() * 0.47;
 			const stripe = new Konva.Rect({
 				x: -stripeWidth / 2,
 				y: -stripeHeight / 2,
@@ -104,39 +94,29 @@ export class KonvaTeamPlayer extends KonvaPlayer {
 				listening: false
 			});
 
-			// Add stripe to group and group to layer
 			this.pivotStripeGroup.add(stripe);
 			layer.add(this.pivotStripeGroup);
-
-			// Update group position on drag
-			this.circle.on('dragmove', () => {
-				this.pivotStripeGroup?.position({
-					x: this.circle.x(),
-					y: this.circle.y()
-				});
-			});
 		}
 
-		// Add dragmove handler to update bounds
-		this.circle.on('dragmove', () => {
+		this.group.on('dragmove', () => {
+			const pos = this.getPosition();
+			this.starShape?.position(pos);
+			this.pivotStripeGroup?.position(pos);
 			this.updateInBounds(trackGeometry);
 		});
 
-		// Initial bounds check
 		this.updateInBounds(trackGeometry);
 	}
 
 	updateInBounds(trackGeometry: KonvaTrackGeometry): void {
-		const playerX = this.circle.x();
-		const playerY = this.circle.y();
+		const pos = this.getPosition();
 		const radius = this.circle.radius();
 		const strokeWidth = this.circle.strokeWidth();
-		const checkRadius = radius + strokeWidth - LINE_WIDTH * 0.9; // Adjust here for strictness
+		const checkRadius = radius + strokeWidth - LINE_WIDTH * 0.9;
 
-		// Check multiple points around the circle's circumference
 		for (let angle = 0; angle < Math.PI * 2; angle += Math.PI / 16) {
-			const checkX = playerX + checkRadius * Math.cos(angle);
-			const checkY = playerY + checkRadius * Math.sin(angle);
+			const checkX = pos.x + checkRadius * Math.cos(angle);
+			const checkY = pos.y + checkRadius * Math.sin(angle);
 
 			const zoneKey = trackGeometry.determineZone({ x: checkX, y: checkY });
 			if (zoneKey === 0) {
@@ -146,7 +126,6 @@ export class KonvaTeamPlayer extends KonvaPlayer {
 			}
 		}
 
-		// If we get here, player is in bounds
 		this.isInBounds = true;
 		this.circle.stroke(colors.inBounds);
 	}
