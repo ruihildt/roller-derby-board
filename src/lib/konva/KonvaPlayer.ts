@@ -19,6 +19,10 @@ interface PlayerCircleConfig {
 	name: string;
 }
 
+/**
+ * Represents a player on the derby track using Konva
+ * Handles player movement, collisions and basic visual representation
+ */
 export class KonvaPlayer {
 	static readonly PLAYER_RADIUS = TRACK_SCALE / 2.4;
 	static readonly STROKE_WIDTH = TRACK_SCALE / 10;
@@ -27,6 +31,13 @@ export class KonvaPlayer {
 	protected trackGeometry: KonvaTrackGeometry;
 	group: Konva.Group;
 
+	/**
+	 * Creates a new player instance
+	 * @param x - Initial x position
+	 * @param y - Initial y position
+	 * @param layer - Konva layer to add the player to
+	 * @param trackGeometry - Track geometry for bounds checking
+	 */
 	constructor(x: number, y: number, layer: Konva.Layer, trackGeometry: KonvaTrackGeometry) {
 		this.trackGeometry = trackGeometry;
 
@@ -38,6 +49,7 @@ export class KonvaPlayer {
 		};
 
 		this.group = new Konva.Group(groupConfig);
+		this.group.setAttr('player', this);
 
 		const circleConfig: PlayerCircleConfig = {
 			x: 0,
@@ -57,6 +69,9 @@ export class KonvaPlayer {
 		layer.batchDraw();
 	}
 
+	/**
+	 * Handles player movement and collisions during drag
+	 */
 	protected handleDragMove(layer: Konva.Layer): void {
 		this.handleCollisions(layer);
 
@@ -67,19 +82,25 @@ export class KonvaPlayer {
 		layer.batchDraw();
 	}
 
-	protected handleCollisions(layer: Konva.Layer): void {
+	/**
+	 * Processes collisions with other players
+	 */
+	private handleCollisions(layer: Konva.Layer): void {
 		const players = this.getOtherPlayers(layer);
 		players.forEach((player) => this.checkAndResolveCollision(player));
 	}
 
-	protected getOtherPlayers(layer: Konva.Layer): KonvaPlayer[] {
+	/**
+	 * Retrieves all other players in the layer
+	 */
+	private getOtherPlayers(layer: Konva.Layer): KonvaPlayer[] {
 		return layer
 			.find('Group')
 			.filter((node) => node instanceof Konva.Group && node !== this.group)
 			.map((group) => (group as Konva.Group).getAttr('player')) as KonvaPlayer[];
 	}
 
-	protected checkAndResolveCollision(otherPlayer: KonvaPlayer): void {
+	private checkAndResolveCollision(otherPlayer: KonvaPlayer): void {
 		const distance = this.distanceTo(otherPlayer);
 		const totalRadius = KonvaPlayer.PLAYER_RADIUS * 2 + KonvaPlayer.STROKE_WIDTH;
 
@@ -88,7 +109,7 @@ export class KonvaPlayer {
 		}
 	}
 
-	protected pushOtherPlayer(otherPlayer: KonvaPlayer, distance: number, totalRadius: number): void {
+	private pushOtherPlayer(otherPlayer: KonvaPlayer, distance: number, totalRadius: number): void {
 		const currentPos = this.getPosition();
 		const otherPos = otherPlayer.getPosition();
 
@@ -105,6 +126,9 @@ export class KonvaPlayer {
 		otherPlayer.group.fire('dragmove');
 	}
 
+	/**
+	 * Gets the current position of the player
+	 */
 	getPosition(): Point {
 		return {
 			x: this.group.x(),
@@ -112,10 +136,16 @@ export class KonvaPlayer {
 		};
 	}
 
+	/**
+	 * Sets the player's position
+	 */
 	setPosition(position: Point): void {
 		this.group.position(position);
 	}
 
+	/**
+	 * Moves the player to a new position and handles collisions
+	 */
 	moveTo(position: Point): void {
 		this.setPosition(position);
 		const layer = this.group.getLayer();
@@ -124,10 +154,9 @@ export class KonvaPlayer {
 		}
 	}
 
-	protected getBaseCircle(): Konva.Circle {
-		return this.group.findOne('.baseCircle') as Konva.Circle;
-	}
-
+	/**
+	 * Calculates distance to another player
+	 */
 	distanceTo(other: KonvaPlayer): number {
 		const currentPos = this.getPosition();
 		const otherPos = other.getPosition();
@@ -136,10 +165,24 @@ export class KonvaPlayer {
 		return Math.sqrt(dx * dx + dy * dy);
 	}
 
+	/**
+	 * Returns the base circle shape representing the player
+	 * Used by child classes to access and modify the player's visual representation
+	 */
+	protected getBaseCircle(): Konva.Circle {
+		return this.group.findOne('.baseCircle') as Konva.Circle;
+	}
+
+	/**
+	 * Returns the Konva group node representing this player
+	 */
 	getNode(): Konva.Group {
 		return this.group;
 	}
 
+	/**
+	 * Removes the player from the layer and cleans up resources
+	 */
 	destroy() {
 		this.group.destroy();
 	}
