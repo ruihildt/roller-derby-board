@@ -139,26 +139,33 @@ export class KonvaTeamPlayer extends KonvaPlayer {
 	/**
 	 * Updates the player's in-bounds status and visual appearance
 	 */
+
 	protected updateInBounds(trackGeometry: KonvaTrackGeometry): void {
 		const pos = this.getPosition();
 		const radius = this.circle.radius();
 		const strokeWidth = this.circle.strokeWidth();
 		const checkRadius = radius + strokeWidth - LINE_WIDTH * 0.9;
 
-		for (let angle = 0; angle < Math.PI * 2; angle += Math.PI / 16) {
-			const checkX = pos.x + checkRadius * Math.cos(angle);
-			const checkY = pos.y + checkRadius * Math.sin(angle);
+		try {
+			for (let angle = 0; angle < Math.PI * 2; angle += Math.PI / 16) {
+				const checkX = pos.x + checkRadius * Math.cos(angle);
+				const checkY = pos.y + checkRadius * Math.sin(angle);
 
-			const zoneKey = trackGeometry.determineZone({ x: checkX, y: checkY });
-			if (zoneKey === 0) {
-				this.isInBounds = false;
-				this.circle.stroke(colors.outOfBounds);
-				return;
+				const zoneKey = trackGeometry.determineZone({ x: checkX, y: checkY });
+				if (zoneKey === 0) {
+					this.isInBounds = false;
+					this.circle.stroke(colors.outOfBounds);
+					return;
+				}
 			}
-		}
 
-		this.isInBounds = true;
-		this.circle.stroke(colors.inBounds);
+			this.isInBounds = true;
+			this.circle.stroke(colors.inBounds);
+		} catch (error) {
+			console.error('Error checking bounds:', error);
+			this.isInBounds = false;
+			this.circle.stroke(colors.outOfBounds);
+		}
 	}
 
 	/**
