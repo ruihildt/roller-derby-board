@@ -1,7 +1,6 @@
 import Konva from 'konva';
 import { TRACK_SCALE } from '$lib/constants';
-import { KonvaTeamPlayer } from './KonvaTeamPlayer';
-import { KonvaTrackGeometry, type Point } from './KonvaTrackGeometry';
+import { type Point } from './KonvaTrackGeometry';
 
 interface PlayerGroupConfig {
 	x: number;
@@ -28,7 +27,6 @@ export class KonvaPlayer {
 	static readonly STROKE_WIDTH = TRACK_SCALE / 10;
 	static readonly PUSH_FORCE = 0.1;
 
-	protected trackGeometry: KonvaTrackGeometry;
 	group: Konva.Group;
 
 	/**
@@ -38,9 +36,7 @@ export class KonvaPlayer {
 	 * @param layer - Konva layer to add the player to
 	 * @param trackGeometry - Track geometry for bounds checking
 	 */
-	constructor(x: number, y: number, layer: Konva.Layer, trackGeometry: KonvaTrackGeometry) {
-		this.trackGeometry = trackGeometry;
-
+	constructor(x: number, y: number, layer: Konva.Layer) {
 		const groupConfig: PlayerGroupConfig = {
 			x,
 			y,
@@ -74,10 +70,6 @@ export class KonvaPlayer {
 	 */
 	protected handleDragMove(layer: Konva.Layer): void {
 		this.handleCollisions(layer);
-
-		if (this instanceof KonvaTeamPlayer) {
-			this.updateInBounds(this.trackGeometry);
-		}
 
 		layer.batchDraw();
 	}
