@@ -180,7 +180,16 @@ export class KonvaTeamPlayer extends KonvaPlayer {
 		}
 	}
 
+	/**
+	 * Removes the player from the layer and cleans up resources
+	 * Ensures proper cleanup of all shapes and event listeners
+	 */
 	destroy(): void {
+		// Clear references to shapes
+		this.starShape = undefined;
+		this.pivotStripeGroup = undefined;
+
+		// Call parent destroy to handle base cleanup
 		super.destroy();
 	}
 }
