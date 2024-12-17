@@ -242,8 +242,8 @@ export class KonvaGame {
 	private updatePersistedState() {
 		const teamPlayers = this.playerManager.getTeamPlayers().map((player) => ({
 			absolute: {
-				x: player.circle.x(),
-				y: player.circle.y()
+				x: player.getPosition().x,
+				y: player.getPosition().y
 			},
 			role: player.role,
 			team: player.team
@@ -251,8 +251,8 @@ export class KonvaGame {
 
 		const skatingOfficials = this.playerManager.getSkatingOfficials().map((official) => ({
 			absolute: {
-				x: official.circle.x(),
-				y: official.circle.y()
+				x: official.getPosition().x,
+				y: official.getPosition().y
 			},
 			role: official.role
 		}));
