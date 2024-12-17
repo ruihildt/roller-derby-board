@@ -1,7 +1,7 @@
 import Konva from 'konva';
 import { TRACK_SCALE } from '$lib/constants';
 import { KonvaTeamPlayer } from './KonvaTeamPlayer';
-import { KonvaTrackGeometry } from './KonvaTrackGeometry';
+import { KonvaTrackGeometry, type Point } from './KonvaTrackGeometry';
 
 interface PlayerGroupConfig {
 	x: number;
@@ -80,7 +80,7 @@ export class KonvaPlayer {
 	}
 
 	protected checkAndResolveCollision(otherPlayer: KonvaPlayer): void {
-		const distance = this.distanceToPlayer(otherPlayer);
+		const distance = this.distanceTo(otherPlayer);
 		const totalRadius = KonvaPlayer.PLAYER_RADIUS * 2 + KonvaPlayer.STROKE_WIDTH;
 
 		if (distance < totalRadius) {
@@ -89,24 +89,50 @@ export class KonvaPlayer {
 	}
 
 	protected pushOtherPlayer(otherPlayer: KonvaPlayer, distance: number, totalRadius: number): void {
-		const dx = otherPlayer.group.x() - this.group.x();
-		const dy = otherPlayer.group.y() - this.group.y();
+		const currentPos = this.getPosition();
+		const otherPos = otherPlayer.getPosition();
+
+		const dx = otherPos.x - currentPos.x;
+		const dy = otherPos.y - currentPos.y;
 		const dirX = dx / distance;
 		const dirY = dy / distance;
 
-		otherPlayer.group.x(this.group.x() + dirX * (totalRadius + KonvaPlayer.PUSH_FORCE));
-		otherPlayer.group.y(this.group.y() + dirY * (totalRadius + KonvaPlayer.PUSH_FORCE));
+		otherPlayer.setPosition({
+			x: currentPos.x + dirX * (totalRadius + KonvaPlayer.PUSH_FORCE),
+			y: currentPos.y + dirY * (totalRadius + KonvaPlayer.PUSH_FORCE)
+		});
 
 		otherPlayer.group.fire('dragmove');
+	}
+
+	getPosition(): Point {
+		return {
+			x: this.group.x(),
+			y: this.group.y()
+		};
+	}
+
+	setPosition(position: Point): void {
+		this.group.position(position);
+	}
+
+	moveTo(position: Point): void {
+		this.setPosition(position);
+		const layer = this.group.getLayer();
+		if (layer) {
+			this.handleDragMove(layer);
+		}
 	}
 
 	protected getBaseCircle(): Konva.Circle {
 		return this.group.findOne('.baseCircle') as Konva.Circle;
 	}
 
-	distanceToPlayer(other: KonvaPlayer): number {
-		const dx = this.group.x() - other.group.x();
-		const dy = this.group.y() - other.group.y();
+	distanceTo(other: KonvaPlayer): number {
+		const currentPos = this.getPosition();
+		const otherPos = other.getPosition();
+		const dx = currentPos.x - otherPos.x;
+		const dy = currentPos.y - otherPos.y;
 		return Math.sqrt(dx * dx + dy * dy);
 	}
 
