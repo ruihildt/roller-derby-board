@@ -3,32 +3,64 @@ import { TRACK_SCALE } from '$lib/constants';
 import { KonvaTeamPlayer } from './KonvaTeamPlayer';
 import { KonvaTrackGeometry } from './KonvaTrackGeometry';
 
+interface PlayerGroupConfig {
+	x: number;
+	y: number;
+	draggable: boolean;
+	name?: string;
+}
+
+interface PlayerCircleConfig {
+	x: number;
+	y: number;
+	radius: number;
+	strokeWidth: number;
+	listening: boolean;
+	name: string;
+}
+
 export class KonvaPlayer {
 	static readonly PLAYER_RADIUS = TRACK_SCALE / 2.4;
 	static readonly STROKE_WIDTH = TRACK_SCALE / 10;
 	protected trackGeometry: KonvaTrackGeometry;
-	protected debugMode: boolean = false;
-	circle: Konva.Circle;
+
+	group: Konva.Group;
 
 	constructor(x: number, y: number, layer: Konva.Layer, trackGeometry: KonvaTrackGeometry) {
 		this.trackGeometry = trackGeometry;
-		this.circle = new Konva.Circle({
-			x: x,
-			y: y,
-			radius: KonvaPlayer.PLAYER_RADIUS,
+
+		const groupConfig: PlayerGroupConfig = {
+			x,
+			y,
 			draggable: true,
-			strokeWidth: KonvaPlayer.STROKE_WIDTH
-		});
+			name: 'playerGroup'
+		};
 
-		this.circle.on('dragmove', () => {
-			const players = layer.find('Circle') as Konva.Circle[];
-			const currentPlayer = this.circle;
+		this.group = new Konva.Group(groupConfig);
 
-			players.forEach((otherPlayer) => {
-				if (otherPlayer === currentPlayer) return;
+		const circleConfig: PlayerCircleConfig = {
+			x: 0,
+			y: 0,
+			radius: KonvaPlayer.PLAYER_RADIUS,
+			strokeWidth: KonvaPlayer.STROKE_WIDTH,
+			listening: true,
+			name: 'baseCircle'
+		};
 
-				const dx = otherPlayer.x() - currentPlayer.x();
-				const dy = otherPlayer.y() - currentPlayer.y();
+		const circle = new Konva.Circle(circleConfig);
+		this.group.add(circle);
+
+		this.group.on('dragmove', () => {
+			const players = layer
+				.find('Group')
+				.filter((node) => node instanceof Konva.Group) as Konva.Group[];
+			const currentGroup = this.group;
+
+			players.forEach((otherGroup) => {
+				if (otherGroup === currentGroup) return;
+
+				const dx = otherGroup.x() - currentGroup.x();
+				const dy = otherGroup.y() - currentGroup.y();
 				const distance = Math.sqrt(dx * dx + dy * dy);
 
 				const totalRadius = KonvaPlayer.PLAYER_RADIUS * 2 + KonvaPlayer.STROKE_WIDTH;
@@ -38,10 +70,10 @@ export class KonvaPlayer {
 					const dirY = dy / distance;
 					const pushForce = 0.1;
 
-					otherPlayer.x(currentPlayer.x() + dirX * (totalRadius + pushForce));
-					otherPlayer.y(currentPlayer.y() + dirY * (totalRadius + pushForce));
+					otherGroup.x(currentGroup.x() + dirX * (totalRadius + pushForce));
+					otherGroup.y(currentGroup.y() + dirY * (totalRadius + pushForce));
 
-					otherPlayer.fire('dragmove');
+					otherGroup.fire('dragmove');
 				}
 			});
 
@@ -49,90 +81,28 @@ export class KonvaPlayer {
 				this.updateInBounds(this.trackGeometry);
 			}
 
-			// Draw projections for current player if debug mode is on
-			if (this.debugMode) {
-				this.drawProjections(this.trackGeometry, layer);
-			}
-
 			layer.batchDraw();
 		});
 
-		layer.add(this.circle);
-		this.toggleDebugMode(false);
+		layer.add(this.group);
 		layer.batchDraw();
 	}
 
+	protected getBaseCircle(): Konva.Circle {
+		return this.group.findOne('.baseCircle') as Konva.Circle;
+	}
+
 	distanceTo(other: KonvaPlayer): number {
-		const dx = this.circle.x() - other.circle.x();
-		const dy = this.circle.y() - other.circle.y();
+		const dx = this.group.x() - other.group.x();
+		const dy = this.group.y() - other.group.y();
 		return Math.sqrt(dx * dx + dy * dy);
 	}
 
-	getNode(): Konva.Circle {
-		return this.circle;
+	getNode(): Konva.Group {
+		return this.group;
 	}
 
 	destroy() {
-		this.circle.destroy();
-		// Clean up any debug elements
-		const layer = this.circle.getLayer();
-		if (layer) {
-			layer.find('.debug-projection').forEach((node) => node.destroy());
-		}
-	}
-
-	// DEBUGGING
-	toggleDebugMode(enabled: boolean) {
-		this.debugMode = enabled;
-		const layer = this.circle.getLayer();
-
-		if (!layer) return;
-
-		if (enabled) {
-			this.drawProjections(this.trackGeometry, layer);
-		} else {
-			layer.find('.debug-projection').forEach((node) => node.destroy());
-			layer.batchDraw();
-		}
-	}
-
-	drawProjections(trackGeometry: KonvaTrackGeometry, layer: Konva.Layer) {
-		if (!this.debugMode) return;
-
-		// Clear existing projections
-		layer.find('.debug-projection').forEach((node) => node.destroy());
-
-		const position = {
-			x: this.circle.x(),
-			y: this.circle.y()
-		};
-
-		const currentZone = trackGeometry.determineZone(position);
-
-		if (currentZone !== 0) {
-			const { innerProjection, outerProjection } = trackGeometry.projectPointToBoundaries(
-				position,
-				currentZone
-			);
-
-			const innerPoint = new Konva.Circle({
-				x: innerProjection.x,
-				y: innerProjection.y,
-				radius: 5,
-				fill: 'purple',
-				name: 'debug-projection'
-			});
-
-			const outerPoint = new Konva.Circle({
-				x: outerProjection.x,
-				y: outerProjection.y,
-				radius: 5,
-				fill: 'purple',
-				name: 'debug-projection'
-			});
-
-			layer.add(innerPoint);
-			layer.add(outerPoint);
-		}
+		this.group.destroy();
 	}
 }
