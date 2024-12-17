@@ -36,6 +36,10 @@ export class KonvaTeamPlayer extends KonvaPlayer {
 	isRearmost: boolean;
 	isForemost: boolean;
 
+	/**
+	 * Returns the base circle shape representing the player
+	 * Used by child classes to access and modify the player's visual representation
+	 */
 	protected get circle(): Konva.Circle {
 		return this.getBaseCircle();
 	}
@@ -63,53 +67,49 @@ export class KonvaTeamPlayer extends KonvaPlayer {
 		circle.fill(team === TeamPlayerTeam.A ? colors.teamAPrimary : colors.teamBPrimary);
 		circle.stroke(colors.outOfBounds);
 
-		// Sets up role-specific visual elements (star for jammer, stripe for pivot)
+		this.setupVisualElements();
+		this.setupEventHandlers(trackGeometry);
+		this.updateInBounds(trackGeometry);
+	}
+
+	/**
+	 * Sets up role-specific visual elements (star for jammer, stripe for pivot)
+	 */
+	private setupVisualElements(): void {
 		if (this.role === TeamPlayerRole.jammer) {
-			this.setupJammerStar(x, y, layer);
+			this.setupJammerStar();
 		}
 		if (this.role === TeamPlayerRole.pivot) {
-			this.setupPivotStripe(x, y, layer);
+			this.setupPivotStripe();
 		}
-
-		// Sets up event handlers for player movement and updates
-		this.group.on('dragmove', () => {
-			const pos = this.getPosition();
-			this.starShape?.position(pos);
-			this.pivotStripeGroup?.position(pos);
-			this.updateInBounds(trackGeometry);
-		});
-
-		this.updateInBounds(trackGeometry);
 	}
 
 	/**
 	 * Creates and configures the jammer star
 	 */
-	private setupJammerStar(x: number, y: number, layer: Konva.Layer): void {
+	private setupJammerStar(): void {
 		this.starShape = new Konva.Star({
-			x,
-			y,
+			x: 0,
+			y: 0,
 			numPoints: 5,
 			innerRadius: this.circle.radius() * 0.33,
 			outerRadius: this.circle.radius() * 0.9,
 			fill: this.team === TeamPlayerTeam.A ? colors.teamASecondary : colors.teamBSecondary,
 			listening: false
 		});
-		layer.add(this.starShape);
+		this.group.add(this.starShape);
 	}
 
 	/**
 	 * Creates and configures the pivot stripe
 	 */
-	private setupPivotStripe(x: number, y: number, layer: Konva.Layer): void {
+	private setupPivotStripe(): void {
 		this.pivotStripeGroup = new Konva.Group({
 			clipFunc: (ctx) => {
 				ctx.beginPath();
 				ctx.arc(0, 0, this.circle.radius() * 0.890027, 0, Math.PI * 2);
 				ctx.closePath();
-			},
-			x,
-			y
+			}
 		});
 
 		const stripeWidth = this.circle.radius() * 1.8;
@@ -124,7 +124,16 @@ export class KonvaTeamPlayer extends KonvaPlayer {
 		});
 
 		this.pivotStripeGroup.add(stripe);
-		layer.add(this.pivotStripeGroup);
+		this.group.add(this.pivotStripeGroup);
+	}
+
+	/**
+	 * Sets up event handlers for player movement and updates
+	 */
+	private setupEventHandlers(trackGeometry: KonvaTrackGeometry): void {
+		this.group.on('dragmove', () => {
+			this.updateInBounds(trackGeometry);
+		});
 	}
 
 	/**
@@ -173,7 +182,5 @@ export class KonvaTeamPlayer extends KonvaPlayer {
 
 	destroy(): void {
 		super.destroy();
-		this.starShape?.destroy();
-		this.pivotStripeGroup?.destroy();
 	}
 }
