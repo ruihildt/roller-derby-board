@@ -94,14 +94,17 @@ export class KonvaPlayerManager {
 	}
 
 	private isPositionValid(x: number, y: number): boolean {
-		const minDistance = KonvaPlayer.PLAYER_RADIUS * 2.2; // Add some buffer
+		const minDistance = KonvaPlayer.PLAYER_RADIUS * 2.2;
+
 		return !this.teamPlayers.some((player) => {
-			const dx = player.circle.x() - x;
-			const dy = player.circle.y() - y;
+			const playerPos = player.getPosition();
+			const dx = playerPos.x - x;
+			const dy = playerPos.y - y;
 			const distance = Math.sqrt(dx * dx + dy * dy);
 			return distance < minDistance;
 		});
 	}
+
 	private getRandomValidPosition(zone: Zone, maxAttempts: number = 50): { x: number; y: number } {
 		// Add buffer for player radius and stroke width
 		const buffer = KonvaPlayer.PLAYER_RADIUS + KonvaPlayer.STROKE_WIDTH;
