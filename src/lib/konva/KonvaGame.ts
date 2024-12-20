@@ -209,8 +209,8 @@ export class KonvaGame {
 			...state,
 			viewSettings: {
 				zoom: BASE_ZOOM,
-				x: 0,
-				y: 0
+				relativeX: 0,
+				relativeY: 0
 			}
 		});
 		this.stage.scale({ x: BASE_ZOOM, y: BASE_ZOOM });
@@ -220,15 +220,13 @@ export class KonvaGame {
 
 	// Update zoom while maintaining the center point
 	private updateZoom(newScale: number) {
-		const oldScale = this.stage.scaleX();
-
 		// Get current center point
 		const centerX = this.stage.width() / 2;
 		const centerY = this.stage.height() / 2;
 
 		// Get current position relative to center
-		const relativeX = (centerX - this.stage.x()) / oldScale;
-		const relativeY = (centerY - this.stage.y()) / oldScale;
+		const relativeX = (centerX - this.stage.x()) / this.stage.scaleX();
+		const relativeY = (centerY - this.stage.y()) / this.stage.scaleX();
 
 		// Calculate new position to maintain the same center point
 		const newX = centerX - relativeX * newScale;
@@ -239,8 +237,8 @@ export class KonvaGame {
 			...state,
 			viewSettings: {
 				zoom: newScale,
-				x: newX,
-				y: newY
+				relativeX: newX / centerX,
+				relativeY: newY / centerY
 			}
 		});
 
@@ -252,6 +250,10 @@ export class KonvaGame {
 	private updatePersistedState() {
 		const centerX = this.width / 2;
 		const centerY = this.height / 2;
+
+		// Calculate relative position from center
+		const relativeX = this.stage.x() / centerX;
+		const relativeY = this.stage.y() / centerY;
 
 		const teamPlayers = this.playerManager.getTeamPlayers().map((player) => {
 			const pos = player.getPosition();
@@ -283,8 +285,8 @@ export class KonvaGame {
 			skatingOfficials,
 			viewSettings: {
 				zoom: this.stage.scaleX(),
-				x: this.stage.x(),
-				y: this.stage.y()
+				relativeX,
+				relativeY
 			}
 		});
 	}
@@ -292,14 +294,23 @@ export class KonvaGame {
 	private loadViewSettings() {
 		const state = get(boardState);
 		if (state.viewSettings) {
+			const centerX = this.width / 2;
+			const centerY = this.height / 2;
+
+			// Convert relative positions back to absolute
+			const absoluteX = state.viewSettings.relativeX * centerX;
+			const absoluteY = state.viewSettings.relativeY * centerY;
+
 			this.stage.scale({
 				x: state.viewSettings.zoom,
 				y: state.viewSettings.zoom
 			});
+
 			this.stage.position({
-				x: state.viewSettings.x,
-				y: state.viewSettings.y
+				x: absoluteX,
+				y: absoluteY
 			});
+
 			this.stage.batchDraw();
 		}
 	}
@@ -320,8 +331,8 @@ export class KonvaGame {
 			skatingOfficials: [],
 			viewSettings: {
 				zoom: BASE_ZOOM,
-				x: 0,
-				y: 0
+				relativeX: 0,
+				relativeY: 0
 			}
 		});
 

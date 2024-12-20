@@ -23,8 +23,8 @@ export interface SkatingOfficialPosition {
 
 interface ViewSettings {
 	zoom: number;
-	x: number;
-	y: number;
+	relativeX: number;
+	relativeY: number;
 }
 
 export interface KonvaBoardState {
@@ -43,7 +43,7 @@ export const boardState = persisted<KonvaBoardState>('derbyboard-save', {
 	skatingOfficials: [],
 	viewSettings: {
 		zoom: 1,
-		x: 0,
-		y: 0
+		relativeX: 0,
+		relativeY: 0
 	}
 });
