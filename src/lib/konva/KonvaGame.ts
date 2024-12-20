@@ -92,6 +92,12 @@ export class KonvaGame {
 
 		// Add window resize handler
 		window.addEventListener('resize', this.handleResize);
+
+		// Add stage-wide event listener for interaction end
+		this.stage.on('mouseup touchend', () => {
+			this.packManager.determinePack();
+			this.playersLayer.batchDraw();
+		});
 	}
 
 	destroy() {
