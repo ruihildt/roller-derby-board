@@ -1,6 +1,6 @@
 import Konva from 'konva';
-import { TRACK_SCALE } from '$lib/constants';
 import { type Point } from './KonvaTrackGeometry';
+import { PLAYER_RADIUS, PLAYER_STROKE_WIDTH } from '$lib/constants';
 
 declare module 'konva/lib/Node' {
 	interface Node {
@@ -29,9 +29,6 @@ interface PlayerCircleConfig {
  * Handles player movement, collisions and basic visual representation
  */
 export class KonvaPlayer {
-	static readonly PLAYER_RADIUS = TRACK_SCALE / 2.4;
-	static readonly STROKE_WIDTH = TRACK_SCALE / 10;
-
 	group: Konva.Group;
 
 	/**
@@ -55,8 +52,8 @@ export class KonvaPlayer {
 		const circleConfig: PlayerCircleConfig = {
 			x: 0,
 			y: 0,
-			radius: KonvaPlayer.PLAYER_RADIUS,
-			strokeWidth: KonvaPlayer.STROKE_WIDTH,
+			radius: PLAYER_RADIUS,
+			strokeWidth: PLAYER_STROKE_WIDTH,
 			listening: true,
 			name: 'baseCircle'
 		};

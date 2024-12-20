@@ -1,7 +1,9 @@
 // Base scaling
-export const TRACK_SCALE = 27;
-export const LINE_WIDTH = TRACK_SCALE / 8;
-export const TEN_FEET_LINE_WIDTH = TRACK_SCALE / 18;
+export const TRACK_SCALE = 35;
+export const LINE_WIDTH = TRACK_SCALE / 10;
+export const TEN_FEET_LINE_WIDTH = TRACK_SCALE / 20;
+export const PLAYER_RADIUS = TRACK_SCALE / 2.4;
+export const PLAYER_STROKE_WIDTH = TRACK_SCALE / 13;
 
 // Primitive track points
 export const CENTER_POINT_OFFSET = 5.33 * TRACK_SCALE; // Distance from center in meters

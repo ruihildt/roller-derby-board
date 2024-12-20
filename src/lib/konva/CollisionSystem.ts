@@ -1,5 +1,6 @@
 import Konva from 'konva';
 import { KonvaPlayer } from './KonvaPlayer';
+import { PLAYER_RADIUS, PLAYER_STROKE_WIDTH } from '$lib/constants';
 
 export class CollisionSystem {
 	private layer: Konva.Layer;
@@ -36,7 +37,7 @@ export class CollisionSystem {
 		const dy = pos2.y - pos1.y;
 		const distance = Math.sqrt(dx * dx + dy * dy);
 
-		const minDistance = KonvaPlayer.PLAYER_RADIUS * 2 + KonvaPlayer.STROKE_WIDTH;
+		const minDistance = PLAYER_RADIUS * 2 + PLAYER_STROKE_WIDTH;
 
 		if (distance < minDistance) {
 			const force = (minDistance - distance) / 2;

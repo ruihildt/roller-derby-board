@@ -3,10 +3,10 @@ import Konva from 'konva';
 import { KonvaTeamPlayer, TeamPlayerRole, TeamPlayerTeam } from './KonvaTeamPlayer';
 import { KonvaSkatingOfficial, SkatingOfficialRole } from './KonvaSkatingOfficial';
 import type { KonvaTrackGeometry, Point, Zone } from './KonvaTrackGeometry';
-import { KonvaPlayer } from './KonvaPlayer';
 import { get } from 'svelte/store';
 import { boardState } from '$lib/stores/konvaBoardState';
 import { CollisionSystem } from './CollisionSystem';
+import { PLAYER_RADIUS, PLAYER_STROKE_WIDTH } from '$lib/constants';
 
 export class KonvaPlayerManager {
 	private layer: Konva.Layer;
@@ -123,13 +123,13 @@ export class KonvaPlayerManager {
 			const playerPos = player.getPosition();
 			const dx = playerPos.x - x;
 			const dy = playerPos.y - y;
-			return Math.sqrt(dx * dx + dy * dy) < KonvaPlayer.PLAYER_RADIUS * 2.2;
+			return Math.sqrt(dx * dx + dy * dy) < PLAYER_RADIUS * 2.2;
 		});
 	}
 
 	private getRandomValidPosition(zone: Zone, maxAttempts: number = 50): { x: number; y: number } {
 		// Add buffer for player radius and stroke width
-		const buffer = KonvaPlayer.PLAYER_RADIUS + KonvaPlayer.STROKE_WIDTH;
+		const buffer = PLAYER_RADIUS + PLAYER_STROKE_WIDTH;
 
 		const minX = Math.min(zone.innerStart.x, zone.innerEnd.x) + buffer;
 		const maxX = Math.max(zone.outerStart.x, zone.outerEnd.x) - buffer;
@@ -149,7 +149,7 @@ export class KonvaPlayerManager {
 	}
 
 	private isFullyInBounds(x: number, y: number): boolean {
-		const radius = KonvaPlayer.PLAYER_RADIUS + KonvaPlayer.STROKE_WIDTH;
+		const radius = PLAYER_RADIUS + PLAYER_STROKE_WIDTH;
 
 		// First check if center point is in start zone
 		if (!this.isPointInStartZone({ x, y })) {
