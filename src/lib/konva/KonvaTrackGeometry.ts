@@ -430,60 +430,15 @@ export class KonvaTrackGeometry {
 	}
 
 	private drawTurn1TenFeetLines(): Konva.Path {
-		const zone = this.zones[2];
-		const turnRadius = Math.hypot(
-			zone.innerStart.x - zone.centerInner.x,
-			zone.innerStart.y - zone.centerInner.y
-		);
-		let currentAngle = Math.atan2(
-			zone.innerStart.y - zone.centerInner.y,
-			zone.innerStart.x - zone.centerInner.x
-		);
-
-		const pathSegments = [];
-		const innerRadius = Math.abs(zone.innerStart.y - zone.centerInner.y);
-		const outerRadius = Math.abs(zone.outerStart.y - zone.centerOuter.y);
-
-		for (let i = 1; i <= 5; i++) {
-			const point = {
-				x: zone.centerInner.x + turnRadius * Math.cos(currentAngle - TURNSEGMENT / turnRadius),
-				y: zone.centerInner.y + turnRadius * Math.sin(currentAngle - TURNSEGMENT / turnRadius)
-			};
-
-			const angle = Math.atan2(point.y - zone.centerInner.y, point.x - zone.centerInner.x);
-
-			const innerPoint = {
-				x: zone.centerInner.x + innerRadius * Math.cos(angle),
-				y: zone.centerInner.y + innerRadius * Math.sin(angle)
-			};
-
-			const outerPoint = {
-				x: zone.centerOuter.x + outerRadius * Math.cos(angle),
-				y: zone.centerOuter.y + outerRadius * Math.sin(angle)
-			};
-
-			const midX = (innerPoint.x + outerPoint.x) / 2;
-			const midY = (innerPoint.y + outerPoint.y) / 2;
-			const lineAngle = Math.atan2(outerPoint.y - innerPoint.y, outerPoint.x - innerPoint.x);
-
-			pathSegments.push(`
-            M ${midX - TENFEETLINE * Math.cos(lineAngle)} ${midY - TENFEETLINE * Math.sin(lineAngle)}
-            L ${midX + TENFEETLINE * Math.cos(lineAngle)} ${midY + TENFEETLINE * Math.sin(lineAngle)}
-        `);
-
-			currentAngle = angle;
-		}
-
-		return new Konva.Path({
-			data: pathSegments.join(' '),
-			stroke: colors.tenFeetLines,
-			strokeWidth: TEN_FEET_LINE_WIDTH,
-			listening: false
-		});
+		return this.drawTurnTenFeetLines(2);
 	}
 
 	private drawTurn2TenFeetLines(): Konva.Path {
-		const zone = this.zones[4];
+		return this.drawTurnTenFeetLines(4);
+	}
+
+	private drawTurnTenFeetLines(turnKey: TurnKey): Konva.Path {
+		const zone = this.zones[turnKey];
 		const turnRadius = Math.hypot(
 			zone.innerStart.x - zone.centerInner.x,
 			zone.innerStart.y - zone.centerInner.y
@@ -494,8 +449,6 @@ export class KonvaTrackGeometry {
 		);
 
 		const pathSegments = [];
-		const innerRadius = Math.abs(zone.innerStart.y - zone.centerInner.y);
-		const outerRadius = Math.abs(zone.outerStart.y - zone.centerOuter.y);
 
 		for (let i = 1; i <= 5; i++) {
 			const point = {
@@ -503,28 +456,24 @@ export class KonvaTrackGeometry {
 				y: zone.centerInner.y + turnRadius * Math.sin(currentAngle - TURNSEGMENT / turnRadius)
 			};
 
-			const angle = Math.atan2(point.y - zone.centerInner.y, point.x - zone.centerInner.x);
+			const { innerProjection, outerProjection } = this.projectPointToBoundariesInTurn(
+				point,
+				turnKey
+			);
 
-			const innerPoint = {
-				x: zone.centerInner.x + innerRadius * Math.cos(angle),
-				y: zone.centerInner.y + innerRadius * Math.sin(angle)
-			};
-
-			const outerPoint = {
-				x: zone.centerOuter.x + outerRadius * Math.cos(angle),
-				y: zone.centerOuter.y + outerRadius * Math.sin(angle)
-			};
-
-			const midX = (innerPoint.x + outerPoint.x) / 2;
-			const midY = (innerPoint.y + outerPoint.y) / 2;
-			const lineAngle = Math.atan2(outerPoint.y - innerPoint.y, outerPoint.x - innerPoint.x);
+			const midX = (innerProjection.x + outerProjection.x) / 2;
+			const midY = (innerProjection.y + outerProjection.y) / 2;
+			const lineAngle = Math.atan2(
+				outerProjection.y - innerProjection.y,
+				outerProjection.x - innerProjection.x
+			);
 
 			pathSegments.push(`
             M ${midX - TENFEETLINE * Math.cos(lineAngle)} ${midY - TENFEETLINE * Math.sin(lineAngle)}
             L ${midX + TENFEETLINE * Math.cos(lineAngle)} ${midY + TENFEETLINE * Math.sin(lineAngle)}
         `);
 
-			currentAngle = angle;
+			currentAngle = Math.atan2(point.y - zone.centerInner.y, point.x - zone.centerInner.x);
 		}
 
 		return new Konva.Path({
