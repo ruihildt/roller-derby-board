@@ -37,6 +37,10 @@ export class KonvaGame {
 		this.width = width;
 		this.height = height;
 
+		// This shouldn't be needed, since it's the default
+		// But I feel a slight delay without it
+		Konva.dragDistance = 0;
+
 		// Create main stage
 		this.stage = new Konva.Stage({
 			container: containerId,
