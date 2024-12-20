@@ -244,22 +244,31 @@ export class KonvaGame {
 	}
 
 	private updatePersistedState() {
-		const teamPlayers = this.playerManager.getTeamPlayers().map((player) => ({
-			absolute: {
-				x: player.getPosition().x,
-				y: player.getPosition().y
-			},
-			role: player.role,
-			team: player.team
-		}));
+		const centerX = this.width / 2;
+		const centerY = this.height / 2;
 
-		const skatingOfficials = this.playerManager.getSkatingOfficials().map((official) => ({
-			absolute: {
-				x: official.getPosition().x,
-				y: official.getPosition().y
-			},
-			role: official.role
-		}));
+		const teamPlayers = this.playerManager.getTeamPlayers().map((player) => {
+			const pos = player.getPosition();
+			return {
+				relative: {
+					x: pos.x - centerX,
+					y: pos.y - centerY
+				},
+				role: player.role,
+				team: player.team
+			};
+		});
+
+		const skatingOfficials = this.playerManager.getSkatingOfficials().map((official) => {
+			const pos = official.getPosition();
+			return {
+				relative: {
+					x: pos.x - centerX,
+					y: pos.y - centerY
+				},
+				role: official.role
+			};
+		});
 
 		boardState.set({
 			version: 3,

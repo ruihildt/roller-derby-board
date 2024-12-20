@@ -3,8 +3,9 @@ import type { TeamPlayerRole } from '$lib/classes/TeamPlayer';
 import type { TeamPlayerTeam } from '$lib/konva/KonvaTeamPlayer';
 import { persisted } from 'svelte-persisted-store';
 
+// Position is relative to the center of the track
 export interface TeamPlayerPosition {
-	absolute: {
+	relative: {
 		x: number;
 		y: number;
 	};
@@ -13,7 +14,7 @@ export interface TeamPlayerPosition {
 }
 
 export interface SkatingOfficialPosition {
-	absolute: {
+	relative: {
 		x: number;
 		y: number;
 	};

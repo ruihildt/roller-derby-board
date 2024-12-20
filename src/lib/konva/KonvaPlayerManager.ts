@@ -66,19 +66,25 @@ export class KonvaPlayerManager {
 
 	initialLoad() {
 		const state = get(boardState);
+		const centerX = this.layer.getStage()!.width() / 2;
+		const centerY = this.layer.getStage()!.height() / 2;
 
 		if (state.teamPlayers.length > 0) {
 			state.teamPlayers.forEach((player) => {
 				this.addTeamPlayer(
-					player.absolute.x,
-					player.absolute.y,
+					centerX + player.relative.x,
+					centerY + player.relative.y,
 					player.team as TeamPlayerTeam,
 					player.role
 				);
 			});
 
 			state.skatingOfficials.forEach((official) => {
-				this.addSkatingOfficial(official.absolute.x, official.absolute.y, official.role);
+				this.addSkatingOfficial(
+					centerX + official.relative.x,
+					centerY + official.relative.y,
+					official.role
+				);
 			});
 		} else {
 			this.addInitialLineup();
