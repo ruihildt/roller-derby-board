@@ -68,7 +68,6 @@ export class KonvaTeamPlayer extends KonvaPlayer {
 		circle.stroke(colors.outOfBounds);
 
 		this.setupVisualElements();
-		this.setupEventHandlers(trackGeometry);
 		this.updateInBounds(trackGeometry);
 	}
 
@@ -128,19 +127,10 @@ export class KonvaTeamPlayer extends KonvaPlayer {
 	}
 
 	/**
-	 * Sets up event handlers for player movement and updates
-	 */
-	private setupEventHandlers(trackGeometry: KonvaTrackGeometry): void {
-		this.group.on('dragmove', () => {
-			this.updateInBounds(trackGeometry);
-		});
-	}
-
-	/**
 	 * Updates the player's in-bounds status and visual appearance
 	 */
 
-	protected updateInBounds(trackGeometry: KonvaTrackGeometry): void {
+	public updateInBounds(trackGeometry: KonvaTrackGeometry): void {
 		const pos = this.getPosition();
 		const radius = this.circle.radius();
 		const strokeWidth = this.circle.strokeWidth();
@@ -171,7 +161,7 @@ export class KonvaTeamPlayer extends KonvaPlayer {
 	/**
 	 * Updates the player's engagement zone status and visual appearance
 	 */
-	protected updateEngagementZoneStatus(isInEngagementZone: boolean): void {
+	public updateEngagementZoneStatus(isInEngagementZone: boolean): void {
 		this.isInEngagementZone = isInEngagementZone;
 
 		if (this.isInBounds) {

@@ -6,10 +6,12 @@ import type { KonvaTrackGeometry, Point, Zone } from './KonvaTrackGeometry';
 import { KonvaPlayer } from './KonvaPlayer';
 import { get } from 'svelte/store';
 import { boardState } from '$lib/stores/konvaBoardState';
+import { CollisionSystem } from './CollisionSystem';
 
 export class KonvaPlayerManager {
 	private layer: Konva.Layer;
 	private trackGeometry: KonvaTrackGeometry;
+	private collisionSystem: CollisionSystem;
 
 	private teamPlayers: KonvaTeamPlayer[] = [];
 	private skatingOfficials: KonvaSkatingOfficial[] = [];
@@ -17,10 +19,27 @@ export class KonvaPlayerManager {
 	constructor(layer: Konva.Layer, trackGeometry: KonvaTrackGeometry) {
 		this.layer = layer;
 		this.trackGeometry = trackGeometry;
+		this.collisionSystem = new CollisionSystem(layer);
+
+		this.layer.on('collision', (evt) => {
+			const player = evt.target.getAttr('player');
+			const otherPlayer = evt.target.getAttr('otherPlayer');
+
+			if (player instanceof KonvaTeamPlayer) {
+				player.updateInBounds(this.trackGeometry);
+			}
+			if (otherPlayer instanceof KonvaTeamPlayer) {
+				otherPlayer.updateInBounds(this.trackGeometry);
+			}
+		});
 	}
 
 	addTeamPlayer(x: number, y: number, team: TeamPlayerTeam, role: TeamPlayerRole) {
 		const player = new KonvaTeamPlayer(x, y, this.layer, team, role, this.trackGeometry);
+		// Trigger collision resolution on drag
+		player.getNode().on('dragmove', () => {
+			this.collisionSystem.resolveCollisions();
+		});
 		this.teamPlayers.push(player);
 		return player;
 	}
@@ -94,14 +113,11 @@ export class KonvaPlayerManager {
 	}
 
 	private isPositionValid(x: number, y: number): boolean {
-		const minDistance = KonvaPlayer.PLAYER_RADIUS * 2.2;
-
 		return !this.teamPlayers.some((player) => {
 			const playerPos = player.getPosition();
 			const dx = playerPos.x - x;
 			const dy = playerPos.y - y;
-			const distance = Math.sqrt(dx * dx + dy * dy);
-			return distance < minDistance;
+			return Math.sqrt(dx * dx + dy * dy) < KonvaPlayer.PLAYER_RADIUS * 2.2;
 		});
 	}
 

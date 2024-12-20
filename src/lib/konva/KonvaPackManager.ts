@@ -36,6 +36,14 @@ export class KonvaPackManager {
 	determinePack() {
 		const blockers = this.playerManager.getBlockers();
 
+		// Reset all players pack related properties first
+		blockers.forEach((p) => {
+			p.isInPack = false;
+			p.isRearmost = false;
+			p.isForemost = false;
+			p.updateEngagementZoneStatus(false);
+		});
+
 		const inBoundsBlockers = blockers.filter(
 			(p) => p.isInBounds && (p.role === TeamPlayerRole.blocker || p.role === TeamPlayerRole.pivot)
 		);
@@ -52,7 +60,11 @@ export class KonvaPackManager {
 			this.updateRearAndForemostPlayers(packGroup);
 			this.updateEngagementZone(packGroup);
 		} else {
-			blockers.forEach((p) => p.updateEngagementZoneStatus(false));
+			// Split pack case - update all players to show no pack
+			blockers.forEach((p) => {
+				p.isInPack = false;
+				p.updateEngagementZoneStatus(false);
+			});
 			this.engagementZonePath.hide();
 		}
 
