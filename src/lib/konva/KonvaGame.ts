@@ -186,8 +186,11 @@ export class KonvaGame {
 			y: newCenterY - worldY * oldScale
 		});
 
-		this.stage.batchDraw();
-		this.updatePersistedState();
+		// Listen for transform completion before updating state
+		this.stage.on('transformend', () => {
+			this.stage.batchDraw();
+			this.updatePersistedState();
+		});
 	};
 
 	// Increase zoom level within MAX_ZOOM limit
