@@ -327,6 +327,10 @@ export class KonvaGame {
 		this.playersLayer.destroyChildren();
 		this.engagementZoneLayer.destroyChildren();
 
+		// Reset stage position and scale
+		this.stage.position({ x: 0, y: 0 });
+		this.stage.scale({ x: BASE_ZOOM, y: BASE_ZOOM });
+
 		// Clear internal arrays in PlayerManager
 		this.playerManager = new KonvaPlayerManager(this.playersLayer, this.trackGeometry);
 
@@ -363,6 +367,7 @@ export class KonvaGame {
 		this.engagementZoneLayer.batchDraw();
 		this.playersLayer.batchDraw();
 
+		this.stage.batchDraw();
 		this.updatePersistedState();
 	}
 }
