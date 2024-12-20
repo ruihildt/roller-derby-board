@@ -46,6 +46,11 @@ export class KonvaGame {
 			pixelRatio: window.devicePixelRatio
 		});
 
+		// Add dragend listener for position persistence
+		this.stage.on('dragend', () => {
+			this.updatePersistedState();
+		});
+
 		// Apply persisted view settings
 		this.loadViewSettings();
 
@@ -84,7 +89,6 @@ export class KonvaGame {
 		this.playerManager.initialLoad();
 		this.packManager.determinePack();
 		this.playersLayer.batchDraw();
-		this.updatePersistedState();
 
 		// Add window resize handler
 		window.addEventListener('resize', this.handleResize);
