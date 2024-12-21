@@ -17,6 +17,7 @@ import {
 import { KonvaTrackGeometry, type Point } from './KonvaTrackGeometry';
 import { KonvaPlayerManager } from './KonvaPlayerManager';
 import { KonvaPackManager } from './KonvaPackManager';
+import { KonvaRecorder } from './KonvaRecorder';
 
 export class KonvaGame {
 	private width: number;
@@ -31,6 +32,8 @@ export class KonvaGame {
 	private trackGeometry: KonvaTrackGeometry;
 	private playerManager!: KonvaPlayerManager;
 	private packManager!: KonvaPackManager;
+
+	private recorder: KonvaRecorder;
 
 	constructor(containerId: string, width: number, height: number) {
 		// Initialize basic properties first
@@ -102,9 +105,12 @@ export class KonvaGame {
 			this.packManager.determinePack();
 			this.playersLayer.batchDraw();
 		});
+
+		this.recorder = new KonvaRecorder(this.stage);
 	}
 
 	destroy() {
+		this.recorder.destroy();
 		window.removeEventListener('resize', this.handleResize);
 		this.trackSurfaceLayer.destroy();
 		this.trackLinesLayer.destroy();
@@ -369,5 +375,13 @@ export class KonvaGame {
 
 		this.stage.batchDraw();
 		this.updatePersistedState();
+	}
+
+	startRecording(bounds?: { x: number; y: number; width: number; height: number }) {
+		this.recorder.startRecording(bounds);
+	}
+
+	stopRecording(): Promise<Blob> {
+		return this.recorder.stopRecording();
 	}
 }
