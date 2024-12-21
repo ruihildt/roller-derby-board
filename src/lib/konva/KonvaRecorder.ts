@@ -1,16 +1,28 @@
-import type Konva from 'konva';
+import Konva from 'konva';
 import fixWebmDuration from 'fix-webm-duration';
 
 export class KonvaRecorder {
 	private mediaRecorder: MediaRecorder | null = null;
 	private recordedChunks: Blob[] = [];
-	private captureCanvas: HTMLCanvasElement | null = null;
+	private captureCanvas: HTMLCanvasElement;
 	private isRecording = false;
 	private recordingStartTime: number = 0;
 	private elapsedTime: number = 0;
 	private timeInterval: number | null = null;
+	private animation: Konva.Animation;
 
-	constructor(private stage: Konva.Stage) {}
+	constructor(private stage: Konva.Stage) {
+		this.captureCanvas = document.createElement('canvas');
+
+		this.animation = new Konva.Animation(() => {
+			if (this.isRecording) {
+				const stageCanvas = this.stage.toCanvas();
+				const ctx = this.captureCanvas.getContext('2d')!;
+				ctx.clearRect(0, 0, this.captureCanvas.width, this.captureCanvas.height);
+				ctx.drawImage(stageCanvas, 0, 0);
+			}
+		}, this.stage.getLayers()[0]);
+	}
 
 	startRecording(bounds?: { x: number; y: number; width: number; height: number }) {
 		this.recordingStartTime = Date.now();
@@ -18,11 +30,13 @@ export class KonvaRecorder {
 			this.elapsedTime = Date.now() - this.recordingStartTime;
 		}, 1000);
 
-		this.captureCanvas = this.getCaptureCanvas(bounds);
-		const stream = this.captureCanvas.captureStream(30); // Reduced to 30fps
+		// Set capture canvas dimensions
+		this.captureCanvas.width = bounds?.width || this.stage.width();
+		this.captureCanvas.height = bounds?.height || this.stage.height();
 
+		// Create media stream from capture canvas
+		const stream = this.captureCanvas.captureStream(30);
 		const mimeTypes = ['video/webm;codecs=vp9', 'video/webm;codecs=vp8', 'video/webm', 'video/mp4'];
-
 		const supportedMimeType = mimeTypes.find((mimeType) => MediaRecorder.isTypeSupported(mimeType));
 
 		this.mediaRecorder = new MediaRecorder(stream, {
@@ -37,46 +51,7 @@ export class KonvaRecorder {
 
 		this.mediaRecorder.start();
 		this.isRecording = true;
-		this.captureFrame(bounds);
-	}
-
-	private getCaptureCanvas(bounds?: { x: number; y: number; width: number; height: number }) {
-		const captureCanvas = document.createElement('canvas');
-
-		if (bounds) {
-			captureCanvas.width = bounds.width;
-			captureCanvas.height = bounds.height;
-		} else {
-			captureCanvas.width = this.stage.width();
-			captureCanvas.height = this.stage.height();
-		}
-
-		return captureCanvas;
-	}
-
-	private captureFrame(bounds?: { x: number; y: number; width: number; height: number }) {
-		if (!this.isRecording || !this.captureCanvas) return;
-
-		const context = this.captureCanvas.getContext('2d')!;
-		const stageCanvas = this.stage.toCanvas();
-
-		if (bounds) {
-			context.drawImage(
-				stageCanvas,
-				bounds.x,
-				bounds.y,
-				bounds.width,
-				bounds.height,
-				0,
-				0,
-				bounds.width,
-				bounds.height
-			);
-		} else {
-			context.drawImage(stageCanvas, 0, 0);
-		}
-
-		requestAnimationFrame(() => this.captureFrame(bounds));
+		this.animation.start();
 	}
 
 	stopRecording(): Promise<Blob> {
@@ -97,8 +72,8 @@ export class KonvaRecorder {
 
 				this.recordedChunks = [];
 				this.isRecording = false;
-				this.captureCanvas = null;
 				this.elapsedTime = 0;
+				this.animation.stop();
 
 				resolve(fixedBlob);
 			};
@@ -111,5 +86,6 @@ export class KonvaRecorder {
 		if (this.isRecording) {
 			this.stopRecording();
 		}
+		this.animation.stop();
 	}
 }
