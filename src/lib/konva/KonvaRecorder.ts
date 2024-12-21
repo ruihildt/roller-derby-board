@@ -13,12 +13,16 @@ export class KonvaRecorder {
 
 	constructor(private stage: Konva.Stage) {
 		this.captureCanvas = document.createElement('canvas');
-
 		this.animation = new Konva.Animation(() => {
 			if (this.isRecording) {
 				const stageCanvas = this.stage.toCanvas();
 				const ctx = this.captureCanvas.getContext('2d')!;
-				ctx.clearRect(0, 0, this.captureCanvas.width, this.captureCanvas.height);
+
+				// Clear and fill with white background
+				ctx.fillStyle = '#ffffff';
+				ctx.fillRect(0, 0, this.captureCanvas.width, this.captureCanvas.height);
+
+				// Draw stage content on top
 				ctx.drawImage(stageCanvas, 0, 0);
 			}
 		}, this.stage.getLayers()[0]);
