@@ -131,9 +131,12 @@ export class KonvaTeamPlayer extends KonvaPlayer {
 	 */
 
 	public updateInBounds(trackGeometry: KonvaTrackGeometry): void {
+		const circle = this.circle;
+		if (!circle) return;
+
 		const pos = this.getPosition();
-		const radius = this.circle.radius();
-		const strokeWidth = this.circle.strokeWidth();
+		const radius = circle.radius();
+		const strokeWidth = circle.strokeWidth();
 		const checkRadius = radius + strokeWidth - LINE_WIDTH * 0.9;
 
 		try {
