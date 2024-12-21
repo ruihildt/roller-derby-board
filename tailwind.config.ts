@@ -1,6 +1,7 @@
 import flowbitePlugin from 'flowbite/plugin';
 import type { Config } from 'tailwindcss';
 import typography from '@tailwindcss/typography';
+import { colors } from './src/lib/constants';
 
 export default {
 	content: [
@@ -24,6 +25,9 @@ export default {
 					800: '#CC4522',
 					900: '#A5371B'
 				}
+			},
+			backgroundColor: {
+				canvas: colors.canvasBackground
 			}
 		}
 	},
