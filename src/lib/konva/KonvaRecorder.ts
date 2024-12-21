@@ -1,14 +1,23 @@
 import type Konva from 'konva';
+import fixWebmDuration from 'fix-webm-duration';
 
 export class KonvaRecorder {
 	private mediaRecorder: MediaRecorder | null = null;
 	private recordedChunks: Blob[] = [];
 	private captureCanvas: HTMLCanvasElement | null = null;
 	private isRecording = false;
+	private recordingStartTime: number = 0;
+	private elapsedTime: number = 0;
+	private timeInterval: number | null = null;
 
 	constructor(private stage: Konva.Stage) {}
 
 	startRecording(bounds?: { x: number; y: number; width: number; height: number }) {
+		this.recordingStartTime = Date.now();
+		this.timeInterval = window.setInterval(() => {
+			this.elapsedTime = Date.now() - this.recordingStartTime;
+		}, 1000);
+
 		this.captureCanvas = this.getCaptureCanvas(bounds);
 		const stream = this.captureCanvas.captureStream(30); // Reduced to 30fps
 
@@ -22,12 +31,11 @@ export class KonvaRecorder {
 
 		this.mediaRecorder.ondataavailable = (event) => {
 			if (event.data.size > 0) {
-				this.recordedChunks.push(event.data);
+				this.recordedChunks = [...this.recordedChunks, event.data];
 			}
 		};
 
-		// Request data chunks every 1000ms instead of storing everything until stop
-		this.mediaRecorder.start(1000);
+		this.mediaRecorder.start();
 		this.isRecording = true;
 		this.captureFrame(bounds);
 	}
@@ -75,14 +83,24 @@ export class KonvaRecorder {
 		return new Promise((resolve) => {
 			if (!this.mediaRecorder) return;
 
-			this.mediaRecorder.onstop = () => {
+			if (this.timeInterval) {
+				clearInterval(this.timeInterval);
+				this.timeInterval = null;
+			}
+
+			this.mediaRecorder.onstop = async () => {
 				const blob = new Blob(this.recordedChunks, {
 					type: 'video/webm'
 				});
+				const duration = Date.now() - this.recordingStartTime;
+				const fixedBlob = await fixWebmDuration(blob, duration);
+
 				this.recordedChunks = [];
 				this.isRecording = false;
 				this.captureCanvas = null;
-				resolve(blob);
+				this.elapsedTime = 0;
+
+				resolve(fixedBlob);
 			};
 
 			this.mediaRecorder.stop();
