@@ -9,26 +9,56 @@ export class KonvaRecorder {
 	private elapsedTime: number = 0;
 	private timeInterval: number | null = null;
 	private animation: Konva.Animation;
-	private layer: Konva.Layer; // Added this line
+	private layer: Konva.Layer;
 
-	constructor(private stage: Konva.Stage) {
+	constructor(
+		private stage: Konva.Stage,
+		private recordingArea?: { x: number; y: number; width: number; height: number }
+	) {
 		const mergedLayer = new Konva.Layer();
 
-		// Temporarily add to stage to get dimensions
 		this.stage.add(mergedLayer);
-		// Then remove it right away
 		mergedLayer.remove();
 
 		this.animation = new Konva.Animation(() => {
 			if (this.isRecording) {
-				// Clear the merged layer
 				mergedLayer.clear();
 
-				// Draw each layer's content in order
-				this.stage.getLayers().forEach((layer) => {
-					const layerCanvas = layer.getNativeCanvasElement();
-					mergedLayer.getContext().drawImage(layerCanvas, 0, 0);
-				});
+				const tempCanvas = document.createElement('canvas');
+				const tempCtx = tempCanvas.getContext('2d')!;
+
+				if (this.recordingArea) {
+					tempCanvas.width = this.recordingArea.width;
+					tempCanvas.height = this.recordingArea.height;
+
+					this.stage.getLayers().forEach((layer) => {
+						const layerCanvas = layer.getNativeCanvasElement();
+						const area = this.recordingArea as {
+							x: number;
+							y: number;
+							width: number;
+							height: number;
+						};
+						tempCtx.drawImage(
+							layerCanvas,
+							area.x,
+							area.y,
+							area.width,
+							area.height,
+							0,
+							0,
+							area.width,
+							area.height
+						);
+					});
+
+					mergedLayer.getContext().drawImage(tempCanvas, 0, 0);
+				} else {
+					this.stage.getLayers().forEach((layer) => {
+						const layerCanvas = layer.getNativeCanvasElement();
+						mergedLayer.getContext().drawImage(layerCanvas, 0, 0);
+					});
+				}
 			}
 		}, mergedLayer);
 
@@ -42,6 +72,15 @@ export class KonvaRecorder {
 		}, 1000);
 
 		const canvas = this.layer.getNativeCanvasElement();
+
+		// Set canvas dimensions right before recording
+		if (this.recordingArea) {
+			canvas.width = this.recordingArea.width;
+			canvas.height = this.recordingArea.height;
+			this.layer.width(this.recordingArea.width);
+			this.layer.height(this.recordingArea.height);
+		}
+
 		const stream = canvas.captureStream(60);
 		const mimeTypes = ['video/webm;codecs=vp9', 'video/webm;codecs=vp8', 'video/webm', 'video/mp4'];
 		const supportedMimeType = mimeTypes.find((mimeType) => MediaRecorder.isTypeSupported(mimeType));

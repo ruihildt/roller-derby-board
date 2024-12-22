@@ -106,7 +106,12 @@ export class KonvaGame {
 			this.playersLayer.batchDraw();
 		});
 
-		this.recorder = new KonvaRecorder(this.stage);
+		this.recorder = new KonvaRecorder(this.stage, {
+			x: this.width * 0.25, // Start at 25% from left
+			y: this.height * 0.25, // Start at 25% from top
+			width: this.width * 0.5, // Take 50% of width
+			height: this.height * 0.5 // Take 50% of height
+		});
 	}
 
 	destroy() {
