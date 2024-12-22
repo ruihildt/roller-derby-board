@@ -4,42 +4,45 @@ import fixWebmDuration from 'fix-webm-duration';
 export class KonvaRecorder {
 	private mediaRecorder: MediaRecorder | null = null;
 	private recordedChunks: Blob[] = [];
-	private captureCanvas: HTMLCanvasElement;
 	private isRecording = false;
 	private recordingStartTime: number = 0;
 	private elapsedTime: number = 0;
 	private timeInterval: number | null = null;
 	private animation: Konva.Animation;
+	private layer: Konva.Layer; // Added this line
 
 	constructor(private stage: Konva.Stage) {
-		this.captureCanvas = document.createElement('canvas');
+		const mergedLayer = new Konva.Layer();
+
+		// Temporarily add to stage to get dimensions
+		this.stage.add(mergedLayer);
+		// Then remove it right away
+		mergedLayer.remove();
+
 		this.animation = new Konva.Animation(() => {
 			if (this.isRecording) {
-				const stageCanvas = this.stage.toCanvas();
-				const ctx = this.captureCanvas.getContext('2d')!;
+				// Clear the merged layer
+				mergedLayer.clear();
 
-				// Clear and fill with white background
-				ctx.fillStyle = '#ffffff';
-				ctx.fillRect(0, 0, this.captureCanvas.width, this.captureCanvas.height);
-
-				// Draw stage content on top
-				ctx.drawImage(stageCanvas, 0, 0);
+				// Draw each layer's content in order
+				this.stage.getLayers().forEach((layer) => {
+					const layerCanvas = layer.getNativeCanvasElement();
+					mergedLayer.getContext().drawImage(layerCanvas, 0, 0);
+				});
 			}
-		}, this.stage.getLayers()[0]);
+		}, mergedLayer);
+
+		this.layer = mergedLayer;
 	}
 
-	startRecording(bounds?: { x: number; y: number; width: number; height: number }) {
+	startRecording() {
 		this.recordingStartTime = Date.now();
 		this.timeInterval = window.setInterval(() => {
 			this.elapsedTime = Date.now() - this.recordingStartTime;
 		}, 1000);
 
-		// Set capture canvas dimensions
-		this.captureCanvas.width = bounds?.width || this.stage.width();
-		this.captureCanvas.height = bounds?.height || this.stage.height();
-
-		// Create media stream from capture canvas
-		const stream = this.captureCanvas.captureStream(30);
+		const canvas = this.layer.getNativeCanvasElement();
+		const stream = canvas.captureStream(60);
 		const mimeTypes = ['video/webm;codecs=vp9', 'video/webm;codecs=vp8', 'video/webm', 'video/mp4'];
 		const supportedMimeType = mimeTypes.find((mimeType) => MediaRecorder.isTypeSupported(mimeType));
 

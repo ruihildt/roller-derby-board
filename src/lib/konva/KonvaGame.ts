@@ -377,8 +377,8 @@ export class KonvaGame {
 		this.updatePersistedState();
 	}
 
-	startRecording(bounds?: { x: number; y: number; width: number; height: number }) {
-		this.recorder.startRecording(bounds);
+	startRecording() {
+		this.recorder.startRecording();
 	}
 
 	stopRecording(): Promise<Blob> {
